@@ -1,4 +1,4 @@
-import support_formulas as supp  # Egen
+import sondre_support_formulas as supp  # Egen
 import user_interface as ui  # Egen
 
 

@@ -3,7 +3,7 @@ import csv
 import matplotlib.pyplot as plt
 import csvwriter
 
-file_name =  "first_order_autocorr_30_all.csv"
+file_name =  "data/export_csv/first_order_autocorr_30_all.csv"
 autocorr = []
 variance = []
 time_list = []
@@ -19,7 +19,7 @@ with open(file_name, newline='') as csvfile:
                 #i = i + 1
 print("Autocorrelations loaded")
 
-file_name = "rolling_variance_all.csv"
+file_name = "data/export_csv/rolling_variance_all.csv"
 
 with open(file_name, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=';', quotechar='|')

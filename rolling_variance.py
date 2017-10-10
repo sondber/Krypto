@@ -11,7 +11,7 @@ def varians2(returns,days_rolling): #takes in the list of logreturns and days ro
             print("Progress in calculation:", round(i/(len(returns)-days_rolling+1)*100, 2), "%")
     return var
 
-file_name =  "logreturns_all.csv"
+file_name =  "data/export_csv/test_data.csv"
 returns = []
 time_list = []
 
@@ -28,4 +28,4 @@ print("The data is loaded")
 variance = varians2(returns, 30)
 
 print("The variances are calculated")
-csvwriter.write_to_file(time_list, variance, "rolling_variance_all.csv")
+csvwriter.write_to_file(time_list, variance, "data/export_csv/rolling_variance_all.csv")

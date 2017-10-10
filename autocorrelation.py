@@ -29,7 +29,7 @@ def autocorrelation_rolling(returns, timestart, window, lag):
                 print("We are currently on line",i,"of",(len(returns)-window+1),"corresponding to",round(i/(len(returns)-window+1)*100,2),"%")
         return rolling_autocorrelation
 
-file_name =  "logreturns_all.csv"
+file_name =  "data/export_csv/test_data.csv"
 returns = []
 time_list = []
 
@@ -48,5 +48,5 @@ rolling_auto = autocorrelation_rolling(returns, 0, 30, 1)
 #print(rolling_auto)
 
 
-csvwriter.write_to_file(time_list, rolling_auto, "first_order_autocorr_30_all.csv")
+csvwriter.write_to_file(time_list, rolling_auto, "data/export_csv/first_order_autocorr_30_all.csv")
 

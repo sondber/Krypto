@@ -1,6 +1,5 @@
-import logreturn
-import csvreader
-import csvwriter
+import jacob_support
+import jacob_csv_handling
 
 print("######### Writing from raw data to return vector ############")
 file_name = input("From what file do you want to load data? (raw data with time, price and volume) ")
@@ -9,8 +8,8 @@ time_list = []
 prices = []
 volume = []
 
-data = csvreader.read_single_csv(file_name, time_list, prices, volume)
-returns = logreturn.logreturn(data[1])
+data = jacob_csv_handling.read_single_csv(file_name, time_list, prices, volume)
+returns = jacob_support.logreturn(data[1])
 
-csvwriter.write_to_file(data[0], returns, to_file)
+jacob_csv_handling.write_to_file(data[0], returns, to_file)
 

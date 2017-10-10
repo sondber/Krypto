@@ -1,6 +1,6 @@
 import numpy as np
 import csv
-import csvwriter
+import jacob_csv_handling
 
 def varians2(returns,days_rolling): #takes in the list of logreturns and days rolling required
     var=np.zeros(len(returns)) #to be returned
@@ -28,4 +28,4 @@ print("The data is loaded")
 variance = varians2(returns, 30)
 
 print("The variances are calculated")
-csvwriter.write_to_file(time_list, variance, "data/export_csv/rolling_variance_all.csv")
+jacob_csv_handling.write_to_file(time_list, variance, "data/export_csv/rolling_variance_all.csv")

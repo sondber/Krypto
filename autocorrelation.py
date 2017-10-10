@@ -1,7 +1,7 @@
 import numpy as np
 import csv
-import csvwriter
 import time
+import jacob_csv_handling
 
 def autocorrelation(array1, array2): #window in minutes, timestart is which minute you want to start in
     #print("Now we are in autocorrelation function(waiting 2 seconds)")
@@ -48,5 +48,5 @@ rolling_auto = autocorrelation_rolling(returns, 0, 30, 1)
 #print(rolling_auto)
 
 
-csvwriter.write_to_file(time_list, rolling_auto, "data/export_csv/first_order_autocorr_30_all.csv")
+jacob_csv_handling.write_to_file(time_list, rolling_auto, "data/export_csv/first_order_autocorr_30_all.csv")
 

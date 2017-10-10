@@ -1,7 +1,7 @@
 import math
 import csv
 import matplotlib.pyplot as plt
-import csvwriter
+import jacob_csv_handling
 
 file_name =  "data/export_csv/first_order_autocorr_30_all.csv"
 autocorr = []
@@ -43,4 +43,4 @@ for i in range(0, len(autocorr)):
 plt.plot(rolls)
 plt.show()
 
-#csvwriter.write_to_file(time_list, rolls, "rolls_all.csv")
+#jacob_csv_handling.write_to_file(time_list, rolls, "rolls_all.csv")

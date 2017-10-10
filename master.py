@@ -5,6 +5,9 @@ import support_formulas as supp
 # import numpy as np
 
 
+# Funker dette? 10.10
+
+
 # ------------------------------------------------------------
 # To fetch lists:
 # ----------------

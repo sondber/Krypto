@@ -1,10 +1,10 @@
 import data_import as di
 import plot
 import user_interface as ui
-import support_formulas as supp
+import sondre_support_formulas as supp
 # import numpy as np
 
-
+# Test om branch funker
 
 # ------------------------------------------------------------
 # To fetch lists:

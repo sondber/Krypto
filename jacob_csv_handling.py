@@ -14,17 +14,17 @@ def read_single_csv(file_name, time_list, price, volume):
                 i = i + 1
         return time_list, price, volume
 
-def write_to_file(time, returns, fname):
+def write_to_file(time, returns, fname, header_second_col):
     filename = fname
     n_rows = len(time)
     n_cols = 2
     print("Exporting data to "+filename+ " ...")
     with open(filename, 'w', newline='') as csvfile:
-        header = ["Time", "Log_return"]
+        header = ["Time", header_second_col]
         write = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         write.writerow(header)
         for i in range(0, n_rows):
             rowdata = [" "]
             rowdata[0] = time[i]
             rowdata.append(returns[i])
-            write.writerow(rowdata
+            write.writerow(rowdata)

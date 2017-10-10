@@ -48,5 +48,5 @@ rolling_auto = autocorrelation_rolling(returns, 0, 30, 1)
 #print(rolling_auto)
 
 
-jacob_csv_handling.write_to_file(time_list, rolling_auto, "data/export_csv/first_order_autocorr_30_all.csv")
+jacob_csv_handling.write_to_file(time_list, rolling_auto, "data/export_csv/first_order_autocorr_30_all.csv","First order autocorrelation 30")
 

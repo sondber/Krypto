@@ -2,12 +2,15 @@ import math
 import csv
 import matplotlib.pyplot as plt
 import jacob_csv_handling
+import sondre_support_formulas as supp
+import data_import as di
 
-file_name =  "data/export_csv/first_order_autocorr_30_all.csv"
+file_name =  "data/export_csv/first_order_autocorr_60_all.csv"
 autocorr = []
 variance = []
 time_list = []
-rolls = []
+
+rolls = [0]
 
 with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
@@ -30,7 +33,7 @@ with open(file_name, newline='') as csvfile:
         #i = i+1
 
 print("Variances loaded")
-for i in range(0, len(autocorr)):
+for i in range(1, len(autocorr)):
     covar_calc = autocorr[i]*(math.sqrt(variance[i])*math.sqrt(variance[i-1]))
     try:
         roll_calc = 2*math.sqrt(-covar_calc)
@@ -39,8 +42,17 @@ for i in range(0, len(autocorr)):
     rolls.append(roll_calc)
 
 
+startdate = "201301"
+enddate = "201709"
+volumes = di.get_lists(1, 1,startdate, enddate)[5]
 
-plt.plot(rolls)
+
+x, ticks = supp.get_ticks(time_list, 5)
+plt.plot(rolls, label="Rolls")
+#plt.plot(volumes, label="Volume")
+plt.xticks(x, ticks)
+#plt.ylim(0, 0.0001)
+plt.legend()
 plt.show()
 
-#jacob_csv_handling.write_to_file(time_list, rolls, "rolls_all.csv")
+jacob_csv_handling.write_to_file(time_list, rolls, "data/export_csv/rolls_all_60.csv", "Rolls estimator")

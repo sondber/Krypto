@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import support_formulas as supp
+import sondre_support_formulas as supp
 import time
 import user_interface as ui
 

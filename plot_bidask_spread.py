@@ -9,10 +9,14 @@ install('numpy')
 import numpy as np
 import numpy as np
 import matplotlib.pyplot as plt
+import sondre_master
+import data_import as di
 
-volumes=[100,80,90,110,150]
-spread=[0.2,0.23,0.19,0.24,0.25]
-time=[0,1,2,3,4]
+startdate = "201301"
+enddate = "201709"
+volumes=di.getlists(1,1,startdate,enddate)[5]
+spread=di.getlists(1,1,startdate,enddate)[4]
+time=di.getlists(1,1,startdate,enddate)[2]
 
 def two_scales(ax1, time, data1, data2, c1, c2):
     """

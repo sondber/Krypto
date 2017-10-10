@@ -4,7 +4,11 @@ import user_interface as ui
 import sondre_support_formulas as supp
 # import numpy as np
 
+<<<<<<< HEAD
 # Test om branch funker
+=======
+#Jacob tester dette
+>>>>>>> 6122b64fddc7073144820d390a4bd9b5c5ef3549
 
 # ------------------------------------------------------------
 # To fetch lists:

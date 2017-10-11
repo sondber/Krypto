@@ -1,12 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import sondre_support_formulas as supp
 import time
-import user_interface as ui
-
 import matplotlib.pyplot as plt
 import numpy as np
-
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 
 
@@ -188,14 +182,7 @@ def easy_plot(y, label, show_plot):
 def scatters(x, y, groups=[], areas=[]):
 def scatters(x, y, color="blue", areas=[], label="No name"):
     n = len(x)
-    if groups:
-        colors = groups
-    else:
-        colors = np.zeros(n)
     if not areas:
-        areas = 1 * np.ones(n)
-
-    plt.scatter(x, y, s=areas, c=colors, alpha=0.5)
         areas = np.ones(n)
     plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
     plt.legend()

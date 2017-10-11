@@ -8,7 +8,7 @@ import sondre_support_formulas as supp
 # ------------------------------------------------------------
 # To fetch lists:
 # ----------------
-# exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc, startdate, enddate)
+# exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc)
 # which_freq    -       0=daily, 1=hourly, 2=minute
 # which_loc     -       0=raw csvs, 1=aggregate csv
 # ------------------------------------------------------------
@@ -25,7 +25,7 @@ if automatic_fetch == 1:    # hvis du vil slippe user interface
 else:
     which_freq, which_loc = ui.where_to_get_data()
 
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc, startdate, enddate)
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc)
 # ----------------------------------------------------------------------------------------
 
 

@@ -64,7 +64,9 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
     supp.write_to_hourly_file(hour_time, hour_volume, hour_price)
 
 
-def get_lists(which_freq, which_loc, startdate, enddate):
+def get_lists(which_freq, which_loc):
+    startdate = "201301"
+    enddate = "201709"
 
     if which_freq == 0:
         file_name = 'data/export_csv/daily_data.csv'

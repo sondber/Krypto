@@ -25,7 +25,7 @@ if automatic_fetch == 1:    # hvis du vil slippe user interface
 else:
     which_freq, which_loc = ui.where_to_get_data()
 
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc, startdate, enddate)
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(which_freq, which_loc)
 # ----------------------------------------------------------------------------------------
 
 
@@ -37,6 +37,10 @@ else:
     print("Did not ask for plots")
 # --------------------------------------------------------------------------
 
+
+x = total_volume
+y = total_price
+plot.scatters(x, y)
 
 
 """

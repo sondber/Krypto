@@ -475,3 +475,25 @@ def minute_to_hourly_volumes(time_list, minute_volumes):
 
     hour_list[n_hours - 1] = sum(minute_volumes[len(minute_volumes) - 1440:len(minute_volumes) - 1])
     return hour_time, hour_list
+
+
+def get_rolls():
+    file_name = "data/export_csv/rolls_all_60.csv"
+    rolls = []
+    time_list = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            try:
+                time_list.append(row[0])
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i+1, file_name))
+            try:
+                rolls.append(float(row[1]))
+            except ValueError:
+                rolls.append(0)
+            i = i + 1
+        return time_list, rolls

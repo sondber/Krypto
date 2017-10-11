@@ -178,3 +178,15 @@ def easy_plot(y, label, show_plot):
         plt.plot(y)
     if show_plot == 1:
         plt.show()
+
+
+def scatters(x, y, groups=[], areas=[]):
+    n = len(x)
+    if groups:
+        colors = groups
+    else:
+        colors = np.zeros(n)
+    if not areas:
+        areas = 1 * np.ones(n)
+
+    plt.scatter(x, y, s=areas, c=colors, alpha=0.5)

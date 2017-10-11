@@ -17,35 +17,7 @@ time=np.zeros(len(spread))
 for i in range(len(spread)):
     time[i]=i
 def two_scales(ax1, time, data1, data2, c1, c2):
-    """
 
-    Parameters
-    ----------
-    ax : axis
-        Axis to put two scales on
-
-    time : array-like
-        x-axis values for both datasets
-
-    data1: array-like
-        Data for left hand scale
-
-    data2 : array-like
-        Data for right hand scale
-
-    c1 : color
-        Color for line 1
-
-    c2 : color
-        Color for line 2
-
-    Returns
-    -------
-    ax : axis
-        Original axis
-    ax2 : axis
-        New twin axis
-    """
     ax2 = ax1.twinx()
 
     ax1.plot(time, data1, color=c1)

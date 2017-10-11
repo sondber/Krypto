@@ -17,7 +17,7 @@ startdate = "201301"
 enddate = "201709"
 
 # ----------------------------------------------------------------------------------------
-automatic_fetch = 0  # <--------- set to '0' if you want manual control, '1' for automatic
+automatic_fetch = 1  # <--------- set to '0' if you want manual control, '1' for automatic
 if automatic_fetch == 1:    # hvis du vil slippe user interface
     which_freq = 2
     which_loc = 1
@@ -30,7 +30,7 @@ exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.
 
 
 # --------------------------------------------------------------------------
-ask_for_plots = 1  # <--------- set to '1' if you want to generate plots
+ask_for_plots = 0  # <--------- set to '1' if you want to generate plots
 if ask_for_plots == 1:
     plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume, currency)
 else:

@@ -1,8 +1,11 @@
-import numpy as np
 import csv
-import jacob_csv_handling
+
 import matplotlib.pyplot as plt
-import sondre_support_formulas as supp
+import numpy as np
+
+import jacob_csv_handling
+from Sondre import sondre_support_formulas as supp
+
 
 def variance(returns, time_list, units_rolling): # takes in the list of logreturns and minutes rolling required
     var = np.zeros(int(len(returns)/units_rolling)) # to be returned

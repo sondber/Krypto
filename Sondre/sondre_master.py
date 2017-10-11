@@ -1,7 +1,7 @@
 import data_import as di
 import plot
-import user_interface as ui
-import sondre_support_formulas as supp
+from Sondre import user_interface as ui
+
 # import numpy as np
 
 

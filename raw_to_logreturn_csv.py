@@ -11,5 +11,5 @@ volume = []
 data = jacob_csv_handling.read_single_csv(file_name, time_list, prices, volume)
 returns = jacob_support.logreturn(data[1])
 
-jacob_csv_handling.write_to_file(data[0], returns, to_file)
+jacob_csv_handling.write_to_file(data[0], returns, to_file,"Log_return")
 

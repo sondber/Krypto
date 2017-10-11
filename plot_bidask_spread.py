@@ -5,11 +5,7 @@ def install(package):
 
 install('numpy')
 
-
-import numpy as np
-import numpy as np
 import matplotlib.pyplot as plt
-import sondre_master
 import data_import as di
 
 startdate = "201301"

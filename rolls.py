@@ -1,11 +1,14 @@
-import math
 import csv
+import math
+
 import matplotlib
 import matplotlib.pyplot as plt
-import jacob_csv_handling
-import sondre_support_formulas as supp
-import data_import as di
 import numpy as np
+
+import data_import as di
+import jacob_csv_handling
+from Sondre import sondre_support_formulas as supp
+
 matplotlib.use("TkAgg") # <-- THIS MAKES IT FAST!
 
 file_name =  "data/export_csv/first_order_autocorr_60_all.csv"

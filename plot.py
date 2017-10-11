@@ -185,9 +185,8 @@ def scatters(x, y, groups=[], areas=[]):
     if groups:
         colors = groups
     else:
-        colors = np.random.rand(n)
+        colors = np.zeros(n)
     if not areas:
         areas = 1 * np.ones(n)
 
     plt.scatter(x, y, s=areas, c=colors, alpha=0.5)
-    plt.show()

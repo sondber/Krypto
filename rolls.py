@@ -1,15 +1,11 @@
 import csv
 import math
 
-import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 
-import data_import as di
 from Jacob import jacob_csv_handling
 from Sondre import sondre_support_formulas as supp
 
-matplotlib.use("TkAgg") # <-- THIS MAKES IT FAST!
 
 file_name =  "data/export_csv/first_order_autocorr_60_all.csv"
 autocorr = []
@@ -48,24 +44,16 @@ for i in range(1, len(autocorr)):
     rolls.append(roll_calc)
 
 
-startdate = "201301"
-enddate = "201709"
-volumes = di.get_lists(1, 1,startdate, enddate)[5]
 
 
-print("Her begynner utrening av ticks/X")
 x, ticks = supp.get_ticks(time_list, 5)
-X = np.arange(len(rolls))
-print("Her er det ferdig")
 
 
-plt.bar(X,rolls, label = "rolls")
-print("Her er bar ferdig")
-#plt.plot(volumes, label="Volume", color="b")
+
+plt.plot(rolls, label = "rolls")
 plt.xticks(x, ticks)
 plt.legend()
 plt.show()
 
-print("Her er plot ferdug")
 
 jacob_csv_handling.write_to_file(time_list, rolls, "data/export_csv/rolls_all_60.csv", "Rolls estimator")

@@ -1,5 +1,3 @@
-import sondre_support_formulas as supp  # Egen
-import user_interface as ui  # Egen
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 
 

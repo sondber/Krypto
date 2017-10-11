@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import data_import as di
-import jacob_csv_handling
+from Jacob import jacob_csv_handling
 from Sondre import sondre_support_formulas as supp
 
 matplotlib.use("TkAgg") # <-- THIS MAKES IT FAST!

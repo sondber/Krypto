@@ -179,7 +179,6 @@ def easy_plot(y, label, show_plot):
         plt.show()
 
 
-def scatters(x, y, groups=[], areas=[]):
 def scatters(x, y, color="blue", areas=[], label="No name"):
     n = len(x)
     if not areas:

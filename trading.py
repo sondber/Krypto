@@ -1,6 +1,7 @@
-import data_import as di
-import support_formulas as supp
 import numpy as np
+import support_formulas as supp
+
+import data_import as di
 
 start_wallet_USD = 1000
 start_wallet_BTC = 0

@@ -2,10 +2,14 @@ import pip
 def install(package):
     pip.main(['install', package])
 
+<<<<<<< HEAD
 import numpy as np
 import numpy as np
+=======
+install('numpy')
+
+>>>>>>> sondre_1110
 import matplotlib.pyplot as plt
-import sondre_master
 import data_import as di
 
 startdate = "201701"

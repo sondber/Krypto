@@ -1,5 +1,4 @@
-import sondre_support_formulas as supp  # Egen
-import user_interface as ui  # Egen
+from Sondre import sondre_support_formulas as supp, user_interface as ui
 
 
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):

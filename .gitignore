@@ -2,3 +2,6 @@
 *.xml
 .DS_Store
 .idea/krypto.iml
+plot_bidask_spread.py
+data_import.py
+plot.py

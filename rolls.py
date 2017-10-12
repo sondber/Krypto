@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from Jacob import jacob_csv_handling
 from Sondre import sondre_support_formulas as supp
 
+##### ER DETTE SYNLIG
+
 
 file_name =  "data/export_csv/first_order_autocorr_60_all.csv"
 autocorr = []

@@ -4,7 +4,7 @@ def install(package):
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sondre_master
+#import sondre_master
 import data_import as di
 
 #volumes=di.get_lists(1,1,startdate,enddate)[5]
@@ -20,6 +20,7 @@ for i in range(100):
 from Sondre import sondre_support_formulas as supp
 time_list, rolls = supp.get_rolls()
 print(rolls)
+
 def two_scales(ax1, time, data1, data2, c1, c2):
     #brukes til å sette de to aksene riktig skalert
     ax2 = ax1.twinx()

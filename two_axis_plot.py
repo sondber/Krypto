@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 import sondre_master
 import data_import as di
 
-startdate = "201701"
-enddate = "201709"
 #volumes=di.get_lists(1,1,startdate,enddate)[5]
 #spread=di.get_lists(1,1,startdate,enddate)[4]
 #time=di.get_lists(1,1,startdate,enddate)[1]

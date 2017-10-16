@@ -46,4 +46,5 @@ def two_axis(data1,data2):
 
 
 two_axis(volumes,spread)
+#print(np.corrcoef(volumes,spread))
 

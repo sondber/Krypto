@@ -364,7 +364,6 @@ def count_rows(file_name):
         n_rows = int(n_rows)
     return n_rows
 
-
 def remove_extremes(in_list, num_of_stds, set_zero, print_analysis):
     out_list = in_list
     std = float(np.std(in_list))

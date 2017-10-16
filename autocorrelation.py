@@ -1,7 +1,10 @@
-import numpy as np
 import csv
 import time
-import jacob_csv_handling
+
+import numpy as np
+
+from Jacob import jacob_csv_handling
+
 
 def autocorrelation(array1, array2):
     try:
@@ -48,5 +51,5 @@ rolling_auto, hourlist = autocorrelation_rolling(returns, time_list, 0, 60, 60)
 #print(rolling_auto)
 
 
-jacob_csv_handling.write_to_file(hourlist, rolling_auto, "data/export_csv/first_order_autocorr_60_all.csv","First order autocorrelation 60")
+jacob_csv_handling.write_to_file(hourlist, rolling_auto, "data/export_csv/first_order_autocorr_60_all.csv", "First order autocorrelation 60")
 

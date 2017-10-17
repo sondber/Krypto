@@ -1,17 +1,19 @@
 import csv
 import math
-
+import two_axis_plot as tap
 import matplotlib.pyplot as plt
-
+import data_import as di
+import descriptive_stats as desc
 from Jacob import jacob_csv_handling
 from Sondre import sondre_support_formulas as supp
 
-file_name =  "data/export_csv/first_order_autocorr_60_all.csv"
+
+file_name =  "data/export_csv/first_order_autocorr_59_all.csv"
 autocorr = []
 variance = []
 time_list = []
 
-rolls = [0]
+rolls = []
 
 with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
@@ -23,7 +25,7 @@ with open(file_name, newline='') as csvfile:
                 #i = i + 1
 print("Autocorrelations loaded")
 
-file_name = "data/export_csv/rolling_variance_all.csv"
+file_name = "data/export_csv/rolling_variance_all_59.csv"
 
 with open(file_name, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=';', quotechar='|')
@@ -34,8 +36,10 @@ with open(file_name, newline='') as csvfile:
         #i = i+1
 
 print("Variances loaded")
-for i in range(1, len(autocorr)):
-    covar_calc = autocorr[i]*(math.sqrt(variance[i])*math.sqrt(variance[i-1]))
+j = 0
+for i in range(0, len(autocorr)):
+    covar_calc = autocorr[i]*(math.sqrt(variance[j])*math.sqrt(variance[j+1]))
+    j += 2
     try:
         roll_calc = 2*math.sqrt(-covar_calc)
     except ValueError:
@@ -45,14 +49,23 @@ for i in range(1, len(autocorr)):
 
 
 
+
 x, ticks = supp.get_ticks(time_list, 5)
 
 
-
+"""
 plt.plot(rolls, label = "rolls")
 plt.xticks(x, ticks)
 plt.legend()
-plt.show()
+"""
+
+jacob_csv_handling.write_to_file(time_list, rolls, "data/export_csv/rolls_all_59.csv", "Rolls estimator")
+
+volumes = di.get_lists(1,1)[5]
+
+desc.combined_stats(volumes,rolls,"Volumes","Rolls")
+
+#tap.two_axis(volumes[15000:41495],rolls[15000:41495])
 
 
-jacob_csv_handling.write_to_file(time_list, rolls, "data/export_csv/rolls_all_60.csv", "Rolls estimator")
+

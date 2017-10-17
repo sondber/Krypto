@@ -58,5 +58,4 @@ def two_axis(data1,data2):
     return None
 
 
-two_axis(volumes[0:41495],rolls[0:41495])
 

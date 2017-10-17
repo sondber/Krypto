@@ -13,17 +13,17 @@ def autocorrelation(array1, array2):
         result = 0
     return result #finner korrelasjonen mellom de to arrays
 
-def autocorrelation_rolling(returns, timelist, timestart, window, lag): #window in minutes, timestart is which minute you want to start in
+def autocorrelation_rolling(returns, timelist, timestart, window): #window in minutes, timestart is which minute you want to start in
     rolling_autocorrelation = np.zeros(int(len(returns)/window))# to be returned
-    counter = 1
+    counter = 0
     hourlist = []
     if timestart+window >= len(returns):
         print("No valid autocorrelations available")
     else:
-        for i in range(timestart+lag, (len(returns)-window+1), 60):
-            array1 = returns[i:i+window] #window is number of minutes back
+        for i in range(timestart, (len(returns)-window), window):
+            array1 = returns[i:i+window-1] #returns 0-58
             #print(array1)
-            array2 = returns[(i-lag):(i+window-lag)]
+            array2 = returns[(i+1):(i+window)]
             #print(array2)
             rolling_autocorrelation[counter] = autocorrelation(array1, array2)
             counter += 1
@@ -47,9 +47,9 @@ with open(file_name, newline='') as csvfile:
 
 print("Now the logreturns have been loaded into the vector(waiting 2 seconds)")
 time.sleep(2)
-rolling_auto, hourlist = autocorrelation_rolling(returns, time_list, 0, 60, 60)
+rolling_auto, hourlist = autocorrelation_rolling(returns, time_list, 0, 60)
 #print(rolling_auto)
 
 
-jacob_csv_handling.write_to_file(hourlist, rolling_auto, "data/export_csv/first_order_autocorr_60_all.csv", "First order autocorrelation 60")
+jacob_csv_handling.write_to_file(hourlist, rolling_auto, "data/export_csv/first_order_autocorr_59_all.csv", "First order autocorrelation 60")
 

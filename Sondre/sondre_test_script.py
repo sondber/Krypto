@@ -76,7 +76,9 @@ if scatters:
 
     plot.plt.show()
 
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists("h")
+
+total_price = di.get_lists("h", data="price")
+total_volume = di.get_lists("h", data="volume")
 
 returns = jake_supp.logreturn(total_price)
 

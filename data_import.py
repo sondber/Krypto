@@ -68,11 +68,11 @@ def get_lists(which_freq, which_loc):
     enddate = "201709"
 
     if which_freq == 0:
-        file_name = 'data/export_csv/daily_data.csv'
+        file_name = "data/export_csv/daily_data.csv"
     elif which_freq == 1:
-        file_name = 'data/export_csv/hourly_data.csv'
+        file_name = "data/export_csv/hourly_data.csv"
     elif which_freq == 2:
-        file_name = 'data/export_csv/minute_data.csv'
+        file_name = "data/export_csv/minute_data.csv"
 
     if which_loc == 1:
         time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)

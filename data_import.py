@@ -63,7 +63,7 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
     supp.write_to_hourly_file(hour_time, hour_volume, hour_price)
 
 
-def get_lists(which_freq=2, which_loc=1):
+def get_lists(which_freq=2, which_loc=1, data="all"):
     startdate = "201301"
     enddate = "201709"
 
@@ -93,5 +93,10 @@ def get_lists(which_freq=2, which_loc=1):
         n_exc = len(exchanges)
         # Gjør akkurat det samme som if which_loc == 1
         time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
+    if data == "price" or data == "prices":
+        return total_price
+    elif data == "volume" or data == "volumes":
+        return total_volume
+    else:
+        return exchanges, time_list, prices, volumes, total_price, total_volume, currency
 
-    return exchanges, time_list, prices, volumes, total_price, total_volume, currency

@@ -63,16 +63,19 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
     supp.write_to_hourly_file(hour_time, hour_volume, hour_price)
 
 
-def get_lists(which_freq, which_loc):
+def get_lists(which_freq=2, which_loc=1):
     startdate = "201301"
     enddate = "201709"
 
-    if which_freq == 0:
+    if which_freq == 0 or which_freq == "day" or which_freq == "d":
         file_name = "data/export_csv/daily_data.csv"
-    elif which_freq == 1:
+        print("Fetching daily data...")
+    elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
         file_name = "data/export_csv/hourly_data.csv"
-    elif which_freq == 2:
+        print("Fetching hourly data...")
+    elif which_freq == 2 or which_freq == "min" or which_freq == "m":
         file_name = "data/export_csv/minute_data.csv"
+        print("Fetching minute data...")
 
     if which_loc == 1:
         time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)

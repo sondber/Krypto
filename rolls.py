@@ -1,5 +1,6 @@
 import csv
 import math
+import numpy as np
 import two_axis_plot as tap
 import matplotlib.pyplot as plt
 import data_import as di
@@ -47,23 +48,29 @@ for i in range(0, len(autocorr)):
     rolls.append(roll_calc)
 
 
+rolls_daily_mean = []
 
+for i in range(0, len(rolls), 24):
+    rolls_daily_mean.append(np.mean(rolls[i:i+24]))
 
+print(rolls_daily_mean)
 
 x, ticks = supp.get_ticks(time_list, 5)
 
 
-"""
+
 plt.plot(rolls, label = "rolls")
 plt.xticks(x, ticks)
 plt.legend()
-"""
+plt.show()
 
 jacob_csv_handling.write_to_file(time_list, rolls, "data/export_csv/rolls_all_59.csv", "Rolls estimator")
 
-volumes = di.get_lists(1,1)[5]
+volumes = di.get_lists(0,1)[5]
+print(len(volumes))
+print(len(rolls_daily_mean))
 
-desc.combined_stats(volumes,rolls,"Volumes","Rolls")
+desc.combined_stats(volumes,rolls_daily_mean[0:1728],"Volumes","Rolls")
 
 #tap.two_axis(volumes[15000:41495],rolls[15000:41495])
 

@@ -478,7 +478,7 @@ def minute_to_hourly_volumes(time_list, minute_volumes):
 
 
 def get_rolls():
-    file_name = "data/export_csv/rolls_all_60.csv"
+    file_name = "data/export_csv/rolls_all_59.csv"
     rolls = []
     time_list = []
     with open(file_name, newline='') as csvfile:

@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 
+import math
 from Jacob import jacob_csv_handling
 
 
@@ -25,7 +26,10 @@ def autocorrelation_rolling(returns, timelist, timestart, window): #window in mi
             #print(array1)
             array2 = returns[(i+1):(i+window)]
             #print(array2)
-            rolling_autocorrelation[counter] = autocorrelation(array1, array2)
+            if math.isnan(autocorrelation(array1,array2)):
+                rolling_autocorrelation[counter] = 0
+            else:
+                rolling_autocorrelation[counter] = autocorrelation(array1, array2)
             counter += 1
             hourlist.append(timelist[i])
             if i%10000==0:

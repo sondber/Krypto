@@ -6,11 +6,9 @@ import data_import as di
 start_wallet_USD = 1000
 start_wallet_BTC = 0
 
-startdate = "201301"
-enddate = "201709"
 
 print("Loading data...")
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(2, 1, startdate, enddate)
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(2, 1)
 print("Data loaded")
 
 price = prices[0,:]

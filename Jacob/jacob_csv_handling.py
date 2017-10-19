@@ -29,3 +29,5 @@ def write_to_file(time, returns, fname, header_second_col):
             rowdata.append(returns[i])
             write.writerow(rowdata)
     print("The writing to file is done")
+
+def

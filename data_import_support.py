@@ -5,9 +5,9 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    startdate = "20120601"
+    startdate = "20120101"
     enddate = "20170531"
-    start_stamp_excel = "01.06.2012 00:00"  # <-- Må matche startdate
+    start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
     end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
     first_year = int(startdate[0:4])
     final_year = int(enddate[0:4])
@@ -15,14 +15,14 @@ def make_time_stamps():
     final_month = int(enddate[4:7])
     first_day = int(startdate[7:9])
     final_day = int(enddate[7:9])
-    start_stamp_unix = 1338508800 # <-- Må matche startdate
-    end_stamp_unix = 1496275140 # <-- Må matche enddate
+    start_stamp_unix = 1325376000  # <-- Må matche startdate
+    end_stamp_unix = 1496275140  # <-- Må matche enddate
     unix_stamps = list(range(start_stamp_unix, end_stamp_unix + 60, 60))
     n_stamps_unix = len(unix_stamps)
     excel_stamps = [start_stamp_excel]
     i = 1
-    print("Progress:")
-    print("0.0%%")
+    print(" Progress:")
+    print("  0.0%%")
     tenperc = n_stamps_unix/10
     while excel_stamps[i - 1] != end_stamp_excel:
         d = int(excel_stamps[i - 1][0:2])
@@ -64,7 +64,7 @@ def make_time_stamps():
 
         if i % tenperc == 0:
             perc = 100 * i / n_stamps_unix
-            print("%0.1f%%" % perc)
+            print("  %0.1f%%" % perc)
 
         excel_stamps.append(make_excel_stamp(y, mo, d, h, mi))
         i = i + 1
@@ -152,6 +152,7 @@ def get_lists_from_fulls(exchanges):
     unix_stamps, excel_stamps = make_time_stamps()
     n_cols = len(excel_stamps)
     prices = np.zeros([n_exc, n_cols])
+    prices_usd = np.zeros([n_exc, n_cols])
     volumes = np.zeros([n_exc, n_cols])
     for i in range(0, n_exc):
         print("Working on exchange %i/%i" % ((i+1), n_exc))
@@ -185,6 +186,7 @@ def get_lists_from_fulls(exchanges):
 def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
     time_list = excel_stamps  # <-- Kun for å kunne bruke gammel syntax
     n_exc = len(exchanges)
+    print()
     print("Exporting data to csv-files...")
     with open(filename, 'w', newline='') as csvfile:
         writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -222,7 +224,7 @@ def remove_nan(in_list):
         if in_list[i] != in_list[i]:
             out_list[i] = 0
             count_nans += 1
-    print("Removed %i instances of 'nan'" % count_nans)
+    print(" Removed %i instances of 'nan'" % count_nans)
     return out_list
 
 

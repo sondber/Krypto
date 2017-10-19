@@ -201,7 +201,7 @@ def logreturn(price):
     return returnlist
 
 
-def make_totals(volumes, prices):
+def make_totals(volumes, prices):  # Has to be all in USD
     print("Generating totals..")
     num_exchanges = np.size(volumes, 0)
     entries = np.size(volumes, 1)

@@ -1,6 +1,6 @@
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 import data_import_support as dis
-
+import numpy as np
 """
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
 
@@ -95,10 +95,30 @@ def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
 
 
 def fetch_long_and_write(exchanges):
+    n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
     filename = "data/export_csv/full_raw_data.csv"
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
-    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices)
+
+    # Convert currencies
+    print("Currency conversion:")
+    prices_usd = []
+    for i in range(0, n_exc):
+        # sjekker valuta
+        exc = exchanges[i]
+        l_exc = len(exc)
+        currency = exc[l_exc - 3:l_exc]
+        if currency != "usd":
+            print(" Converting currency of %s from %s to USD..." % (exc, currency.upper()))
+            # single_price_usd = jacobsformel(prices[i,:])
+            # prices_usd.append(single_price_usd)
+            prices_usd.append(prices[i,:])
+        else:
+            print("%s is already USD" % exc)
+            prices_usd.append(prices[i,:])
+
+    prices_usd = np.matrix(prices_usd)
+    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices_usd)
 
     minute_filename = "data/export_csv/minute_data.csv"
     minute_excel_stamps = excel_stamps

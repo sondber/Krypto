@@ -61,31 +61,38 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
 
 
 # Denne krever litt jobb med ny datastruktur!
-def get_lists(which_freq=2, which_loc=1, data="all"):
+def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
     # Bruker ikke which_loc
-    exchanges = ["bitstampusd"]
+    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    n_exc = len(exchanges)
 
-    if which_freq == 0 or which_freq == "day" or which_freq == "d":
-        file_name = "data/export_csv/daily_data.csv"
-        print("Fetching daily data...")
-    elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
-        file_name = "data/export_csv/hourly_data.csv"
-        print("Fetching hourly data...")
-    elif which_freq == 2 or which_freq == "min" or which_freq == "m":
-        file_name = "data/export_csv/minute_data.csv"
-        print("Fetching minute data...")
+    if compex == 0:
+        if which_freq == 0 or which_freq == "day" or which_freq == "d":
+            file_name = "data/export_csv/daily_data.csv"
+            print("Fetching daily data...")
+        elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
+            file_name = "data/export_csv/hourly_data.csv"
+            print("Fetching hourly data...")
+        elif which_freq == 2 or which_freq == "min" or which_freq == "m":
+            file_name = "data/export_csv/minute_data.csv"
+            print("Fetching minute data...")
+        else:
+            print("Bad input")
+            file_name = "data/export_csv/full_raw_data.csv"
+    else:
+        file_name = "data/export_csv/full_raw_data.csv"
 
-    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)
+    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     total_volume, total_price = supp.make_totals(volumes, prices)
-    exchanges = ["bitstampusd"]
     currency = 0
 
-    if data == "price" or data == "prices":
+    if data == "price" or data == "prices" or data == "p":
         return total_price
-    elif data == "volume" or data == "volumes":
+    elif data == "volume" or data == "volumes" or data == "v":
         return total_volume
     else:
         return exchanges, time_list, prices, volumes, total_price, total_volume, currency
+
 
 def fetch_long_and_write(exchanges):
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)

@@ -104,7 +104,7 @@ def fill_blanks(in_list):
             if in_list[i] == 0:
                 if i == 0:
                     j = 0
-                    while in_list[j] == 0:
+                    while in_list[j] == 0 and j<60:
                         j = j + 1
                     out_list[0] = in_list[j]
                 elif i == n:

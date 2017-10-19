@@ -5,24 +5,25 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    startdate = "20120101"
+    startdate = "20120601"
     enddate = "20170531"
+    start_stamp_excel = "01.06.2012 00:00"  # <-- Må matche startdate
+    end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
     first_year = int(startdate[0:4])
     final_year = int(enddate[0:4])
     first_month = int(startdate[4:7])
     final_month = int(enddate[4:7])
     first_day = int(startdate[7:9])
     final_day = int(enddate[7:9])
-    start_stamp_unix = 1325376000 # <-- Må matche startdate
+    start_stamp_unix = 1338508800 # <-- Må matche startdate
     end_stamp_unix = 1496275140 # <-- Må matche enddate
     unix_stamps = list(range(start_stamp_unix, end_stamp_unix + 60, 60))
     n_stamps_unix = len(unix_stamps)
-    start_stamp_excel = "01.01.2012 00:00"
-    end_stamp_excel = "17.10.2017 23:59"
     excel_stamps = [start_stamp_excel]
     i = 1
     print("Progress:")
     print("0.0%%")
+    tenperc = n_stamps_unix/10
     while excel_stamps[i - 1] != end_stamp_excel:
         d = int(excel_stamps[i - 1][0:2])
         mo = int(excel_stamps[i - 1][3:5])
@@ -61,7 +62,7 @@ def make_time_stamps():
             mo = 1
             y = y + 1
 
-        if i % 304850 == 0:
+        if i % tenperc == 0:
             perc = 100 * i / n_stamps_unix
             print("%0.1f%%" % perc)
 
@@ -164,7 +165,6 @@ def get_lists_from_fulls(exchanges):
         single_price = remove_nan(single_price)
         single_price = supp.fill_blanks(single_price)
         single_volume = remove_nan(single_volume)
-
 
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_price)

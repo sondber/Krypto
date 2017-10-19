@@ -1,6 +1,6 @@
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 import data_import_support as dis
-
+import numpy as np
 """
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
 
@@ -61,37 +61,64 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
 
 
 # Denne krever litt jobb med ny datastruktur!
-def get_lists(which_freq=2, which_loc=1, data="all"):
+def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
     # Bruker ikke which_loc
-    exchanges = ["bitstampusd"]
+    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    n_exc = len(exchanges)
 
-    if which_freq == 0 or which_freq == "day" or which_freq == "d":
-        file_name = "data/export_csv/daily_data.csv"
-        print("Fetching daily data...")
-    elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
-        file_name = "data/export_csv/hourly_data.csv"
-        print("Fetching hourly data...")
-    elif which_freq == 2 or which_freq == "min" or which_freq == "m":
-        file_name = "data/export_csv/minute_data.csv"
-        print("Fetching minute data...")
+    if compex == 0:
+        if which_freq == 0 or which_freq == "day" or which_freq == "d":
+            file_name = "data/export_csv/daily_data.csv"
+            print("Fetching daily data...")
+        elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
+            file_name = "data/export_csv/hourly_data.csv"
+            print("Fetching hourly data...")
+        elif which_freq == 2 or which_freq == "min" or which_freq == "m":
+            file_name = "data/export_csv/minute_data.csv"
+            print("Fetching minute data...")
+        else:
+            print("Bad input")
+            file_name = "data/export_csv/full_raw_data.csv"
+    else:
+        file_name = "data/export_csv/full_raw_data.csv"
 
-    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)
+    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     total_volume, total_price = supp.make_totals(volumes, prices)
-    exchanges = ["bitstampusd"]
     currency = 0
 
-    if data == "price" or data == "prices":
+    if data == "price" or data == "prices" or data == "p":
         return total_price
-    elif data == "volume" or data == "volumes":
+    elif data == "volume" or data == "volumes" or data == "v":
         return total_volume
     else:
         return exchanges, time_list, prices, volumes, total_price, total_volume, currency
 
+
 def fetch_long_and_write(exchanges):
+    n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
     filename = "data/export_csv/full_raw_data.csv"
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
-    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices)
+
+    # Convert currencies
+    print("Currency conversion:")
+    prices_usd = []
+    for i in range(0, n_exc):
+        # sjekker valuta
+        exc = exchanges[i]
+        l_exc = len(exc)
+        currency = exc[l_exc - 3:l_exc]
+        if currency != "usd":
+            print(" Converting currency of %s from %s to USD..." % (exc, currency.upper()))
+            # single_price_usd = jacobsformel(prices[i,:])
+            # prices_usd.append(single_price_usd)
+            prices_usd.append(prices[i,:])
+        else:
+            print("%s is already USD" % exc)
+            prices_usd.append(prices[i,:])
+
+    prices_usd = np.matrix(prices_usd)
+    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices_usd)
 
     minute_filename = "data/export_csv/minute_data.csv"
     minute_excel_stamps = excel_stamps

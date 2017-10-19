@@ -8,6 +8,9 @@ import os
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+exchanges = ["bitstampusd"]
+di.fetch_long_and_write(exchanges)
+
 total_price = di.get_lists("h", data="price")
 total_volume = di.get_lists("h", data="volume")
 returns = jake_supp.logreturn(total_price)

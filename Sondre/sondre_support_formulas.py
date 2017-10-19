@@ -201,7 +201,8 @@ def logreturn(price):
     return returnlist
 
 
-def all_in_one_list(volumes, prices):
+def make_totals(volumes, prices):
+    print("Generating totals..")
     num_exchanges = np.size(volumes, 0)
     entries = np.size(volumes, 1)
     total_volume = np.zeros(entries)
@@ -215,11 +216,17 @@ def all_in_one_list(volumes, prices):
                 total_price[i] = (prices[j, i] * volumes[j, i]) + total_price[i]
             total_price[i] = float(total_price[i]) / float(total_volume[i])
     if total_price[0] == 0:
-        total_price[0] = total_price[1]
+        r = 0
+        while total_price[r] == 0:
+            r = r + 1
+        while r > 0:
+            total_price[r - 1] = total_price[r]
+            r = r - 1
     return total_volume, total_price
 
 
 def convert_currencies(exchanges, prices):
+    print("Converting currencies...")
     currency_handle = []
     for i in range(0, len(exchanges)):
         exc_name = exchanges[i]
@@ -241,7 +248,7 @@ def convert_currencies(exchanges, prices):
 
 def write_to_raw_file(volumes, prices, time_list, exchanges, filename):
     n_exc = len(exchanges)
-    print("Exporting data to csv-files...")
+    print("Exporting data to csv-file...")
     with open(filename, 'w', newline='') as csvfile:
         writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         n_rows = np.size(volumes, 1)

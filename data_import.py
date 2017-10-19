@@ -1,6 +1,7 @@
 from Sondre import sondre_support_formulas as supp, user_interface as ui
+import data_import_support as dis
 
-
+"""
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
 
     compex = compare_exchanges
@@ -41,14 +42,10 @@ def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
     elif compex == 1:
         print("NB! Original currencies...\n")
 
-    if no_extreme:
-        n_stds_volume = int(input("How many standard deviations away from mean do we allow? ") or 3)
-        for i in range(0, n_exc):
-            volumes[i, :] = supp.remove_extremes(volumes[i, :], n_stds_volume, 1, 0)
-
-    total_volume, total_prices = supp.all_in_one_list(volumes, prices)
+    total_volume, total_prices = supp.make_totals(volumes, prices)
 
     return exchanges, time_list, prices, volumes, total_prices, total_volume, currency
+"""
 
 
 def convert_to_lower_freq(time_list, total_price, total_volume):
@@ -63,9 +60,10 @@ def convert_to_lower_freq(time_list, total_price, total_volume):
     supp.write_to_hourly_file(hour_time, hour_volume, hour_price)
 
 
+# Denne krever litt jobb med ny datastruktur!
 def get_lists(which_freq=2, which_loc=1, data="all"):
-    startdate = "201301"
-    enddate = "201709"
+    # Bruker ikke which_loc
+    exchanges = ["bitstampusd"]
 
     if which_freq == 0 or which_freq == "day" or which_freq == "d":
         file_name = "data/export_csv/daily_data.csv"
@@ -77,22 +75,11 @@ def get_lists(which_freq=2, which_loc=1, data="all"):
         file_name = "data/export_csv/minute_data.csv"
         print("Fetching minute data...")
 
-    if which_loc == 1:
-        time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)
-        total_volume, total_price = supp.all_in_one_list(volumes, prices)
-        exchanges = ["bitstampusd"]
-        currency = 0
-    else:
-        compex, currency, no_extreme = ui.import_data()
-        exchanges, time_list, prices, volumes, total_price, total_volume, currency = get_data(compex, currency, no_extreme, startdate, enddate)
-        if compex == 0:
-            convert_to_lower_freq(time_list, total_price, total_volume)
-        else:
-            file_name = "data/export_csv/raw_data_compex.csv"
+    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, 1)
+    total_volume, total_price = supp.make_totals(volumes, prices)
+    exchanges = ["bitstampusd"]
+    currency = 0
 
-        n_exc = len(exchanges)
-        # Gjør akkurat det samme som if which_loc == 1
-        time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     if data == "price" or data == "prices":
         return total_price
     elif data == "volume" or data == "volumes":
@@ -100,3 +87,22 @@ def get_lists(which_freq=2, which_loc=1, data="all"):
     else:
         return exchanges, time_list, prices, volumes, total_price, total_volume, currency
 
+def fetch_long_and_write(exchanges):
+    excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
+    filename = "data/export_csv/full_raw_data.csv"
+    dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
+    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices)
+
+    minute_filename = "data/export_csv/minute_data.csv"
+    minute_excel_stamps = excel_stamps
+    dis.write_to_total_files(minute_total_volume, minute_total_price, minute_excel_stamps, minute_filename)
+
+    hour_excel_stamps, hour_total_price = supp.minute_to_hourly_prices(minute_excel_stamps, minute_total_price)
+    hour_total_volume = supp.minute_to_hourly_volumes(minute_excel_stamps, minute_total_volume)[1]
+    hour_filename = "data/export_csv/hourly_data.csv"
+    dis.write_to_total_files(hour_total_volume, hour_total_price, hour_excel_stamps, hour_filename)
+
+    day_excel_stamps, day_total_price = supp.minute_to_daily_prices(minute_excel_stamps, minute_total_price)
+    day_total_volume = supp.minute_to_daily_volumes(minute_excel_stamps, minute_total_volume)[1]
+    day_filename = "data/export_csv/daily_data.csv"
+    dis.write_to_total_files(day_total_volume, day_total_price, day_excel_stamps, day_filename)

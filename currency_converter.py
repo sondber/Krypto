@@ -38,11 +38,3 @@ def convert_to_usd(price_in_foreign_currency, currency): # prices as 2D-matrix w
 
 ##testing
 #prices_time, prices_converted = convert_to_USD(TESTLIST(TWODIM_teimstamp_price), "EUR")
-
-
-
-
-
-
-
-

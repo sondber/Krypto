@@ -6,20 +6,12 @@ from Sondre import sondre_support_formulas as supp
 
 
 def currency_converter(prices_time, prices, xrate_times, xrate):
-    """
-    prices_day = []
-    prices_month = []
-    prices_year = []
-    xrate_date = []
-    xrate_month = []
-    xrate_year = []
-    """
     prices_converted = []
 
-    prices_year, prices_month, prices_day = supp.fix_time_list(prices_time) #this is probably inccorect, need to decide the output
-    xrate_year, xrate_month, xrate_day = supp.fix_time_list(xrate_times) #see line above
+    prices_year, prices_month, prices_day, hour, minute = supp.fix_time_list(prices_time)
+    xrate_year, xrate_month, xrate_day, hour, minute = supp.fix_time_list(xrate_times)
 
-    for i in range(0,len(prices)):
+    for i in range(0, len(prices)):
         found = 0
         j = 0
         while not found:
@@ -33,19 +25,28 @@ def currency_converter(prices_time, prices, xrate_times, xrate):
     return prices_time, prices_converted
 
 
-def import_data(price_file, currency): #price_file as string, currency as string ("JPY")
+def convert_to_USD(price_in_foreign_currency, currency): #price_file as string, currency as string ("JPY")
     timestamp_price = []
     timestamp_xrate = []
     xrate = []
     price = []
-    timestamp_price, price = csv_handling.read_price_csv(price_file, timestamp_price, price)
-    timestamp_xrate, xrate = csv_handling.read_currency_csv("data/bitcoincharts/" + currency + ".csv", timestamp_xrate, xrate)
-    return timestamp_price, price, timestamp_xrate, xrate
+    timestamp_price, price = csv_handling.read_price_csv(price_in_foreign_currency, timestamp_price, price)
+    timestamp_xrate, xrate = csv_handling.read_currency_csv("data/Forex/" + currency + ".csv", timestamp_xrate, xrate)
+    # test med csv-fetch, deretter lag kun med liste-input
+    prices_time, prices_converted = currency_converter(timestamp_price, price, xrate_times, xrate)
+
+    return prices_time, prices_converted
 
 ##testing
 
+prices_time, prices_converted = convert_to_USD("test_NOTSYNC.csv", "JPY")
 
 
+#timestamp_price = []
+#timestamp_xrate = []
+#xrate = []
+#price = []
+#timestamp_prices, prices = csv_handling.read_price_csv("test_NOTSYNC.csv",  timestamp_price, price)
 
 
 

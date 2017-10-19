@@ -48,18 +48,3 @@ def read_currency_csv(file_name, timestamp, xrate): #timestamp, xrate are empty 
         return timestamp, xrate
 
 
-def read_price_csv(file_name, timestamp, price): #timestmap, price are empty lists
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        for row in reader:
-            try:
-                timestamp.append(str(row[0]))
-                price.append(float(row[1]))
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            i = i + 1
-        return timestamp, price
-

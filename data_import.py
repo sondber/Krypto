@@ -1,5 +1,5 @@
 from Sondre import sondre_support_formulas as supp, user_interface as ui
-
+import data_import_support as dis
 
 """
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
@@ -87,8 +87,6 @@ def get_lists(which_freq=2, which_loc=1, data="all"):
     else:
         return exchanges, time_list, prices, volumes, total_price, total_volume, currency
 
-<<<<<<< HEAD
-
 def fetch_long_and_write(exchanges):
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
     filename = "data/export_csv/full_raw_data.csv"
@@ -108,5 +106,3 @@ def fetch_long_and_write(exchanges):
     day_total_volume = supp.minute_to_daily_volumes(minute_excel_stamps, minute_total_volume)[1]
     day_filename = "data/export_csv/daily_data.csv"
     dis.write_to_total_files(day_total_volume, day_total_price, day_excel_stamps, day_filename)
-=======
->>>>>>> parent of 1f82aad... 18/10

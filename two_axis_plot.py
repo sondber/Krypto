@@ -4,58 +4,73 @@ def install(package):
 
 import numpy as np
 import matplotlib.pyplot as plt
-#import sondre_master
 import data_import as di
-import pandas as pd
 
-'''
-def pandaplot(list1,list2):
-    ax1=list1.plot(color='r',ylim=(0,100))
-    ax2=list2.plot(secondary_y=True,color='b',ylim=(0,30))
-'''
+volumes = di.get_lists(1, 1)[5]
+prices = di.get_lists(1, 1)[4]
 
 
-#volumes=di.get_lists(1,1,startdate,enddate)[5]
-#spread=di.get_lists(1,1,startdate,enddate)[4]
-#time=di.get_lists(1,1,startdate,enddate)[1]
-'''
-volumes=np.zeros(100)
-spread=np.zeros(100)
-for i in range(100):
-    volumes[i]=i*i-0.002*i*i*i
-    spread[i]=10*i-0.055*i*i
-    '''
-
-from Sondre import sondre_support_formulas as supp
-time_list, rolls = supp.get_rolls()
-print(len(rolls))
-volumes=di.get_lists(1,1)[5]
-print(len(volumes))
-
-def two_scales(ax1, time, data1, data2, c1, c2):
+def two_scales(ax1, time, data1, data2,title1,title2,title_x, color1, color2,type1,type2,scale1,scale2):
     #brukes til å sette de to aksene riktig skalert
+    print('running two_scales')
     ax2 = ax1.twinx()
-    ax1.plot(time, data1, color=c1)#bar her gir søyler
-    ax1.set_ylim([-2500,max(data1)])
-    ax1.set_xlabel('time (min)')
-    ax1.set_ylabel('vol')
-    ax2.bar(time, data2, color=c2)#plot her gir en kontinuerlig graf
-    ax2.set_ylim([0,0.01])
-    ax2.set_ylabel('spread')
+    if (type1=='plot'):
+        ax1.plot(time, data1, color=color1)
+    elif (type1=='bar'):
+        ax1.bar(time, data1, color=color1)
+
+    if (type2 == 'plot'):
+        ax2.plot(time, data2, color=color2)
+    elif (type2 == 'bar'):
+        ax2.bar(time, data2, color=color2)
+    print(type1)
+
+    if (scale2=='plot_over_bar' or scale1=='plot_over_bar'):
+        print("plot over bar")
+        ax1.set_ylim([min(data1) - 0.2 * (max(data1) - min(data1)), max(data1)])
+        ax2.set_ylim([min(data2),max(data2)])
+    else:
+        if (scale1=='auto'):
+            print('scale1 auto')
+        elif (scale1=='custom'):
+            print("min(data1): ",min(data1))
+            print("max(data1): ",max(data1))
+            minimum=input('set new min: ')
+            maximum=input('set new max: ')
+            ax1.set_ylim([int(minimum),int(maximum)])
+        ax1.set_xlabel(title_x)
+        ax1.set_ylabel(title1)
+        if (scale2=='auto'):
+            print('scale2 auto')
+        elif (scale2=='custom'):
+            print("min(data2): ",min(data2))
+            print("max(data2): ",max(data2))
+            minimum=input('set new min: ')
+            maximum=input('set new max: ')
+            ax2.set_ylim([int(minimum),int(maximum)])
+
+
+
+    ax2.set_ylabel(title2)
     return ax1, ax2
 
 
-def two_axis(data1,data2):
+def two_axis(data1,data2, title1="data1",title2="data2",title_x='time (hours)',color1='r',color2='b',
+             type1='plot',type2='bar',scale1='auto',scale2='auto'):
     #denne gir et 2-akset system for de to datasettene
-    #husk å stille bar vs plot i two_scales
+    print('running two_axis')
     time = np.zeros(len(data1))
     for i in range(len(data1)):
         time[i] = i
     # Create axes
     fig, ax = plt.subplots()
-    ax1, ax2 = two_scales(ax, time, data1, data2, 'r', 'b')
+    ax1, ax2 = two_scales(ax, time, data1, data2,title1,title2,title_x,color1,color2,type1,type2,scale1,scale2)
     plt.show()
+    print("picture finished")
     return None
 
+#print(np.corrcoef(volumes[40000:41495],rolls[40000:41495]))
+
+two_axis(prices,volumes, scale1='plot_over_bar')
 
 

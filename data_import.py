@@ -1,6 +1,7 @@
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 import data_import_support as dis
 import numpy as np
+import currency_converter as curr
 """
 def get_data(compare_exchanges, convert_to_usd, no_extreme, startdate, enddate):
 
@@ -101,7 +102,8 @@ def fetch_long_and_write(exchanges):
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
     # Convert currencies
-    print("Currency conversion:")
+    print()
+    print("Currency conversion:---------")
     prices_usd = []
     for i in range(0, n_exc):
         # sjekker valuta
@@ -110,11 +112,11 @@ def fetch_long_and_write(exchanges):
         currency = exc[l_exc - 3:l_exc]
         if currency != "usd":
             print(" Converting currency of %s from %s to USD..." % (exc, currency.upper()))
-            # single_price_usd = jacobsformel(prices[i,:])
-            # prices_usd.append(single_price_usd)
-            prices_usd.append(prices[i,:])
+            print("  This may take several minutes for a single conversion")
+            single_price_usd = curr.convert_to_usd(excel_stamps, prices[i,:], currency)
+            prices_usd.append(single_price_usd)
         else:
-            print("%s is already USD" % exc)
+            print(" %s is already USD" % exc)
             prices_usd.append(prices[i,:])
 
     prices_usd = np.matrix(prices_usd)

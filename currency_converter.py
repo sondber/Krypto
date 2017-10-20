@@ -26,10 +26,12 @@ def currency_converter(prices_time, prices, xrate_times, xrate):
     return prices_time, prices_converted
 
 
-def convert_to_usd(price_in_foreign_currency, currency): # prices as 2D-matrix with timestamp and price WITHOUT HEADER, currency as string ("JPY")
-    timestamp_price = price_in_foreign_currency[0] # stores timestamp of prices in own vector
-    price = price_in_foreign_currency[1] # stores prices of prices in own vector
+def convert_to_usd(timestamp_price, price_in_foreign_currency, currency): # prices as 2D-matrix with timestamp and price WITHOUT HEADER, currency as string ("JPY")
+    # timestamp_price = price_in_foreign_currency[0] # stores timestamp of prices in own vector
+    # price = price_in_foreign_currency[1] # stores prices of prices in own vector
+    price = price_in_foreign_currency
     timestamp_xrate = []
+    currency = currency.upper()  # Makes sure the currency code is all upper case
     xrate = []
     timestamp_xrate, xrate = csv_handling.read_currency_csv("data/Forex/" + currency + ".csv", timestamp_xrate, xrate) # fetches xrates
     prices_time, prices_converted = currency_converter(timestamp_price, price, timestamp_xrate, xrate)  # processes each price

@@ -223,8 +223,6 @@ def remove_nan(in_list):
     for i in range(0, n):
         if in_list[i] != in_list[i]:
             out_list[i] = 0
-            count_nans += 1
-    print(" Removed %i instances of 'nan'" % count_nans)
     return out_list
 
 

@@ -9,3 +9,4 @@ plot.py
 *.xml
 .DS_Store
 .DS_Store
+Jacob/__pycache__/jacob_csv_handling.cpython-36.pyc

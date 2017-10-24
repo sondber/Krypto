@@ -5,24 +5,25 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    startdate = "20120101"
-    enddate = "20170531"
-    first_year = int(startdate[0:4])
-    final_year = int(enddate[0:4])
-    first_month = int(startdate[4:7])
-    final_month = int(enddate[4:7])
-    first_day = int(startdate[7:9])
-    final_day = int(enddate[7:9])
-    start_stamp_unix = 1325376000 # <-- Må matche startdate
-    end_stamp_unix = 1496275140 # <-- Må matche enddate
+    short = 0  # <-------------- For å teste modell bare
+    if short == 1:
+        start_stamp_excel = "01.04.2017 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1491004800  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+    else:
+        start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1325376000  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+
     unix_stamps = list(range(start_stamp_unix, end_stamp_unix + 60, 60))
     n_stamps_unix = len(unix_stamps)
-    start_stamp_excel = "01.01.2012 00:00"
-    end_stamp_excel = "17.10.2017 23:59"
     excel_stamps = [start_stamp_excel]
     i = 1
-    print("Progress:")
-    print("0.0%%")
+    print(" Progress:")
+    print("  0.0%%")
+    tenperc = n_stamps_unix/10
     while excel_stamps[i - 1] != end_stamp_excel:
         d = int(excel_stamps[i - 1][0:2])
         mo = int(excel_stamps[i - 1][3:5])
@@ -61,48 +62,14 @@ def make_time_stamps():
             mo = 1
             y = y + 1
 
-        if i % 304850 == 0:
+        if i % tenperc == 0:
             perc = 100 * i / n_stamps_unix
-            print("%0.1f%%" % perc)
+            print("  %0.1f%%" % perc)
 
         excel_stamps.append(make_excel_stamp(y, mo, d, h, mi))
         i = i + 1
 
     return unix_stamps, excel_stamps
-
-
-# Tror ikke denne er nødvendig mer -----
-def make_empty_csv(exchanges):
-    print("Fetching timestamps...")
-    unix_stamps, excel_stamps = make_time_stamps()
-    print("Creating empty csv-file...")
-
-    filename = "data/export_csv/full_raw_data.csv"
-
-    with open(filename, 'w', newline='') as csvfile:
-        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        n_rows = len(excel_stamps)
-
-        header1 = [" "]
-        header2 = [" "]
-        header3 = ["Time"]
-        for exc in exchanges:
-            currency = exc[len(exc) - 3: len(exc)]
-            header1.append(exc)
-            header1.append("")
-            header2.append("Price")
-            header2.append("Volume")
-            header3.append(currency.upper())
-            header3.append("BTC")
-
-        writ.writerow(header1)
-        writ.writerow(header2)
-        writ.writerow(header3)
-        for i in range(0, n_rows):
-            rowdata = [excel_stamps[i]]
-            writ.writerow(rowdata)
-    print("Empty csv \033[33;0;0m'%s'\033[0;0;0m successfully created" % filename)
-# --------------------------------------
 
 
 def read_long_csvs(file_name, time_list, price, volume):
@@ -151,6 +118,7 @@ def get_lists_from_fulls(exchanges):
     unix_stamps, excel_stamps = make_time_stamps()
     n_cols = len(excel_stamps)
     prices = np.zeros([n_exc, n_cols])
+    prices_usd = np.zeros([n_exc, n_cols])
     volumes = np.zeros([n_exc, n_cols])
     for i in range(0, n_exc):
         print("Working on exchange %i/%i" % ((i+1), n_exc))
@@ -164,7 +132,6 @@ def get_lists_from_fulls(exchanges):
         single_price = remove_nan(single_price)
         single_price = supp.fill_blanks(single_price)
         single_volume = remove_nan(single_volume)
-
 
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_price)
@@ -185,6 +152,7 @@ def get_lists_from_fulls(exchanges):
 def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
     time_list = excel_stamps  # <-- Kun for å kunne bruke gammel syntax
     n_exc = len(exchanges)
+    print()
     print("Exporting data to csv-files...")
     with open(filename, 'w', newline='') as csvfile:
         writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -221,8 +189,6 @@ def remove_nan(in_list):
     for i in range(0, n):
         if in_list[i] != in_list[i]:
             out_list[i] = 0
-            count_nans += 1
-    print("Removed %i instances of 'nan'" % count_nans)
     return out_list
 
 
@@ -252,3 +218,23 @@ def write_to_total_files(total_volume, total_price, excel_stamps, filename):
             rowdata.append(total_volume[i])
             writ.writerow(rowdata)
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
+def opening_hours(in_excel_stamps, in_prices, in_volumes):
+    year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
+    n_mins = len(in_excel_stamps)
+    out_excel_stamps = []
+    out_prices = []
+    out_volumes = []
+    for i in range(n_mins):
+        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            out_excel_stamps.append(in_excel_stamps[i])
+            out_prices.append(in_prices[:, i])
+            out_volumes.append(in_volumes[:, i])
+    out_prices = np.transpose(np.matrix(out_prices))
+    out_volumes = np.transpose(np.matrix(out_volumes))
+    return out_excel_stamps, out_prices, out_volumes
+
+
+def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
+    

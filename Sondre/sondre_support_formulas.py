@@ -3,62 +3,6 @@ import numpy as np
 import math
 
 
-def data_fetch(exchange, first_year, first_month, final_year, final_month):
-    (time_list, price, volume) = get_price_volume(exchange, first_year, first_month, final_year, final_month)
-    # (year, month, day, hour, minute) = fix_time_list(time_list)    Denne brukes ikke
-    price = fill_blanks(price)  # Interpolates to fill zero volume minutes
-    print("Blanks successfuly removed for " + exchange)
-    print()
-    return time_list, price, volume
-
-
-def get_price_volume(exchange, first_year, first_month, final_year, final_month):
-    time_list = []
-    price = []
-    volume = []
-    if first_year == final_year:
-        i = first_year
-        for j in range(first_month, final_month + 1):
-            file_name = make_file_name(i, j, exchange)
-            (time_list, price, volume) = read_single_exc_csvs(file_name, time_list, price, volume)
-    else:
-        for i in range(first_year, final_year + 1):
-            if i == final_year:
-                for j in range(1, final_month + 1):
-                    file_name = make_file_name(i, j, exchange)
-                    (time_list, price, volume) = read_single_exc_csvs(file_name, time_list, price, volume)
-            elif i == first_year:
-                for j in range(first_month, 12 + 1):
-                    file_name = make_file_name(i, j, exchange)
-                    (time_list, price, volume) = read_single_exc_csvs(file_name, time_list, price, volume)
-            else:
-                for j in range(1, 12 + 1):
-                    file_name = make_file_name(i, j, exchange)
-                    (time_list, price, volume) = read_single_exc_csvs(file_name, time_list, price, volume)
-
-    print()
-    print(exchange + ":")
-    n = len(price)
-    print("A total of %i minutes (%i days) were loaded into the lists" % (n, n/(60*24)))
-
-    if n % 1440 == 0:
-        print("There are no excess minutes in the dataset")
-    else:
-        print("\033[0;31;0mThere is something wrong with the data\n \033[0;0;0m")
-    return time_list, price, volume
-
-
-def make_file_name(year, month, exchange):
-    if month >= 10:
-        month_serial = str(month)
-    else:
-        month_serial = "0" + str(month)
-    year_serial = str(year)
-    ex = str(exchange) + "/"
-    file_name = "data/bitcoincharts/" + ex + year_serial + month_serial + ".csv"
-    return file_name
-
-
 def read_single_exc_csvs(file_name, time_list, price, volume):
     with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
@@ -76,26 +20,6 @@ def read_single_exc_csvs(file_name, time_list, price, volume):
         return time_list, price, volume
 
 
-def gather_exchanges(exchanges, first_year, first_month, final_year, final_month):
-    print("A total of " + str(len(exchanges)) + " exchanges are included")
-    print("The relevant time period is from %i.%i to %i.%i" % (first_month, first_year, final_month, final_year))
-    print()
-    i = 0
-
-    for exc in exchanges:
-        (time_list, price, volume) = data_fetch(exc, first_year, first_month, final_year, final_month)
-        if i == 0:
-            volumes = np.zeros([len(exchanges), len(volume)])
-            prices = np.zeros([len(exchanges), len(volume)])
-        # print("Length: " + str(len(volume)))
-
-        for j in range(0, len(volume)):
-            volumes[i, j] = volume[j]
-            prices[i, j] = price[j]
-        i = i + 1
-    return volumes, prices, time_list
-
-
 def fill_blanks(in_list):
     out_list = in_list
     n = len(in_list)
@@ -104,7 +28,7 @@ def fill_blanks(in_list):
             if in_list[i] == 0:
                 if i == 0:
                     j = 0
-                    while in_list[j] == 0:
+                    while in_list[j] == 0 and j<60:
                         j = j + 1
                     out_list[0] = in_list[j]
                 elif i == n:
@@ -201,7 +125,7 @@ def logreturn(price):
     return returnlist
 
 
-def make_totals(volumes, prices):
+def make_totals(volumes, prices):  # Has to be all in USD
     print("Generating totals..")
     num_exchanges = np.size(volumes, 0)
     entries = np.size(volumes, 1)
@@ -372,33 +296,6 @@ def count_rows(file_name):
     return n_rows
 
 
-def remove_extremes(in_list, num_of_stds, set_zero, print_analysis):
-    out_list = in_list
-    std = float(np.std(in_list))
-    max_val = max(in_list)
-    min_val = min(in_list)
-    mean = float(np.mean(in_list))
-
-    if print_analysis:
-        print("Mean of %0.1f" % mean)
-        print("Max of %0.1f" % max_val)
-        print("Min of %0.1f" % min_val)
-        print("Standard deviation of %0.1f" % std)
-        steps = []
-        for i in range(0, 10):
-            steps.append(sum(1 if x > (mean + (i + 1) * std) else 0 for x in in_list))
-            print("There are %i values above %i standard deviations of the mean" % (steps[i], (i + 1)))
-
-    for i in range(0, len(in_list)):
-        if (in_list[i] > (mean + (num_of_stds * std))) or (in_list[i] < (mean - (num_of_stds * std))):
-            if set_zero:
-                out_list[i] = 0
-            else:
-                out_list[i] = out_list[i - 1]
-    print("Extreme values removed \n")
-    return out_list
-
-
 def get_ticks(time_list, number_of_ticks):
     n = number_of_ticks
     n_mins = len(time_list)
@@ -410,78 +307,6 @@ def get_ticks(time_list, number_of_ticks):
         timestamp = timestamp[0:10]
         myticks.append(timestamp)
     return x, myticks
-
-
-def minute_to_daily_prices(time_list, minute_prices):
-    n_mins = len(minute_prices)
-    n_days = int(n_mins/1440)
-    daily_list = np.zeros(n_days)
-    day_time = []
-    if n_mins % 1440 != 0:
-        excess = n_mins % 1440
-        print("There is something wrong with the data")
-        print("There is an excess of %i minutes" % excess)
-
-    for i in range(0, n_days - 1):
-        daily_list[i] = minute_prices[1440 * (i + 1)]  # Bruker bare closing price
-        day_time.append(time_list[1440 * i])
-    daily_list[n_days - 1] = minute_prices[n_mins - 1]
-    return day_time, daily_list
-
-
-def minute_to_daily_volumes(time_list, minute_volumes):
-    n_mins = len(minute_volumes)
-    n_days = int(n_mins/1440)
-    daily_list = np.zeros(n_days)
-    day_time = []
-
-    if n_mins % 1440 != 0:
-        excess = n_mins % 1440
-        print("There is something wrong with the data")
-        print("There is an excess of %i minutes" % excess)
-
-    for i in range(0, n_days - 1):
-        daily_list[i] = sum(minute_volumes[1440 * i:1440*(i + 1)])  # Bruker totalt volum
-        day_time.append(time_list[1440 * i])
-
-    daily_list[n_days - 1] = sum(minute_volumes[len(minute_volumes) - 1440:len(minute_volumes) - 1])
-    return day_time, daily_list
-
-
-def minute_to_hourly_prices(time_list, minute_prices):
-    n_mins = len(minute_prices)
-    n_hours = int(n_mins/60)
-    hour_list = np.zeros(n_hours)
-    hour_time = []
-    if n_mins % 60 != 0:
-        excess = n_mins % 60
-        print("There is something wrong with the data")
-        print("There is an excess of %i minutes" % excess)
-
-    for i in range(0, n_hours - 1):
-        hour_list[i] = minute_prices[60 * (i + 1)]  # Bruker bare closing price
-        hour_time.append(time_list[60 * i])
-    hour_list[n_hours - 1] = minute_prices[n_mins - 1]
-    return hour_time, hour_list
-
-
-def minute_to_hourly_volumes(time_list, minute_volumes):
-    n_mins = len(minute_volumes)
-    n_hours = int(n_mins/60)
-    hour_list = np.zeros(n_hours)
-    hour_time = []
-
-    if n_mins % 60 != 0:
-        excess = n_mins % 60
-        print("There is something wrong with the data")
-        print("There is an excess of %i minutes" % excess)
-
-    for i in range(0, n_hours - 1):
-        hour_list[i] = sum(minute_volumes[60 * i:60*(i + 1)])  # Bruker totalt volum
-        hour_time.append(time_list[60 * i])
-
-    hour_list[n_hours - 1] = sum(minute_volumes[len(minute_volumes) - 1440:len(minute_volumes) - 1])
-    return hour_time, hour_list
 
 
 def get_rolls():

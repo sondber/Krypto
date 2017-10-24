@@ -4,7 +4,7 @@ import numpy as np
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 
 
-def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume, currency):
+def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume):
     number_of_ticks = 5
     n_exc = len(exchanges)
     fig_count = 1  # Ensures that each graph has its own unique figure
@@ -29,7 +29,7 @@ def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume
         plt.figure(fig_count)
         fig_count = fig_count + 1
         plt.xticks(x, myticks)
-        price_plots(total_prices, prices, exchanges, currency)
+        price_plots(total_prices, prices, exchanges)
 
     if varplots:
         plt.figure(fig_count)
@@ -126,22 +126,17 @@ def volume_plots(total_volume, volumes, exchanges):
     plot_for_exchanges(volumes, exchanges)
 
 
-def price_plots(total_prices, prices, exchanges, currency):
+def price_plots(total_prices, prices, exchanges):
     n_exc = len(exchanges)
     if n_exc > 1:
         for i in range(0, n_exc):
             plt.plot(prices[i, :], label=exchanges[i])
     else:
         plt.plot(prices, label=exchanges[0])
-    if currency:
-        plt.title("Prices converted to USD")
-        plt.ylabel("USD/BTC")
-    else:
-        plt.title("Prices in original currencies")
-
+    plt.title("Price chart")
+    plt.ylabel("USD/BTC")
     if n_exc > 1:
         plt.plot(total_prices, label="Volume weighted average price, USD/BTC", linewidth=0.5, color="black")
-
     plt.legend()
 
 

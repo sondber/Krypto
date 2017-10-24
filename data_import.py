@@ -58,3 +58,7 @@ def fetch_long_and_write(exchanges):
 
     filename = "data/export_csv/minute_data.csv"
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
+
+    for i in range(5, 10, 5):
+        time_stamps_min, prices_min, volumes_min = dis.convert_to_lower_freq(excel_stamps, prices, volumes, conversion_rate=i)
+        filename = "data/export_csv/" + str(i) +"mins.csv"

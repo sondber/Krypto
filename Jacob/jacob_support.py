@@ -11,7 +11,7 @@ def logreturn(price): # takes list of prices, returns equal length list of log r
     return returnlist
 
 
-def price_differences(price): # takes list of prices, returns equal length list of first price differences
+def first_price_differences(price): # takes list of prices, returns equal length list of first price differences
     returnlist = [0.00] * len(price)
     for i in range(1,len(price)):
         try:

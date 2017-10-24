@@ -1,19 +1,21 @@
 import math
 from Jacob import jacob_csv_handling, jacob_support
+import matplotlib.pyplot as plt
 
 #The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
 
 def rolls_new(price_differences, time_list_minute, window):
     calculation_inside = 0
-    spread = []
+    spread = [0]
     time_list_hour = []
+    time_list_hour.append(time_list_minute[0])
     count_value_error = 0
-    for i in range(0,len(price_differences)-1,window):
+    for i in range(0, len(price_differences)-window, window):
         # print("Outer loop: ", i)
         time_list_hour.append(time_list_minute[i])
         for y in range(i+1,i+window+1):
-            #print("Inner loop: ",y)
+            # print("Inner loop: ",y)
             calculation_inside = calculation_inside + (price_differences[y]*price_differences[y-1])
         try:
             ba_calc = 2*math.sqrt(-calculation_inside/(window-1))
@@ -45,15 +47,17 @@ else:
     time_list = data[0]
 
 window1 = 60 # calculate spread for this period of minutes
-window2 = 30
+window2 = 60*8
 
 print("The length of the price_diff: ", len(price_differences))
-
 
 print("Calculates BA-spread:")
 
 spread1, time_list_hour1, count_value_error_1 = rolls_new(price_differences, time_list, window1)
 spread2, time_list_hour2, count_value_error_2 = rolls_new(price_differences, time_list, window2)
+
+print(len(spread1))
+print(len(spread2))
 
 print("The following is the BAs with window",window1)
 print(time_list_hour1)
@@ -64,3 +68,8 @@ print("The following is the BAs with window",window2)
 print(time_list_hour2)
 print(spread2)
 print("With",window2,"window,",count_value_error_2,"value errors were counted")
+
+plt.plot(spread1)
+plt.show()
+
+

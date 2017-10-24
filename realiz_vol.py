@@ -12,7 +12,7 @@ import os
 
 os.chdir("C:/Users/Marky/Documents/GitHub/krypto")
 #volumes = di.get_lists("h", data="volume")
-prices = di.get_lists("m", data="p")
+#prices = di.get_lists("m", data="p")
 
 def simple_returns(prices):
     ret=np.zeros(len(prices))
@@ -45,7 +45,10 @@ returns=[1,2,1,2,1,2,1,2,3,-1,0,4,1,2,3,-1,3,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-
             1,2,1,2,1,2,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,
             1,2,1,2,1,2,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4]
 
-print(simple_returns(prices))
-#print(realized_vol(simple_returns(prices)))
+#a=simple_returns(prices)
+#print(simple_returns(prices))
+#plot_list(a)
+plot_list(realized_vol(simple_returns(prices)))
 
 #plot_list(realized_vol(returns))
+plot_list(realized_vol(simple_returns(returns)))

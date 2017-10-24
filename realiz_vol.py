@@ -12,13 +12,13 @@ import os
 
 os.chdir("C:/Users/Marky/Documents/GitHub/krypto")
 #volumes = di.get_lists("h", data="volume")
-prices = di.get_lists("m", data="prices")
+prices = di.get_lists("m", data="p")
 
 def simple_returns(prices):
     ret=np.zeros(len(prices))
     for i in range(1,len(prices)):
         if (prices[i]!=0):
-            ret[i]=(int(prices[i])-int(prices[i-1]))/int(prices[i])
+            ret[i]=((prices[i])-(prices[i-1]))/(prices[i])
     return ret
 
 def realized_vol(returns,frequency="hour"):

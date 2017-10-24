@@ -5,18 +5,18 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    startdate = "20120101"
-    enddate = "20170531"
-    start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
-    end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
-    first_year = int(startdate[0:4])
-    final_year = int(enddate[0:4])
-    first_month = int(startdate[4:7])
-    final_month = int(enddate[4:7])
-    first_day = int(startdate[7:9])
-    final_day = int(enddate[7:9])
-    start_stamp_unix = 1325376000  # <-- Må matche startdate
-    end_stamp_unix = 1496275140  # <-- Må matche enddate
+    short = 1  # <-------------- For å teste modell bare
+    if short == 1:
+        start_stamp_excel = "01.04.2017 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1491004800  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+    else:
+        start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1325376000  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+
     unix_stamps = list(range(start_stamp_unix, end_stamp_unix + 60, 60))
     n_stamps_unix = len(unix_stamps)
     excel_stamps = [start_stamp_excel]
@@ -70,40 +70,6 @@ def make_time_stamps():
         i = i + 1
 
     return unix_stamps, excel_stamps
-
-
-# Tror ikke denne er nødvendig mer -----
-def make_empty_csv(exchanges):
-    print("Fetching timestamps...")
-    unix_stamps, excel_stamps = make_time_stamps()
-    print("Creating empty csv-file...")
-
-    filename = "data/export_csv/full_raw_data.csv"
-
-    with open(filename, 'w', newline='') as csvfile:
-        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        n_rows = len(excel_stamps)
-
-        header1 = [" "]
-        header2 = [" "]
-        header3 = ["Time"]
-        for exc in exchanges:
-            currency = exc[len(exc) - 3: len(exc)]
-            header1.append(exc)
-            header1.append("")
-            header2.append("Price")
-            header2.append("Volume")
-            header3.append(currency.upper())
-            header3.append("BTC")
-
-        writ.writerow(header1)
-        writ.writerow(header2)
-        writ.writerow(header3)
-        for i in range(0, n_rows):
-            rowdata = [excel_stamps[i]]
-            writ.writerow(rowdata)
-    print("Empty csv \033[33;0;0m'%s'\033[0;0;0m successfully created" % filename)
-# --------------------------------------
 
 
 def read_long_csvs(file_name, time_list, price, volume):

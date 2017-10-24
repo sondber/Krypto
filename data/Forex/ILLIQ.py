@@ -38,3 +38,5 @@ def ILLIQ(returns, volume):
 
 #ILLIQ(returns,volume)
 print(ILLIQ(abs_returns(prices),volumes))
+print(abs_returns(prices))
+print(volumes)

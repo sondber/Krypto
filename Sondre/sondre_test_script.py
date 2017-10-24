@@ -9,12 +9,16 @@ import os
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd", "btcncny", "krakeneur", "coincheckjpy"]
+exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+exchanges = ["bitstampusd"]
 di.fetch_long_and_write(exchanges)
 
+
+
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(compex=0)
+plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume, currency)
 exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(compex=1)
 plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume, currency)
-
 
 """
 total_price = di.get_lists("h", data="price")

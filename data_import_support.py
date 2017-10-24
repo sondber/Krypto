@@ -237,4 +237,15 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
 
 
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    n_high = len(time_stamps)
+    n_cols_high = len(time_stamps)
+    n_exc = np.size(volumes, 0)
+    n_cols_low = int(n_cols_high/conversion_rate)
+    time_stamps_low = []
+    prices_low = np.zeros([n_exc, n_cols_low])
+    volumes_low = np.zeros([n_exc, n_cols_low])
+    for i in range(0, n_cols_low):
+        time_stamps_low.append(time_stamps[i * conversion_rate])
+        for j in range(0, n_exc):
+            prices_low[j, i] = prices[j, i * conversion_rate]
+            volumes_low[j, i] = volumes[j, i * conversion_rate]
+    return time_stamps_low, prices_low, volumes_low

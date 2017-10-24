@@ -5,18 +5,18 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    startdate = "20120101"
-    enddate = "20170531"
-    start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
-    end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
-    first_year = int(startdate[0:4])
-    final_year = int(enddate[0:4])
-    first_month = int(startdate[4:7])
-    final_month = int(enddate[4:7])
-    first_day = int(startdate[7:9])
-    final_day = int(enddate[7:9])
-    start_stamp_unix = 1325376000  # <-- Må matche startdate
-    end_stamp_unix = 1496275140  # <-- Må matche enddate
+    short = 0  # <-------------- For å teste modell bare
+    if short == 1:
+        start_stamp_excel = "01.04.2017 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1491004800  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+    else:
+        start_stamp_excel = "01.01.2012 00:00"  # <-- Må matche startdate
+        end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
+        start_stamp_unix = 1325376000  # <-- Må matche startdate
+        end_stamp_unix = 1496275140  # <-- Må matche enddate
+
     unix_stamps = list(range(start_stamp_unix, end_stamp_unix + 60, 60))
     n_stamps_unix = len(unix_stamps)
     excel_stamps = [start_stamp_excel]
@@ -218,3 +218,19 @@ def write_to_total_files(total_volume, total_price, excel_stamps, filename):
             rowdata.append(total_volume[i])
             writ.writerow(rowdata)
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
+def opening_hours(in_excel_stamps, in_prices, in_volumes):
+    year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
+    n_mins = len(in_excel_stamps)
+    out_excel_stamps = []
+    out_prices = []
+    out_volumes = []
+    for i in range(n_mins):
+        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            out_excel_stamps.append(in_excel_stamps[i])
+            out_prices.append(in_prices[:, i])
+            out_volumes.append(in_volumes[:, i])
+    out_prices = np.transpose(np.matrix(out_prices))
+    out_volumes = np.transpose(np.matrix(out_volumes))
+    return out_excel_stamps, out_prices, out_volumes

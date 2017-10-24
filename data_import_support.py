@@ -234,3 +234,7 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
     out_prices = np.transpose(np.matrix(out_prices))
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
+
+
+def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
+    

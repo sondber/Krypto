@@ -4,17 +4,9 @@ import numpy as np
 import currency_converter as curr
 
 
-# Denne krever litt jobb med ny datastruktur!
-def get_lists(which_freq=2, data="all", compex=1):
-    # Bruker ikke which_loc
+def get_lists(which_freq=2, data="all"):
     exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
     n_exc = len(exchanges)
-
-
-    if compex == 0:
-        comp ="_total"
-    else:
-        comp = ""
 
     if which_freq == 0 or which_freq == "day" or which_freq == "d":
         freq = "daily"
@@ -26,17 +18,16 @@ def get_lists(which_freq=2, data="all", compex=1):
         freq = "minute"
     print("Fetching %s data..." % freq)
 
-    file_name = "data/export_csv/" + freq + "_data" + comp + ".csv"
+    file_name = "data/export_csv/" + freq + "_data.csv"
     time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     total_volume, total_price = supp.make_totals(volumes, prices)
-    currency = 0
 
     if data == "price" or data == "p":
         return total_price
     elif data == "volume" or data == "v":
         return total_volume
     else:
-        return exchanges, time_list, prices, volumes, total_price, total_volume, currency
+        return exchanges, time_list, prices, volumes, total_price, total_volume
 
 
 def fetch_long_and_write(exchanges):

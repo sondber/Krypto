@@ -218,3 +218,11 @@ def write_to_total_files(total_volume, total_price, excel_stamps, filename):
             rowdata.append(total_volume[i])
             writ.writerow(rowdata)
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
+def opening_hours(in_excel_stamps, in_prices, in_volumes):
+    year, month, day, hour, minute = supp.fix_time_list(excel_stamps)
+
+
+
+    return out_excel_stamps, out_prices, out_volumes

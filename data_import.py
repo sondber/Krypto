@@ -54,6 +54,10 @@ def fetch_long_and_write(exchanges):
     n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
     filename = "data/export_csv/full_raw_data.csv"
+
+    excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
+
+
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
     # Convert currencies

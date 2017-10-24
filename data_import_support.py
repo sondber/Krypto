@@ -5,7 +5,7 @@ import numpy as np
 
 def make_time_stamps():
     print("Generating time stamps...")
-    short = 1  # <-------------- For å teste modell bare
+    short = 0  # <-------------- For å teste modell bare
     if short == 1:
         start_stamp_excel = "01.04.2017 00:00"  # <-- Må matche startdate
         end_stamp_excel = "31.05.2017 23:59"  # <-- Må matche startdate
@@ -221,8 +221,16 @@ def write_to_total_files(total_volume, total_price, excel_stamps, filename):
 
 
 def opening_hours(in_excel_stamps, in_prices, in_volumes):
-    year, month, day, hour, minute = supp.fix_time_list(excel_stamps)
-
-
-
+    year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
+    n_mins = len(in_excel_stamps)
+    out_excel_stamps = []
+    out_prices = []
+    out_volumes = []
+    for i in range(n_mins):
+        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            out_excel_stamps.append(in_excel_stamps[i])
+            out_prices.append(in_prices[:, i])
+            out_volumes.append(in_volumes[:, i])
+    out_prices = np.transpose(np.matrix(out_prices))
+    out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes

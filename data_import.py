@@ -4,18 +4,6 @@ import numpy as np
 import currency_converter as curr
 
 
-def convert_to_lower_freq(time_list, total_price, total_volume):
-    day_time, daily_price = supp.minute_to_daily_prices(time_list, total_price)
-    daily_volume = supp.minute_to_daily_volumes(time_list, total_volume)[1]  # ettallet på slutten er fordi jeg ikke trenger å hente ut tiden på nytt
-    hour_time, hour_price = supp.minute_to_hourly_prices(time_list, total_price)
-    hour_volume = supp.minute_to_hourly_volumes(time_list, total_volume)[1]  # ettallet på slutten er fordi jeg ikke trenger å hente ut tiden på nytt
-
-    # Skrive til fil
-
-    supp.write_to_daily_file(day_time, daily_volume, daily_price)
-    supp.write_to_hourly_file(hour_time, hour_volume, hour_price)
-
-
 # Denne krever litt jobb med ny datastruktur!
 def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
     # Bruker ikke which_loc
@@ -53,12 +41,6 @@ def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
 def fetch_long_and_write(exchanges):
     n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
-    filename = "data/export_csv/full_raw_data.csv"
-
-    excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
-
-
-    dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
     # Convert currencies
     """
@@ -80,8 +62,7 @@ def fetch_long_and_write(exchanges):
             prices_usd.append(prices[i,:])
     """
 
-    minute_total_volume, minute_total_price = supp.make_totals(volumes, prices)
+    excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
 
-    minute_filename = "data/export_csv/minute_data.csv"
-    minute_excel_stamps = excel_stamps
-    dis.write_to_total_files(minute_total_volume, minute_total_price, minute_excel_stamps, minute_filename)
+    filename = "data/export_csv/minute_data.csv"
+    dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)

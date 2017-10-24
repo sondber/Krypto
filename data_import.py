@@ -22,9 +22,9 @@ def get_lists(which_freq=2, data="all"):
     time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     total_volume, total_price = supp.make_totals(volumes, prices)
 
-    if data == "price" or data == "p":
+    if data == "price" or data == "p" or data == "prices":
         return total_price
-    elif data == "volume" or data == "v":
+    elif data == "volume" or data == "v" or data == "volumes":
         return total_volume
     else:
         return exchanges, time_list, prices, volumes, total_price, total_volume

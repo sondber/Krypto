@@ -237,4 +237,4 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
 
 
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    
+    n_high = len(time_stamps)

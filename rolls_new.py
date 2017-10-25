@@ -1,4 +1,5 @@
 import math
+import data_import as di
 from Jacob import jacob_csv_handling, jacob_support
 import matplotlib.pyplot as plt
 
@@ -34,6 +35,7 @@ if load_price_differences:
     prices = []
     volume = []
     data = jacob_csv_handling.read_single_csv(file_name, time_list, prices, volume)
+    # data = di.get_lists(data="p")
     price_differences = jacob_support.first_price_differences(data[1]) # calculates price differences
     time_list = data[0]
     jacob_csv_handling.write_to_file(data[0], price_differences, to_file, "Price_differences")

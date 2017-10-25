@@ -4,38 +4,30 @@ import numpy as np
 import currency_converter as curr
 
 
-# Denne krever litt jobb med ny datastruktur!
-def get_lists(which_freq=2, which_loc=1, data="all", compex=0):
-    # Bruker ikke which_loc
+def get_lists(which_freq=2, data="all"):
     exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
     n_exc = len(exchanges)
 
-    if compex == 0:
-        if which_freq == 0 or which_freq == "day" or which_freq == "d":
-            file_name = "data/export_csv/daily_data.csv"
-            print("Fetching daily data...")
-        elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
-            file_name = "data/export_csv/hourly_data.csv"
-            print("Fetching hourly data...")
-        elif which_freq == 2 or which_freq == "min" or which_freq == "m":
-            file_name = "data/export_csv/minute_data.csv"
-            print("Fetching minute data...")
-        else:
-            print("Bad input")
-            file_name = "data/export_csv/full_raw_data.csv"
+    if which_freq == 0 or which_freq == "day" or which_freq == "d":
+        freq = "daily"
+    elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
+        freq = "hourly"
+    elif which_freq == 2 or which_freq == "min" or which_freq == "m":
+        freq = "minute"
     else:
-        file_name = "data/export_csv/full_raw_data.csv"
+        freq = "minute"
+    print("Fetching %s data..." % freq)
 
+    file_name = "data/export_csv/" + freq + "_data.csv"
     time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
     total_volume, total_price = supp.make_totals(volumes, prices)
-    currency = 0
 
-    if data == "price" or data == "prices" or data == "p":
+    if data == "price" or data == "p" or data == "prices":
         return total_price
-    elif data == "volume" or data == "volumes" or data == "v":
+    elif data == "volume" or data == "v" or data == "volumes":
         return total_volume
     else:
-        return exchanges, time_list, prices, volumes, total_price, total_volume, currency
+        return exchanges, time_list, prices, volumes, total_price, total_volume
 
 
 def fetch_long_and_write(exchanges):
@@ -66,3 +58,7 @@ def fetch_long_and_write(exchanges):
 
     filename = "data/export_csv/minute_data.csv"
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
+
+    for i in range(5, 10, 5):
+        time_stamps_min, prices_min, volumes_min = dis.convert_to_lower_freq(excel_stamps, prices, volumes, conversion_rate=i)
+        filename = "data/export_csv/" + str(i) +"mins.csv"

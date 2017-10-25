@@ -163,13 +163,10 @@ def var_plots(prices, exchanges, title):  # Denne må skrives om så den tar inn
     plt.title(title)
 
 
-def easy_plot(y, label, show_plot):
+def easy_plot(y, label="My plot", show_plot=1):
     label = str(label)
-    if len(label) > 1:
-        plt.plot(y, label=label)
-        plt.legend()
-    else:
-        plt.plot(y)
+    plt.plot(y, label=label)
+    plt.legend()
     if show_plot == 1:
         plt.show()
 

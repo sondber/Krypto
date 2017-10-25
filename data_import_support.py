@@ -220,6 +220,23 @@ def write_to_total_files(total_volume, total_price, excel_stamps, filename):
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
 
+def write_to_gold_csvs(excel_stamps, volume, price, bid, ask, filename):
+    n_rows = len(excel_stamps)
+    with open(filename, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        header1 = ["Time", "Price", "Volume", "Bid", "Ask"]
+        writ.writerow(header1)
+        for i in range(0, n_rows):
+            rowdata = [" "]
+            rowdata[0] = excel_stamps[i]
+            rowdata.append(price[i])
+            rowdata.append(volume[i])
+            rowdata.append(bid[i])
+            rowdata.append(ask[i])
+            writ.writerow(rowdata)
+    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
 def opening_hours(in_excel_stamps, in_prices, in_volumes):
     year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
     n_mins = len(in_excel_stamps)
@@ -254,3 +271,87 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 #def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     
 >>>>>>> markus
+
+
+def read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask):
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            date.append(str(row[1]))
+            time_NYC.append(str(row[2]))
+            try:
+                volume.append(float(row[9]))
+                price.append(float(row[10]))
+            except ValueError:
+                volume.append(0)
+                price.append(0)
+            bid.append(float(row[13]))
+            ask.append(float(row[18]))
+            i = i + 1
+    return date, time_NYC, volume, price, bid, ask
+
+
+def fix_gold_stamps(gold_date, time_NYC):
+    n_rows = len(gold_date)
+    excel_stamps = []
+    for i in range(n_rows):
+        day = int(gold_date[i][0:2])
+        hour = int(time_NYC[i][0:2]) + 5
+
+        if hour > 23:
+            day = day + 1
+            hour = hour - 24
+
+        if day < 10:
+            day_s = "0" + str(day)
+        else:
+            day_s = str(day)
+        month = get_month(gold_date[i][3:6])
+        if month < 10:
+            month_s = "0" + str(month)
+        else:
+            month_s = str(month)
+        year_s = gold_date[i][7:12]
+
+        if hour < 10:
+            hour_s = "0" + str(hour)
+        else:
+            hour_s = str(hour)
+        min_s = time_NYC[i][3:5]
+        excel_stamps.append(day_s + "." + month_s + "." + year_s + " " + hour_s + ":" + min_s)
+
+    return excel_stamps
+
+def get_month(month_string):
+    month_string = month_string.lower()
+    if month_string == "jan":
+        month_num = 1
+    elif month_string == "feb":
+        month_num = 2
+    elif month_string == "mar":
+        month_num = 3
+    elif month_string == "apr":
+        month_num = 4
+    elif month_string == "may":
+        month_num = 5
+    elif month_string == "jun":
+        month_num = 6
+    elif month_string == "jul":
+        month_num = 7
+    elif month_string == "aug":
+        month_num = 8
+    elif month_string == "sep":
+        month_num = 9
+    elif month_string == "oct":
+        month_num = 10
+    elif month_string == "nov":
+        month_num = 11
+    elif month_string == "dec":
+        month_num = 12
+    else:
+        print("Error in dis.get_month!")
+
+    return month_num

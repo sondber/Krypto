@@ -62,3 +62,56 @@ def fetch_long_and_write(exchanges):
     for i in range(5, 10, 5):
         time_stamps_min, prices_min, volumes_min = dis.convert_to_lower_freq(excel_stamps, prices, volumes, conversion_rate=i)
         filename = "data/export_csv/" + str(i) +"mins.csv"
+
+
+def import_gold_lists(s_year=2012, s_month=1, e_year=2017, e_month=9):
+    date = []
+    time_NYC = []
+    volume = []
+    price = []
+    bid = []
+    ask = []
+    if e_year == s_year:
+        y = e_year  # =s_year
+        for m in range(s_month, e_month):
+            if m < 10:
+                ms = "0" + str(m)
+            else:
+                ms = str(m)
+            file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
+            date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
+    else:
+        for y in range(s_year, e_year + 1):
+            if y == s_year:
+                for m in range(s_month, 12 + 1):
+                    if m < 10:
+                        ms = "0" + str(m)
+                    else:
+                        ms = str(m)
+                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
+                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
+            elif y == e_year:
+                for m in range(1, e_month + 1):
+                    if m < 10:
+                        ms = "0" + str(m)
+                    else:
+                        ms = str(m)
+                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
+                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
+            else:
+                for m in range(1, 12 + 1):
+                    if m < 10:
+                        ms = "0" + str(m)
+                    else:
+                        ms = str(m)
+                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
+                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
+    date = np.transpose(date)
+    time_NYC = np.transpose(time_NYC)
+    volume = np.transpose(volume)
+    price = np.transpose(price)
+    bid = np.transpose(bid)
+    ask = np.transpose(ask)
+    excel_stamps = dis.fix_gold_stamps(date, time_NYC)
+    file_name = "data/export_csv/gold_data.csv"
+    dis.write_to_gold_csvs(excel_stamps, volume, price, bid, ask, file_name)

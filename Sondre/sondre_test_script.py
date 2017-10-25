@@ -8,29 +8,14 @@ import os
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
 
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
-exchanges = ["bitstampusd"]
-di.fetch_long_and_write(exchanges)
 
-#exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
-#di.fetch_long_and_write(exchanges)
+bitstamp_price = prices[0, :]
+bitstamp_volume = volumes[0, :]
+bitstamp_returns = jake_supp.logreturn(bitstamp_price)
+btce_price = prices[1, :]
+btce_volume = volumes[1, :]
+btce_returns = jake_supp.logreturn(btce_price)
 
-#exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
-#plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume)
-
-di.import_gold_lists()
-
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(compex=0)
-plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume, currency)
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(compex=1)
-plot.user_plots(exchanges, time_list, prices, volumes, total_price, total_volume, currency)
-
-# print(volume)
-# print(gold_price)
-"""
-total_price = di.get_lists("h", data="price")
-total_volume = di.get_lists("h", data="volume")
-returns = jake_supp.logreturn(total_price)
-desc.combined_stats(total_volume, returns, "Volume", "Returns")
-"""
+desc.combined_stats(bitstamp_returns, btce_returns, "Bitstamp", "BTCE")

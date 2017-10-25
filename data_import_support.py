@@ -253,7 +253,6 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
     return out_excel_stamps, out_prices, out_volumes
 
 
-<<<<<<< HEAD
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     n_cols_high = len(time_stamps)
     n_exc = np.size(volumes, 0)
@@ -267,10 +266,6 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
             prices_low[j, i] = prices[j, i * conversion_rate]
             volumes_low[j, i] = volumes[j, i * conversion_rate]
     return time_stamps_low, prices_low, volumes_low
-=======
-#def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    
->>>>>>> markus
 
 
 def read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask):

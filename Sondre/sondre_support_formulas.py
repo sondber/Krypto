@@ -310,7 +310,7 @@ def get_ticks(time_list, number_of_ticks):
 
 
 def get_rolls():
-    file_name = "data/export_csv/rolls_all_59.csv"
+    file_name = "data/export_csv/relative_spreads_60.csv"
     rolls = []
     time_list = []
     with open(file_name, newline='') as csvfile:

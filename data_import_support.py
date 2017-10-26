@@ -264,12 +264,38 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
         time_stamps_low.append(time_stamps[i * conversion_rate])
         for j in range(0, n_exc):
             prices_low[j, i] = prices[j, i * conversion_rate]
-            volumes_low[j, i] = volumes[j, i * conversion_rate]
+            volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate : (i + 1)*conversion_rate])
     return time_stamps_low, prices_low, volumes_low
 
 #def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    
 
+<<<<<<< HEAD
+=======
+
+def convert_to_hour(time_stamps, prices, volumes):
+    year, month, day, hour, minute = supp.fix_time_list(time_stamps)
+    n_mins = len(time_stamps)
+    n_hours = int(n_mins/6.5)
+    n_exc = np.size(prices,0)
+    time_stamps_out = []
+    prices_out = np.zeros([n_exc, n_hours])
+    volumes_out = np.zeros([n_exc, n_hours])
+    k = 0
+    for i in range(n_mins):
+        if hour[i] == 13 and minute[i] == 30:
+            time_stamps_out.append(time_stamps[i])
+            for j in range(n_exc):
+                prices_out[j, k] = np.average(prices[j, i:(i + 30)])
+                volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
+            k += 1
+        elif minute[i] == 0:
+            time_stamps_out.append(time_stamps[i])
+            for j in range(n_exc):
+                prices_out[j, k] = np.average(prices[j, i:(i + 60)])
+                volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+            k += 1
+    return time_stamps_out, prices_out, volumes_out
+>>>>>>> master
 
 
 def read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask):
@@ -323,6 +349,7 @@ def fix_gold_stamps(gold_date, time_NYC):
         excel_stamps.append(day_s + "." + month_s + "." + year_s + " " + hour_s + ":" + min_s)
 
     return excel_stamps
+
 
 def get_month(month_string):
     month_string = month_string.lower()

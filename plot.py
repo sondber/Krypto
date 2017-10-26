@@ -80,11 +80,10 @@ def time_of_day(in_list):
     time_list = range(0, 24 * 60)
     daycount = 0
     mincount = 0
-    days = len(in_list)/(60*24)
+    days = len(in_list) / (60 * 24)
 
     while daycount < days:
-
-        day_list = in_list[mincount:(mincount+24*60)]
+        day_list = in_list[mincount:(mincount + 24 * 60)]
         plt.plot(time, day_list)
         daycount = daycount + 1
         mincount = daycount * 60 * 24
@@ -95,7 +94,6 @@ def time_of_day(in_list):
 
 
 def plot_for_exchanges(matrix, exchanges):
-
     try:  # Skal bare sjekke om dette er bitstamp eller om det er for alle exchangene
         n_cols = np.size(matrix, 1)
     except IndexError:
@@ -140,7 +138,8 @@ def price_plots(total_prices, prices, exchanges):
     plt.legend()
 
 
-def var_plots(prices, exchanges, title):  # Denne må skrives om så den tar inn en liste med varianse og plotter det i stedet
+def var_plots(prices, exchanges,
+              title):  # Denne må skrives om så den tar inn en liste med varianse og plotter det i stedet
     n_exc = len(exchanges)
     mins = [1]
     mins[0] = int(input("How many mintues rolling average would you like? "))
@@ -153,7 +152,7 @@ def var_plots(prices, exchanges, title):  # Denne må skrives om så den tar inn
                 mov_var = supp.moving_variance(prices, m)
             exc = exchanges[i]
             if m > 60:
-                interval = " " + str(m/60) + " hours"
+                interval = " " + str(m / 60) + " hours"
             else:
                 interval = " " + str(m) + " minutes"
             plot_label = exc + interval + " moving average " + title
@@ -177,3 +176,61 @@ def scatters(x, y, color="blue", areas=[], label="No name"):
         areas = np.ones(n)
     plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
     plt.legend()
+
+
+def two_scales(ax1, time, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
+    # brukes til å sette de to aksene riktig skalert
+    print(' Running two_scales...')
+    ax2 = ax1.twinx()
+    if type1 == 'plot':
+        ax1.plot(time, data1, color=color1, linewidth=0.5)
+    elif type1 == 'bar':
+        ax1.bar(time, data1, color=color1)
+
+    if type2 == 'plot':
+        ax2.plot(time, data2, color=color2, linewidth=0.5)
+    elif type2 == 'bar':
+        ax2.bar(time, data2, color=color2)
+    print("  Type of plot: ", type1)
+
+    if scale2 == 'plot_over_bar' or scale1 == 'plot_over_bar':
+        print("  plot over bar")
+        ax1.set_ylim([min(data1) - 0.2 * (max(data1) - min(data1)), max(data1)])
+        ax2.set_ylim([min(data2), max(data2)])
+    else:
+        if scale1 == 'auto':
+            print('  Scale1: auto')
+        elif scale1 == 'custom':
+            print("  min(%s): %0.1f" % (title1, min(data1)))
+            print("  max(%s): %0.1f" % (title1, max(data1)))
+            minimum = input('   Set new min: ')
+            maximum = input('   Set new max: ')
+            ax1.set_ylim([float(minimum), float(maximum)])
+        ax1.set_xlabel(title_x)
+        ax1.set_ylabel(title1)
+        if scale2 == 'auto':
+            print('  Scale2: auto')
+        elif scale2 == 'custom':
+            print("  min(%s): %0.1f" % (title2, min(data2)))
+            print("  max(%s): %0.1f" % (title2, max(data2)))
+            minimum = input('   Set new min: ')
+            maximum = input('   Set new max: ')
+            ax2.set_ylim([float(minimum), float(maximum)])
+
+    ax2.set_ylabel(title2)
+    return ax1, ax2
+
+
+def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)', color1='r', color2='b',
+             type1='plot', type2='bar', scale1='auto', scale2='auto'):
+    # denne gir et 2-akset system for de to datasettene
+    print("Running two_axis... \033[31;00;0m(even though the plural of axis is 'axes'....Markus....)\033[00;00;0m")
+    time = np.zeros(len(data1))
+    for i in range(len(data1)):
+        time[i] = i
+    # Create axes
+    fig, ax = plt.subplots()
+    ax1, ax2 = two_scales(ax, time, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2)
+    plt.show()
+    print("Finished graphing")
+    return None

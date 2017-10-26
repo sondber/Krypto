@@ -23,7 +23,7 @@ def make_time_stamps():
     i = 1
     print(" Progress:")
     print("  0.0%%")
-    tenperc = n_stamps_unix/10
+    tenperc = n_stamps_unix / 10
     while excel_stamps[i - 1] != end_stamp_excel:
         d = int(excel_stamps[i - 1][0:2])
         mo = int(excel_stamps[i - 1][3:5])
@@ -54,7 +54,7 @@ def make_time_stamps():
             mi = 0
             h = 0
             d = 1
-            mo = mo +1
+            mo = mo + 1
         else:
             mi = 0
             h = 0
@@ -84,26 +84,26 @@ def read_long_csvs(file_name, time_list, price, volume):
                 price.append(float(row[7]))
                 volume.append(float(row[5]))
             except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i+1, file_name))
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
         return time_list, price, volume
 
 
 def make_excel_stamp(y, mo, d, h, mi):
     ys = str(y)
-    if mo<10:
+    if mo < 10:
         mos = "0" + str(mo)
     else:
         mos = str(mo)
-    if d<10:
+    if d < 10:
         ds = "0" + str(d)
     else:
         ds = str(d)
-    if h<10:
+    if h < 10:
         hs = "0" + str(h)
     else:
         hs = str(h)
-    if mi<10:
+    if mi < 10:
         mis = "0" + str(mi)
     else:
         mis = str(mi)
@@ -121,7 +121,7 @@ def get_lists_from_fulls(exchanges):
     prices_usd = np.zeros([n_exc, n_cols])
     volumes = np.zeros([n_exc, n_cols])
     for i in range(0, n_exc):
-        print("Working on exchange %i/%i" % ((i+1), n_exc))
+        print("Working on exchange %i/%i" % ((i + 1), n_exc))
         single_price = []
         single_volume = []
         time_list = []
@@ -162,7 +162,7 @@ def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
         header2 = [" "]
         header3 = ["Time"]
         for exc in exchanges:
-            currency = exc[len(exc)-3: len(exc)]
+            currency = exc[len(exc) - 3: len(exc)]
             header1.append(exc)
             header1.append("")
             header2.append("Price")
@@ -256,7 +256,7 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     n_cols_high = len(time_stamps)
     n_exc = np.size(volumes, 0)
-    n_cols_low = int(n_cols_high/conversion_rate)
+    n_cols_low = int(n_cols_high / conversion_rate)
     time_stamps_low = []
     prices_low = np.zeros([n_exc, n_cols_low])
     volumes_low = np.zeros([n_exc, n_cols_low])
@@ -264,36 +264,52 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
         time_stamps_low.append(time_stamps[i * conversion_rate])
         for j in range(0, n_exc):
             prices_low[j, i] = prices[j, i * conversion_rate]
-            volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate : (i + 1)*conversion_rate])
+            volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate: (i + 1) * conversion_rate])
     return time_stamps_low, prices_low, volumes_low
 
-#def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
 <<<<<<< HEAD
 =======
+# def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
-def convert_to_hour(time_stamps, prices, volumes):
+def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
-    n_hours = int(n_mins/6.5)
-    n_exc = np.size(prices,0)
+    print("minutes: ", n_mins)
     time_stamps_out = []
-    prices_out = np.zeros([n_exc, n_hours])
-    volumes_out = np.zeros([n_exc, n_hours])
     k = 0
-    for i in range(n_mins):
-        if hour[i] == 13 and minute[i] == 30:
-            time_stamps_out.append(time_stamps[i])
-            for j in range(n_exc):
-                prices_out[j, k] = np.average(prices[j, i:(i + 30)])
-                volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
-            k += 1
-        elif minute[i] == 0:
-            time_stamps_out.append(time_stamps[i])
-            for j in range(n_exc):
-                prices_out[j, k] = np.average(prices[j, i:(i + 60)])
-                volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
-            k += 1
+    n_exc = np.size(prices, 0)
+
+    if opening_hours_only == 1:
+        n_hours = int(n_mins * (7 / 390) + 1)
+        print("hours: ", n_hours)
+        prices_out = np.zeros([n_exc, n_hours])
+        volumes_out = np.zeros([n_exc, n_hours])
+        for i in range(n_mins - 59):
+            if hour[i] == 13 and minute[i] == 30:
+                time_stamps_out.append(time_stamps[i])
+                for j in range(n_exc):
+                    prices_out[j, k] = np.average(prices[j, i:(i + 30)])
+                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
+                k += 1
+            elif minute[i] == 0:
+                time_stamps_out.append(time_stamps[i])
+                for j in range(n_exc):
+                    prices_out[j, k] = np.average(prices[j, i:(i + 60)])
+                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                k += 1
+    else:
+        n_hours = int(n_mins / 60)
+        print("hours: ", n_hours)
+        prices_out = np.zeros([n_exc, n_hours])
+        volumes_out = np.zeros([n_exc, n_hours])
+        for i in range(n_mins - 59):
+            if minute[i] == 0:
+                time_stamps_out.append(time_stamps[i])
+                for j in range(n_exc):
+                    prices_out[j, k] = np.average(prices[j, i:(i + 60)])
+                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                k += 1
     return time_stamps_out, prices_out, volumes_out
 >>>>>>> master
 
@@ -381,3 +397,75 @@ def get_month(month_string):
         print("Error in dis.get_month!")
 
     return month_num
+
+
+def average_over_day(time_list, data, frequency="h"):
+    year, month, day, hour, minute = supp.fix_time_list(time_list)
+    out_data = []
+    n_entries = len(time_list)
+    day_time = [] # Excel stamps for each minute in the day
+    h_list =[]  # integer indicating which hour it is
+    m_list=[] # integer indicating which minute it is
+
+    # Generating day_time ---------------
+    if frequency == "h":
+        if hour[0] == 13:
+            for h in range(13, 20):
+                if h < 10:
+                    hs = "0" + str(h)
+                else:
+                    hs = str(h)
+                day_time.append(hs + ":" + "00")
+                h_list.append(h)
+        elif hour[0] == 0:
+            for h in range(0, 24):
+                if h < 10:
+                    hs = "0" + str(h)
+                else:
+                    hs = str(h)
+                day_time.append(hs + ":" + "00")
+                h_list.append(h)
+        else:
+            print("di.average_over_day: Something was wrong with the time_list....")
+            return None
+    else:
+        if hour[0] == 13:
+            for h in range(13, 20):
+                if h < 10:
+                    hs = "0" + str(h)
+                else:
+                    hs = str(h)
+                if h == 13:
+                    mins_in_hour = 30
+                else:
+                    mins_in_hour = 60
+                for m in range(0, mins_in_hour):
+                    if m < 10:
+                        ms = "0" + str(m)
+                    else:
+                        ms = str(m)
+                    day_time.append(hs + ":" + ms)
+                    h_list.append(h)
+                    m_list.append(m)
+        elif hour[0] == 0:
+            for h in range(0, 24):
+                if h < 10:
+                    hs = "0" + str(h)
+                else:
+                    hs = str(h)
+                for m in range(0, 60):
+                    if m < 10:
+                        ms = "0" + str(m)
+                    else:
+                        ms = str(m)
+                    day_time.append(hs + ":" + ms)
+                    h_list.append(h)
+                    m_list.append(m)
+        else:
+            print("di.average_over_day: Something was wrong with the time_list....")
+            return None
+    # -----------------------------------
+
+    # Calculate average -----------------
+    ##### Todo
+    return day_time, out_data

@@ -69,10 +69,7 @@ def average_at_time_of_day(in_list):
             mintcount = 0
         else:
             mintcount = mintcount + 1
-
-    # avg_total = sum(list)/len(list)
     avg_per_min = avg_per_min/(len(in_list)/(24 * 60))
-    # avg_avg = sum(avg_per_min)/len(avg_per_min)
     return avg_per_min
 
 

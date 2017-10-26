@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 def rolls(prices, price_differences, time_list_minute, window):
     spread = []
     spread_rel = []
+    prices_start = []
     time_list_hour = []
     count_value_error = 0
     half_hour = 30
@@ -30,6 +31,7 @@ def rolls(prices, price_differences, time_list_minute, window):
             spread.append(ba_calc)
             time_list_hour.append(time_list_minute[pos])
             spread_rel.append(ba_calc/prices[pos])
+            prices_start.append(prices[pos])
             half = 0
             pos += 30
             sum_inside = 0
@@ -44,6 +46,7 @@ def rolls(prices, price_differences, time_list_minute, window):
             spread.append(ba_calc)
             time_list_hour.append(time_list_minute[pos])
             spread_rel.append(ba_calc/prices[pos])
+            prices_start.append(prices[pos])
             pos += 60
             sum_inside = 0
             if tod == 6:
@@ -51,7 +54,7 @@ def rolls(prices, price_differences, time_list_minute, window):
                 half = 1
             else:
                 tod += 1
-    return spread, spread_rel, time_list_hour, count_value_error
+    return spread, spread_rel, time_list_hour, count_value_error, prices_start
 
 
 load_price_differences = 1
@@ -74,9 +77,11 @@ print("The length of the price_diff: ", len(price_differences))
 
 print("Calculates BA-spread:")
 
-spread1, spread1_rel, time_list_hour1, count_value_error_1 = rolls(total_price, price_differences, time_list, window1)
+spread1, spread1_rel, time_list_hour1, count_value_error_1, prices_start = rolls(total_price, price_differences, time_list, window1)
 # spread2, time_list_hour2, count_value_error_2 = rolls_new(price_differences, time_list, window2)
 
+jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "relative_spreads.csv", "Relative spread from Roll")
+jacob_csv_handling.write_to_file(time_list_hour1, prices_start, "prices_start.csv", "Price")
 
 
 """

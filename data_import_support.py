@@ -266,6 +266,13 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
             prices_low[j, i] = prices[j, i * conversion_rate]
             volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate : (i + 1)*conversion_rate])
     return time_stamps_low, prices_low, volumes_low
+<<<<<<< HEAD
+
+#def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
+    
+
+=======
+>>>>>>> master
 
 
 def convert_to_hour(time_stamps, prices, volumes):

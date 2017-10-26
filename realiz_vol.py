@@ -81,7 +81,7 @@ def realized_vol(prices):
 
     ax=plt.subplot()
     ax.set_ylim([0,0.005])
-    ax.set_xlim([750,800])
+    ax.set_xlim([775,779])
     plt.legend()
     plt.show()
     return 0

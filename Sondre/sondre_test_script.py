@@ -11,14 +11,7 @@ import os
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
-
 time_list, prices, volumes = dis.convert_to_hour(time_list, prices, volumes)
-
-start = 0
-end = 100
-interval = 1
-for i in range(start, end, interval):
-    print(i, time_list[i], volumes[0, i])
 
 
 """
@@ -30,8 +23,17 @@ btce_volume = volumes[1, :]
 btce_returns = jake_supp.logreturn(btce_price)
 """
 
-#time_list_rolls, rolls = supp.get_rolls()
 
-#print(len(rolls))
+print("Bistamp: ")
+print("Length:", len(time_list))
+print(time_list[0])
+print(time_list[13845])
 
-#tap.two_axis(volumes[0, 0:41495], rolls, scale1="custom", scale2="custom", title1="Bitstamp Prices", title2="BTCE Prices", type1="plot", type2="plot")
+
+time_list_rolls, rolls = supp.get_rolls()
+print("Rolls: ")
+print("Length:", len(rolls))
+print(time_list_rolls[0])
+print(time_list_rolls[13844])
+
+#tap.two_axis(volumes[0, :], rolls, scale1="custom", scale2="custom", title1="Bitstamp Prices", title2="BTCE Prices", type1="plot", type2="plot")

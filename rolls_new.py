@@ -16,7 +16,7 @@ def rolls(prices, price_differences, time_list_minute, window):
     half = 1 # indicates that one half hour must be accounted for
     tod = 0 # tod to keep track of when to reset half
     sum_inside = 0
-    while pos < len(price_differences)-window:
+    while pos < len(price_differences):
         if half == 1:
             for i in range(pos+1, pos+half_hour+1):
                 sum_inside = sum_inside + (price_differences[i]*price_differences[i-1])

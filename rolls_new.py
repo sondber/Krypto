@@ -1,7 +1,6 @@
 import math
 import data_import as di
 from Jacob import jacob_csv_handling, jacob_support
-import time
 import matplotlib.pyplot as plt
 
 

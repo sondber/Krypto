@@ -268,8 +268,6 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     return time_stamps_low, prices_low, volumes_low
 
 
-<<<<<<< HEAD
-=======
 # def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
 def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
@@ -311,7 +309,6 @@ def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
                 k += 1
     return time_stamps_out, prices_out, volumes_out
->>>>>>> master
 
 
 def read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask):

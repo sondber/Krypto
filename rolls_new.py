@@ -1,11 +1,12 @@
 import math
 import data_import as di
 from Jacob import jacob_csv_handling, jacob_support
-import matplotlib.pyplot as plt
 
 
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
+
+# Next week: Put price_differences-function in this file. Make "rolls" call price differences with input "prices".
 
 def rolls(prices, price_differences, time_list_minute, day=0):
     window = 60
@@ -60,12 +61,13 @@ def rolls(prices, price_differences, time_list_minute, day=0):
     else:
         sum_inside = 0
         if day == 1:
-            minutes_in_window = (6*60)+30
+            minutes_in_window = (6 * 60) + 30
         else:
-            minutes_in_window = ((6*60)+30)*5
+            minutes_in_window = ((6 * 60) + 30) * 5
 
-        for i in range(0, len(price_differences) if day == 1 else len(price_differences)-minutes_in_window, minutes_in_window):
-            for y in range(i+1, i+minutes_in_window):
+        for i in range(0, len(price_differences) if day == 1 else len(price_differences) - minutes_in_window,
+                       minutes_in_window):
+            for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 1))
@@ -80,45 +82,46 @@ def rolls(prices, price_differences, time_list_minute, day=0):
 
     return spread, spread_rel, time_list_hour, count_value_error, prices_start
 
-day= int(input("Calculate Rolls on an hourly (0) or daily(1) or weekly(2) basis: "))
+
+day = int(input("Calculate Rolls on an hourly (0) or daily(1) or weekly(2) basis: "))
 if day == 0:
-    suffix  = "hourly"
+    suffix = "hourly"
 elif day == 1:
     suffix = "daily"
 else:
     suffix = "weekly"
 
-
 load_price_differences = 1
 if load_price_differences:
-    to_file = "data/export_csv/price_diffs_"+suffix+".csv"
+    to_file = "data/export_csv/price_diffs_" + suffix + ".csv"
     time_list = []
     prices = []
     volume = []
-    time_list = di.get_lists()[1]
-    total_price = di.get_lists()[4]
+    time_list = di.get_lists()[1]  # di.getlists is updated so it is possible to extract only opening hours or full day
+    total_price = di.get_lists()[4]  # write something to choose exchange or to generate all exchanges
+
+    #exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
+    #bitstampusd_price = prices[0, :]
+    #btceusd_price = prices[1, :]
     price_differences = jacob_support.first_price_differences(total_price)  # calculates price difference
     jacob_csv_handling.write_to_file(time_list, price_differences, to_file, "Price_differences")
 
-window1 = 60  # calculate spread for this period of minutes
 
 print("The length of the price_diff: ", len(price_differences))
 
 print("Calculates BA-spread ...")
 
-
 spread1, spread1_rel, time_list_hour1, count_value_error_1, prices_start = rolls(total_price, price_differences,
                                                                                  time_list, day)
 print("The BA-spreads are now calculated.")
 
-jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "data/export_csv/relative_spreads_"+suffix+".csv",
+jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "data/export_csv/relative_spreads_" + suffix + ".csv",
                                  "Relative spread from Roll")
-
 
 print("The length of the spread-vector is", len(spread1))
 print("The length of the time-vector is", len(time_list_hour1))
 
-print("The following is the BAs calculated",suffix)
+print("The following is the BAs calculated", suffix)
 print(time_list_hour1)
 print(spread1)
 print(spread1_rel)

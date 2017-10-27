@@ -13,10 +13,10 @@ import os
 import datetime as dt
 
 os.chdir("C:/Users/Marky/Documents/GitHub/krypto")
-#exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
+exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
 #year, month, day, hour, minute = supp.fix_time_list(time_list)
 
-prices = di.get_lists(data="p")
+
 
 
 def realized_vol(prices):

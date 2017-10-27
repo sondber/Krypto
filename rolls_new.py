@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
 
-def rolls(prices, price_differences, time_list_minute, window, day=0):
+def rolls(prices, price_differences, time_list_minute, day=0):
+    window = 60
     spread = []
     spread_rel = []
     prices_start = []
@@ -107,7 +108,7 @@ print("Calculates BA-spread ...")
 
 
 spread1, spread1_rel, time_list_hour1, count_value_error_1, prices_start = rolls(total_price, price_differences,
-                                                                                 time_list, window1, day)
+                                                                                 time_list, day)
 print("The BA-spreads are now calculated.")
 
 jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "data/export_csv/relative_spreads_"+suffix+".csv",
@@ -117,16 +118,8 @@ jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "data/export_csv/
 print("The length of the spread-vector is", len(spread1))
 print("The length of the time-vector is", len(time_list_hour1))
 
-print("The following is the BAs with window", window1)
+print("The following is the BAs calculated",suffix)
 print(time_list_hour1)
 print(spread1)
 print(spread1_rel)
-print("With", window1, "window,", count_value_error_1, "value errors were counted")
-
-
-x = []
-for i in range(len(spread1_rel)):
-    x.append(i)
-
-plt.bar(x, spread1_rel)
-plt.show()
+print(count_value_error_1, "value errors were counted when calculating", suffix, "Rolls")

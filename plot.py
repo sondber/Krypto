@@ -183,14 +183,14 @@ def two_scales(ax1, time, data1, data2, title1, title2, title_x, color1, color2,
     print(' Running two_scales...')
     ax2 = ax1.twinx()
     if type1 == 'plot':
-        ax1.plot(time, data1, color=color1, linewidth=0.5)
+        ax1.plot(time, data1, color=color1, linewidth=0.5, label=title1)
     elif type1 == 'bar':
-        ax1.bar(time, data1, color=color1)
+        ax1.bar(time, data1, color=color1, label=title1)
 
     if type2 == 'plot':
-        ax2.plot(time, data2, color=color2, linewidth=0.5)
+        ax2.plot(time, data2, color=color2, linewidth=0.5, label=title2)
     elif type2 == 'bar':
-        ax2.bar(time, data2, color=color2)
+        ax2.bar(time, data2, color=color2, label=title2)
     print("  Type of plot: ", type1)
 
     if scale2 == 'plot_over_bar' or scale1 == 'plot_over_bar':
@@ -201,8 +201,8 @@ def two_scales(ax1, time, data1, data2, title1, title2, title_x, color1, color2,
         if scale1 == 'auto':
             print('  Scale1: auto')
         elif scale1 == 'custom':
-            print("  min(%s): %0.1f" % (title1, min(data1)))
-            print("  max(%s): %0.1f" % (title1, max(data1)))
+            print("  min(%s): %0.4f" % (title1, min(data1)))
+            print("  max(%s): %0.4f" % (title1, max(data1)))
             minimum = input('   Set new min: ')
             maximum = input('   Set new max: ')
             ax1.set_ylim([float(minimum), float(maximum)])
@@ -211,8 +211,8 @@ def two_scales(ax1, time, data1, data2, title1, title2, title_x, color1, color2,
         if scale2 == 'auto':
             print('  Scale2: auto')
         elif scale2 == 'custom':
-            print("  min(%s): %0.1f" % (title2, min(data2)))
-            print("  max(%s): %0.1f" % (title2, max(data2)))
+            print("  min(%s): %0.4f" % (title2, min(data2)))
+            print("  max(%s): %0.4f" % (title2, max(data2)))
             minimum = input('   Set new min: ')
             maximum = input('   Set new max: ')
             ax2.set_ylim([float(minimum), float(maximum)])
@@ -231,6 +231,7 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     # Create axes
     fig, ax = plt.subplots()
     ax1, ax2 = two_scales(ax, time, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2)
+    plt.legend()
     plt.show()
     print("Finished graphing")
     return None

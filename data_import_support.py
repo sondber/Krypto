@@ -1,6 +1,7 @@
 import csv
 from Sondre import sondre_support_formulas as supp
 import numpy as np
+from datetime import date
 
 
 def make_time_stamps():
@@ -243,11 +244,16 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
     out_excel_stamps = []
     out_prices = []
     out_volumes = []
+
+    # Kan sette inn en funksjon som sjekker om det er helligdag
+
     for i in range(n_mins):
-        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
-            out_excel_stamps.append(in_excel_stamps[i])
-            out_prices.append(in_prices[:, i])
-            out_volumes.append(in_volumes[:, i])
+        w_day = int(date(year[i], month[i], day[i]).isoweekday())
+        if w_day != 6 and w_day != 7:
+            if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+                out_excel_stamps.append(in_excel_stamps[i])
+                out_prices.append(in_prices[:, i])
+                out_volumes.append(in_volumes[:, i])
     out_prices = np.transpose(np.matrix(out_prices))
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
@@ -268,8 +274,11 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     return time_stamps_low, prices_low, volumes_low
 
 
+<<<<<<< HEAD
 # def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
+=======
+>>>>>>> master
 def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
@@ -392,17 +401,16 @@ def get_month(month_string):
         month_num = 12
     else:
         print("Error in dis.get_month!")
-
+        month_num = -1
     return month_num
 
 
 def average_over_day(time_list, data, frequency="h"):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
-    out_data = []
     n_entries = len(time_list)
-    day_time = [] # Excel stamps for each minute in the day
-    h_list =[]  # integer indicating which hour it is
-    m_list=[] # integer indicating which minute it is
+    day_time = []  # Excel stamps for each minute in the day
+    h_list = []  # integer indicating which hour it is
+    m_list = []  # integer indicating which minute it is
 
     # Generating day_time ---------------
     if frequency == "h":
@@ -464,5 +472,22 @@ def average_over_day(time_list, data, frequency="h"):
     # -----------------------------------
 
     # Calculate average -----------------
-    ##### Todo
+    n_out = len(day_time)
+    out_data = np.zeros(n_out)
+    total_list = np.zeros(n_out)
+    num_list = np.zeros(n_out)
+
+    if frequency == "h":
+        for i in range(n_entries):
+            index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            total_list[index] += data[i]
+            num_list[index] += 1
+    else:
+        for i in range(n_entries):
+            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[
+                0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            total_list[index] += data[i]
+            num_list[index] += 1
+    for i in range(n_out):
+        out_data[i] = float(total_list[i]) / float(num_list[i])
     return day_time, out_data

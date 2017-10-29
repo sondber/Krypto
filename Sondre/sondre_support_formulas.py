@@ -198,70 +198,6 @@ def write_to_raw_file(volumes, prices, time_list, exchanges, filename):
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
 
-def write_to_daily_file(day_time, total_volume, total_price):
-    exchanges = ["bitstampusd"]
-    filename = "data/export_csv/daily_data.csv"
-    n_rows = len(day_time)
-    with open(filename, 'w', newline='') as csvfile:
-        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
-        header1 = [" "]
-        header2 = [" "]
-        header3 = ["Time"]
-        for exc in exchanges:
-            currency = exc[len(exc)-3: len(exc)]
-            header1.append(exc)
-            header1.append("")
-            header2.append("Price")
-            header2.append("Volume")
-            header3.append(currency.upper())
-            header3.append("BTC")
-
-        writ.writerow(header1)
-        writ.writerow(header2)
-        writ.writerow(header3)
-
-        for i in range(0, n_rows):
-            rowdata = [" "]
-            rowdata[0] = day_time[i]
-            rowdata.append(total_price[i])
-            rowdata.append(total_volume[i])
-            writ.writerow(rowdata)
-    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
-
-
-def write_to_hourly_file(hour_time, total_volume, total_price):
-    exchanges = ["bitstampusd"]
-    filename = "data/export_csv/hourly_data.csv"
-    n_rows = len(hour_time)
-    with open(filename, 'w', newline='') as csvfile:
-        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-
-        header1 = [" "]
-        header2 = [" "]
-        header3 = ["Time"]
-        for exc in exchanges:
-            currency = exc[len(exc) - 3: len(exc)]
-            header1.append(exc)
-            header1.append("")
-            header2.append("Price")
-            header2.append("Volume")
-            header3.append(currency.upper())
-            header3.append("BTC")
-
-        writ.writerow(header1)
-        writ.writerow(header2)
-        writ.writerow(header3)
-
-        for i in range(0, n_rows):
-            rowdata = [" "]
-            rowdata[0] = hour_time[i]
-            rowdata.append(total_price[i])
-            rowdata.append(total_volume[i])
-            writ.writerow(rowdata)
-    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
-
-
 def fetch_aggregate_csv(file_name, n_exc):
     n_rows = count_rows(file_name)
     n_exc = int(n_exc)
@@ -307,7 +243,7 @@ def get_ticks(time_list, number_of_ticks):
 
 
 def get_rolls():
-    file_name = "data/export_csv/relative_spreads_60.csv"
+    file_name = "data/export_csv/relative_spreads_hourly.csv"
     rolls = []
     time_list = []
     with open(file_name, newline='') as csvfile:

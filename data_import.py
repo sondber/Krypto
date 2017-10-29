@@ -4,7 +4,7 @@ import numpy as np
 import currency_converter as curr
 
 
-def get_lists(which_freq=2, data="all"):
+def get_lists(which_freq=2, data="all", opening_hours="y", make_totals="y"):
     exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
     n_exc = len(exchanges)
 
@@ -18,19 +18,28 @@ def get_lists(which_freq=2, data="all"):
         freq = "minute"
     print("Fetching %s data..." % freq)
 
-    file_name = "data/export_csv/" + freq + "_data.csv"
-    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
-    total_volume, total_price = supp.make_totals(volumes, prices)
-
-    if data == "price" or data == "p" or data == "prices":
-        return total_price
-    elif data == "volume" or data == "v" or data == "volumes":
-        return total_volume
+    if opening_hours == "y":
+        oh = ""
+        print(" \033[32;0;0mOnly fetching data for NYSE opening hours...\033[0;0;0m")
     else:
-        return exchanges, time_list, prices, volumes, total_price, total_volume
+        oh = "_full_day"
+
+    file_name = "data/export_csv/" + freq + "_data" + oh + ".csv"
+    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
+
+    if make_totals == "y":
+        total_volume, total_price = supp.make_totals(volumes, prices)
+        if data == "price" or data == "p" or data == "prices":
+            return total_price
+        elif data == "volume" or data == "v" or data == "volumes":
+            return total_volume
+        else:
+            return exchanges, time_list, prices, volumes, total_price, total_volume
+    else:
+        return exchanges, time_list, prices, volumes
 
 
-def fetch_long_and_write(exchanges):
+def fetch_long_and_write(exchanges, opening_hours_only="y"):
     n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
 
@@ -53,10 +62,12 @@ def fetch_long_and_write(exchanges):
             print(" %s is already USD" % exc)
             prices_usd.append(prices[i,:])
     """
+    if opening_hours_only == "y":
+        excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
+        filename = "data/export_csv/minute_data.csv"
+    else:
+        filename = "data/export_csv/minute_data_full_day.csv"
 
-    excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
-
-    filename = "data/export_csv/minute_data.csv"
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
     for i in range(5, 10, 5):

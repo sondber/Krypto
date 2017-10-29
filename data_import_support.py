@@ -259,6 +259,27 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
     return out_excel_stamps, out_prices, out_volumes
 
 
+# Denne er kun et eksperiment
+def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
+    year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
+    n_mins = len(in_excel_stamps)
+    out_excel_stamps = []
+    out_prices = []
+    out_volumes = []
+
+    # Kan sette inn en funksjon som sjekker om det er helligdag
+
+    for i in range(n_mins):
+        w_day = int(date(year[i], month[i], day[i]).isoweekday())
+        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            out_excel_stamps.append(in_excel_stamps[i])
+            out_prices.append(in_prices[:, i])
+            out_volumes.append(in_volumes[:, i])
+    out_prices = np.transpose(np.matrix(out_prices))
+    out_volumes = np.transpose(np.matrix(out_volumes))
+    return out_excel_stamps, out_prices, out_volumes
+
+
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     n_cols_high = len(time_stamps)
     n_exc = np.size(volumes, 0)
@@ -274,20 +295,18 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     return time_stamps_low, prices_low, volumes_low
 
 
-
 # def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
 def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
+    print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
-    print("minutes: ", n_mins)
     time_stamps_out = []
     k = 0
     n_exc = np.size(prices, 0)
 
     if opening_hours_only == 1:
         n_hours = int(n_mins * (7 / 390) + 1)
-        print("hours: ", n_hours)
         prices_out = np.zeros([n_exc, n_hours])
         volumes_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
@@ -431,7 +450,7 @@ def average_over_day(time_list, data, frequency="h"):
         else:
             print("di.average_over_day: Something was wrong with the time_list....")
             return None
-    else:
+    elif frequency == "m":
         if hour[0] == 13:
             for h in range(13, 20):
                 if h < 10:
@@ -464,6 +483,8 @@ def average_over_day(time_list, data, frequency="h"):
                     day_time.append(hs + ":" + ms)
                     h_list.append(h)
                     m_list.append(m)
+        elif frequency == "d":
+            1  # todo
         else:
             print("di.average_over_day: Something was wrong with the time_list....")
             return None
@@ -480,12 +501,14 @@ def average_over_day(time_list, data, frequency="h"):
             index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
             total_list[index] += data[i]
             num_list[index] += 1
-    else:
+    elif frequency == "m":
         for i in range(n_entries):
             index = (hour[i] - hour[0]) * 60 + minute[i] - minute[
                 0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
             total_list[index] += data[i]
             num_list[index] += 1
+    elif frequency == "d":
+        1 # Daily todo
     for i in range(n_out):
         out_data[i] = float(total_list[i]) / float(num_list[i])
     return day_time, out_data

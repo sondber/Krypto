@@ -5,7 +5,8 @@ import currency_converter as curr
 
 
 def get_lists(which_freq=2, data="all", opening_hours="y", make_totals="y"):
-    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    ########exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    exchanges = ["bitstampusd"]
     n_exc = len(exchanges)
 
     if which_freq == 0 or which_freq == "day" or which_freq == "d":

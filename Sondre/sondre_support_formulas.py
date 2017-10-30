@@ -23,21 +23,17 @@ def read_single_exc_csvs(file_name, time_list, price, volume):
 def fill_blanks(in_list):
     out_list = in_list
     n = len(in_list)
+    startlim = 60  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
     for i in range(0, n):
         try:
             if in_list[i] == 0:
                 if i == 0:
                     j = 0
-                    while in_list[j] == 0 and j<60:
+                    while in_list[j] == 0 and j < startlim:
                         j = j + 1
                     out_list[0] = in_list[j]
-                elif i == n:
-                    out_list[i] = in_list[i - 1]
                 else:
-                    if out_list[i + 1] == 0:
-                        out_list[i] = in_list[i - 1]
-                    else:
-                        out_list[i] = (in_list[i - 1] + in_list[i + 1])/2
+                    out_list[i] = in_list[i - 1]
         except IndexError:
             out_list[i] = in_list[i - 1]
             print("\033[0;31;0mThere was a problem on row %i \033[0;0;0m" % i)

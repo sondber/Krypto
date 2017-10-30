@@ -2,6 +2,7 @@ import csv
 from Sondre import sondre_support_formulas as supp
 import numpy as np
 from datetime import date
+from matplotlib import pyplot as plt
 
 
 def make_time_stamps():
@@ -134,6 +135,7 @@ def get_lists_from_fulls(exchanges):
         single_price = supp.fill_blanks(single_price)
         single_volume = remove_nan(single_volume)
 
+
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_price)
         r = 0
@@ -142,11 +144,18 @@ def get_lists_from_fulls(exchanges):
         start_j = 0
         while time_list[start_j] < unix_stamps[0]:
             start_j += 1
+
         for j in range(start_j, n):
             while unix_stamps[r] != time_list[j]:
                 r = r + 1
             prices[i, r] = single_price[j]
             volumes[i, r] = single_volume[j]
+
+    for i in range(n_exc):
+        single = supp.fill_blanks(prices[i, :])
+        for j in range(0, len(single)):
+            prices[i, j] = single[j]
+
     return excel_stamps, unix_stamps, prices, volumes
 
 
@@ -493,9 +502,8 @@ def average_over_day(time_list, data, frequency="h"):
     # Calculate average -----------------
     n_out = len(day_time)
     out_data = np.zeros(n_out)
-    total_list = np.zeros(n_out)
     num_list = np.zeros(n_out)
-
+    total_list = np.zeros(n_out)
     if frequency == "h":
         for i in range(n_entries):
             index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
@@ -509,6 +517,12 @@ def average_over_day(time_list, data, frequency="h"):
             num_list[index] += 1
     elif frequency == "d":
         1 # Daily todo
+        print("Daily ikke laget enda")
     for i in range(n_out):
         out_data[i] = float(total_list[i]) / float(num_list[i])
+    plt.plot(total_list)
+    plt.figure(2)
+    num_list[20] += 50
+    plt.plot(num_list)
+    plt.show()
     return day_time, out_data

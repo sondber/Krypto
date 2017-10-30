@@ -121,7 +121,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
     print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
           "value errors were counted when calculating Roll-spreads")
 
-    return spread, spread_rel, time_list, count_value_error  # ,prices_start
+    return spread, spread_rel, time_list, count_value_error 
 
 
 frequency = 0

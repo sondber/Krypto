@@ -36,22 +36,22 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
 
     # determine minutes_in_window based on opening_hours and calc_basis
     if opening_times == 1:
-        if calc_basis == 1: # daily with opening hours only
+        if calc_basis == 1:  # daily with opening hours only
             minutes_in_window = (6 * 60) + 30
             freq_desc = "daily"
-        elif calc_basis == 2: # weekly with openings hours only
+        elif calc_basis == 2:  # weekly with openings hours only
             minutes_in_window = ((6 * 60) + 30) * 5
             freq_desc = "weekly"
-        else: # hourly with openings hours. Minutes_in_window is not used in this case
+        else:  # hourly with openings hours. Minutes_in_window is not used in this case
             freq_desc = "hourly"
     else:
-        if calc_basis == 0: # hourly with full data
+        if calc_basis == 0:  # hourly with full data
             minutes_in_window = 60
             freq_desc = "hourly"
-        elif calc_basis == 1: # daily with full data
+        elif calc_basis == 1:  # daily with full data
             minutes_in_window = 60 * 24
             freq_desc = "daily"
-        else: # weekly with full data
+        else:  # weekly with full data
             minutes_in_window = 60 * 24 * 7
             freq_desc = "weekly"
 
@@ -118,13 +118,14 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
     print("Spreads-calculation is finished")
     print("The length of the spread-vector is", len(spread_rel))
     print("The length of the time-vector is", len(time_list))
-    print(count_value_error, "value errors were counted when calculating Roll-spreads")
+    print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
+          "value errors were counted when calculating Roll-spreads")
 
     return spread, spread_rel, time_list, count_value_error  # ,prices_start
 
 
 frequency = 0
-opening = "n"
+opening = "y"
 exchanges, time_list, prices_minute, volumes, total_price, total_volume = di.get_lists(opening_hours=opening)
 prices = prices_minute[0, :]
 

@@ -1,22 +1,65 @@
 import math
 import data_import as di
-from Jacob import jacob_csv_handling, jacob_support
+from Sondre import sondre_support_formulas as supp
 
 
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
+def first_price_differences(prices):  # takes list of prices, returns equal length list of first price differences
+    returnlist = [0]
+    for i in range(1, len(prices)):  # check the logic of setting first index to zero in relation to return calculation
+        try:
+            returnlist.append(prices[i] - prices[(i - 1)])
+        except ValueError:
+            returnlist.append(0)
+            print("Something wrong happened when calculating price difference")
+    return returnlist
 
-# Next week: Put price_differences-function in this file. Make "rolls" call price differences with input "prices".
 
-def rolls(prices, price_differences, time_list_minute, day=0):
-    window = 60
+def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 hour/day/week
+    year, month, day, hour, minute = supp.fix_time_list(time_list_minute)
     spread = []
     spread_rel = []
-    prices_start = []
-    time_list_hour = []
+    time_list = []
     count_value_error = 0
-    half_hour = 30
-    if day == 0:
+    print("Calculating first price differences ...")
+    price_differences = first_price_differences(prices_minute)  # calculates price difference
+    print("Price differences-calculation finished. ")
+
+    # determine opening hours yes/no
+    if hour[0] == 13:  # this indicates that opening times are being investigated
+        opening_times = 1
+        opening_hours_desc = "opening hours"
+    else:
+        opening_times = 0
+        opening_hours_desc = "full day"
+
+    # determine minutes_in_window based on opening_hours and calc_basis
+    if opening_times == 1:
+        if calc_basis == 1: # daily with opening hours only
+            minutes_in_window = (6 * 60) + 30
+            freq_desc = "daily"
+        elif calc_basis == 2: # weekly with openings hours only
+            minutes_in_window = ((6 * 60) + 30) * 5
+            freq_desc = "weekly"
+        else: # hourly with openings hours. Minutes_in_window is not used in this case
+            freq_desc = "hourly"
+    else:
+        if calc_basis == 0: # hourly with full data
+            minutes_in_window = 60
+            freq_desc = "hourly"
+        elif calc_basis == 1: # daily with full data
+            minutes_in_window = 60 * 24
+            freq_desc = "daily"
+        else: # weekly with full data
+            minutes_in_window = 60 * 24 * 7
+            freq_desc = "weekly"
+
+    print("Calculating spreads on a/an", freq_desc, "basis using", opening_hours_desc, "data")
+
+    if calc_basis == 0 and opening_times:  # opening times and hourly basis needs to account for half hours
+        half_hour = 30
+        window = 60
         pos = 0  # position in price diff vector
         half = 1  # indicates that one half hour must be accounted for
         tod = 0  # tod to keep track of when to reset half
@@ -31,9 +74,10 @@ def rolls(prices, price_differences, time_list_minute, day=0):
                     count_value_error += 1
                     ba_calc = 0
                 spread.append(ba_calc)
-                time_list_hour.append(time_list_minute[pos])
-                spread_rel.append(ba_calc / prices[pos])
-                prices_start.append(prices[pos])
+                time_list.append(time_list_minute[pos])
+                if prices_minute[pos] == 0:
+                    print("Here is a zero!")
+                spread_rel.append(ba_calc / prices_minute[pos])
                 half = 0
                 pos += 30
                 sum_inside = 0
@@ -46,10 +90,8 @@ def rolls(prices, price_differences, time_list_minute, day=0):
                     count_value_error += 1
                     ba_calc = 0
                 spread.append(ba_calc)
-                time_list_hour.append(time_list_minute[pos])
-                spread_rel.append(ba_calc / prices[pos])
-                prices_start.append(prices[pos])
-                # pos += 60
+                time_list.append(time_list_minute[pos])
+                spread_rel.append(ba_calc / prices_minute[pos])
                 sum_inside = 0
                 if tod == 5:
                     tod = 0
@@ -60,12 +102,7 @@ def rolls(prices, price_differences, time_list_minute, day=0):
                     pos += 60
     else:
         sum_inside = 0
-        if day == 1:
-            minutes_in_window = (6 * 60) + 30
-        else:
-            minutes_in_window = ((6 * 60) + 30) * 5
-
-        for i in range(0, len(price_differences) if day == 1 else len(price_differences) - minutes_in_window,
+        for i in range(0, len(price_differences) - minutes_in_window if calc_basis == 2 else len(price_differences),
                        minutes_in_window):
             for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
@@ -75,54 +112,20 @@ def rolls(prices, price_differences, time_list_minute, day=0):
                 count_value_error += 1
                 ba_calc = 0
             spread.append(ba_calc)
-            time_list_hour.append(time_list_minute[i])
-            spread_rel.append(ba_calc / prices[i])
-            prices_start.append(prices[i])
+            time_list.append(time_list_minute[i])
+            spread_rel.append(ba_calc / prices_minute[i])
             sum_inside = 0
+    print("Spreads-calculation is finished")
+    print("The length of the spread-vector is", len(spread_rel))
+    print("The length of the time-vector is", len(time_list))
+    print(count_value_error, "value errors were counted when calculating Roll-spreads")
 
-    return spread, spread_rel, time_list_hour, count_value_error, prices_start
-
-
-day = int(input("Calculate Rolls on an hourly (0) or daily(1) or weekly(2) basis: "))
-if day == 0:
-    suffix = "hourly"
-elif day == 1:
-    suffix = "daily"
-else:
-    suffix = "weekly"
-
-load_price_differences = 1
-if load_price_differences:
-    to_file = "data/export_csv/price_diffs_" + suffix + ".csv"
-    time_list = []
-    prices = []
-    volume = []
-    time_list = di.get_lists()[1]  # di.getlists is updated so it is possible to extract only opening hours or full day
-    total_price = di.get_lists()[4]  # write something to choose exchange or to generate all exchanges
-
-    #exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists()
-    #bitstampusd_price = prices[0, :]
-    #btceusd_price = prices[1, :]
-    price_differences = jacob_support.first_price_differences(total_price)  # calculates price difference
-    jacob_csv_handling.write_to_file(time_list, price_differences, to_file, "Price_differences")
+    return spread, spread_rel, time_list, count_value_error  # ,prices_start
 
 
-print("The length of the price_diff: ", len(price_differences))
+frequency = 0
+opening = "n"
+exchanges, time_list, prices_minute, volumes, total_price, total_volume = di.get_lists(opening_hours=opening)
+prices = prices_minute[0, :]
 
-print("Calculates BA-spread ...")
-
-spread1, spread1_rel, time_list_hour1, count_value_error_1, prices_start = rolls(total_price, price_differences,
-                                                                                 time_list, day)
-print("The BA-spreads are now calculated.")
-
-jacob_csv_handling.write_to_file(time_list_hour1, spread1_rel, "data/export_csv/relative_spreads_" + suffix + ".csv",
-                                 "Relative spread from Roll")
-
-print("The length of the spread-vector is", len(spread1))
-print("The length of the time-vector is", len(time_list_hour1))
-
-print("The following is the BAs calculated", suffix)
-print(time_list_hour1)
-print(spread1)
-print(spread1_rel)
-print(count_value_error_1, "value errors were counted when calculating", suffix, "Rolls")
+spread, spread_rel, time_list, count_value_error = rolls(total_price, time_list, frequency)

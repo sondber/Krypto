@@ -12,3 +12,4 @@ plot.py
 Jacob/__pycache__/jacob_csv_handling.cpython-36.pyc
 data_import_support.py
 data/long_raw_data/bitstampusd.csv
+data/export_csv/minute_data_full_day.csv

@@ -306,13 +306,19 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
 # def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
-def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
+def convert_to_hour(time_stamps, prices, volumes):
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
     time_stamps_out = []
     k = 0
     n_exc = np.size(prices, 0)
+
+    if hour[0] == 0:
+        opening_hours_only = 0
+    else:
+        opening_hours_only = 1
+        print("  Opening hours only")
 
     if opening_hours_only == 1:
         n_hours = int(n_mins * (7 / 390) + 1)
@@ -333,7 +339,6 @@ def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
                 k += 1
     else:
         n_hours = int(n_mins / 60)
-        print("hours: ", n_hours)
         prices_out = np.zeros([n_exc, n_hours])
         volumes_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
@@ -346,13 +351,19 @@ def convert_to_hour(time_stamps, prices, volumes, opening_hours_only=1):
     return time_stamps_out, prices_out, volumes_out
 
 
-def convert_to_day(time_stamps, prices, volumes, opening_hours_only=1):
+def convert_to_day(time_stamps, prices, volumes):
     print(" \033[32;0;0mConverting to daily data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
     time_stamps_out = []
     k = 0
     n_exc = np.size(prices, 0)
+
+    if hour[0] == 0:
+        opening_hours_only = 0
+    else:
+        opening_hours_only = 1
+        print("  Opening hours only")
 
     if opening_hours_only == 1:
         n_days = int(n_mins / 390) + 1
@@ -366,7 +377,7 @@ def convert_to_day(time_stamps, prices, volumes, opening_hours_only=1):
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 390)])
                 k += 1
     else:
-        n_days = int(n_mins / 390)
+        n_days = int(n_mins / 1440)
         prices_out = np.zeros([n_exc, n_days])
         volumes_out = np.zeros([n_exc, n_days])
         for i in range(n_mins - 59):
@@ -467,6 +478,7 @@ def get_month(month_string):
 def average_over_day(time_list, data, frequency="h"):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
+    print("n: ", n_entries)
     day_time = []  # Excel stamps for each minute in the day
     h_list = []  # integer indicating which hour it is
     m_list = []  # integer indicating which minute it is
@@ -526,7 +538,10 @@ def average_over_day(time_list, data, frequency="h"):
                     h_list.append(h)
                     m_list.append(m)
     elif frequency == "d":
-        day_time = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
+        if hour[0] == 0:
+            day_time = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
+        else:
+            day_time = ["Mon", "Tue", "Wed", "Thur", "Fri"]
     else:
         print("di.average_over_day: Something was wrong with the time_list....")
         return None

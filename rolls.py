@@ -121,12 +121,4 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
     print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
           "value errors were counted when calculating Roll-spreads")
 
-    return spread, spread_rel, time_list, count_value_error 
-
-
-frequency = 2
-opening = "y"
-exchanges, time_list, prices_minute, volumes, total_price, total_volume = di.get_lists(opening_hours=opening)
-prices = prices_minute[0, :]
-
-spread, spread_rel, time_list, count_value_error = rolls(total_price, time_list, frequency)
+    return spread, spread_rel, time_list, count_value_error

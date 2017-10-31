@@ -1,4 +1,3 @@
-import time
 import matplotlib.pyplot as plt
 import numpy as np
 from Sondre import sondre_support_formulas as supp, user_interface as ui
@@ -178,19 +177,19 @@ def scatters(x, y, color="blue", areas=[], label="No name"):
     plt.legend()
 
 
-def two_scales(ax1, time, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
+def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
     # brukes til å sette de to aksene riktig skalert
     print(' Running two_scales...')
     ax2 = ax1.twinx()
     if type1 == 'plot':
-        ax1.plot(time, data1, color=color1, linewidth=0.5, label=title1)
+        ax1.plot(time_list, data1, color=color1, linewidth=0.5, label=title1)
     elif type1 == 'bar':
-        ax1.bar(time, data1, color=color1, label=title1)
+        ax1.bar(time_list, data1, color=color1, label=title1)
 
     if type2 == 'plot':
-        ax2.plot(time, data2, color=color2, linewidth=0.5, label=title2)
+        ax2.plot(time_list, data2, color=color2, linewidth=0.5, label=title2)
     elif type2 == 'bar':
-        ax2.bar(time, data2, color=color2, label=title2)
+        ax2.bar(time_list, data2, color=color2, label=title2)
     print("  Type of plot: ", type1)
 
     if scale2 == 'plot_over_bar' or scale1 == 'plot_over_bar':
@@ -225,12 +224,12 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
              type1='plot', type2='bar', scale1='auto', scale2='auto'):
     # denne gir et 2-akset system for de to datasettene
     print("Running two_axis... \033[31;00;0m(even though the plural of axis is 'axes'....Markus....)\033[00;00;0m")
-    time = np.zeros(len(data1))
+    time_list = np.zeros(len(data1))
     for i in range(len(data1)):
-        time[i] = i
+        time_list[i] = i
     # Create axes
     fig, ax = plt.subplots()
-    ax1, ax2 = two_scales(ax, time, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2)
+    ax1, ax2 = two_scales(ax, time_list, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2)
     plt.legend()
     plt.show()
     print("Finished graphing")

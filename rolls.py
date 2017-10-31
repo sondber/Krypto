@@ -16,15 +16,17 @@ def first_price_differences(prices):  # takes list of prices, returns equal leng
     return returnlist
 
 
-def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 hour/day/week
+def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc_basis 0/1/2 hour/day/week
     year, month, day, hour, minute = supp.fix_time_list(time_list_minute)
     spread = []
     spread_rel = []
     time_list = []
     count_value_error = 0
-    print("Calculating first price differences ...")
+    if kill_output == 0:
+        print("Calculating first price differences ...")
     price_differences = first_price_differences(prices_minute)  # calculates price difference
-    print("Price differences-calculation finished. ")
+    if kill_output == 0:
+        print("Price differences-calculation finished. ")
 
     # determine opening hours yes/no
     if hour[0] == 13:  # this indicates that opening times are being investigated
@@ -55,7 +57,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
             minutes_in_window = 60 * 24 * 7
             freq_desc = "weekly"
 
-    print("Calculating spreads on a/an", freq_desc, "basis using", opening_hours_desc, "data")
+    if kill_output == 0:
+        print("Calculating spreads on a/an", freq_desc, "basis using", opening_hours_desc, "data")
 
     if calc_basis == 0 and opening_times:  # opening times and hourly basis needs to account for half hours
         half_hour = 30
@@ -115,10 +118,11 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
             time_list.append(time_list_minute[i])
             spread_rel.append(ba_calc / prices_minute[i])
             sum_inside = 0
-    print("Spreads-calculation is finished")
-    print("The length of the spread-vector is", len(spread_rel))
-    print("The length of the time-vector is", len(time_list))
-    print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
-          "value errors were counted when calculating Roll-spreads")
+    if kill_output == 0:
+        print("Spreads-calculation is finished")
+        print("The length of the spread-vector is", len(spread_rel))
+        print("The length of the time-vector is", len(time_list))
+        print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
+              "value errors were counted when calculating Roll-spreads")
 
     return spread, spread_rel, time_list, count_value_error

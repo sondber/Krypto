@@ -1,7 +1,7 @@
 import math
 import data_import as di
 from Sondre import sondre_support_formulas as supp
-
+import matplotlib.pyplot as plt
 
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
@@ -69,7 +69,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
                 for i in range(pos + 1, pos + half_hour):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
-                    ba_calc = 2 * math.sqrt(-sum_inside / (half_hour - 1))
+                    ba_calc = 2 * math.sqrt(-sum_inside / (half_hour - 2))
                 except ValueError:
                     count_value_error += 1
                     ba_calc = 0
@@ -85,7 +85,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
                 for i in range(pos + 1, pos + window):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
-                    ba_calc = 2 * math.sqrt(-sum_inside / (window - 1))
+                    ba_calc = 2 * math.sqrt(-sum_inside / (window - 2))
                 except ValueError:
                     count_value_error += 1
                     ba_calc = 0
@@ -107,7 +107,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
             for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
             try:
-                ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 1))
+                ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 2))
             except ValueError:
                 count_value_error += 1
                 ba_calc = 0
@@ -124,7 +124,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0):  # calc_basis 0/1/2 ho
     return spread, spread_rel, time_list, count_value_error 
 
 
-frequency = 0
+frequency = 2
 opening = "y"
 exchanges, time_list, prices_minute, volumes, total_price, total_volume = di.get_lists(opening_hours=opening)
 prices = prices_minute[0, :]

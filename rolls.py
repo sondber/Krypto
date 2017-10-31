@@ -1,7 +1,5 @@
 import math
-import data_import as di
 from Sondre import sondre_support_formulas as supp
-import matplotlib.pyplot as plt
 
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 

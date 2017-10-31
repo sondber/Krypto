@@ -2,6 +2,7 @@ import csv
 from Sondre import sondre_support_formulas as supp
 import numpy as np
 from datetime import date
+import math
 from matplotlib import pyplot as plt
 
 
@@ -321,7 +322,7 @@ def convert_to_hour(time_stamps, prices, volumes):
         print("  Opening hours only")
 
     if opening_hours_only == 1:
-        n_hours = int(n_mins * (7 / 390) + 1)
+        n_hours = int(math.ceil(n_mins * (7 / 390)))
         prices_out = np.zeros([n_exc, n_hours])
         volumes_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
@@ -363,10 +364,9 @@ def convert_to_day(time_stamps, prices, volumes):
         opening_hours_only = 0
     else:
         opening_hours_only = 1
-        print("  Opening hours only")
 
     if opening_hours_only == 1:
-        n_days = int(n_mins / 390) + 1
+        n_days = int(math.ceil(n_mins / 390))
         prices_out = np.zeros([n_exc, n_days])
         volumes_out = np.zeros([n_exc, n_days])
         for i in range(n_mins - 59):
@@ -478,7 +478,6 @@ def get_month(month_string):
 def average_over_day(time_list, data, frequency="h"):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
-    print("n: ", n_entries)
     day_time = []  # Excel stamps for each minute in the day
     h_list = []  # integer indicating which hour it is
     m_list = []  # integer indicating which minute it is

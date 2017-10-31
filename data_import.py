@@ -4,19 +4,10 @@ import numpy as np
 import currency_converter as curr
 
 
-def get_lists(which_freq=2, data="all", opening_hours="y", make_totals="y"):
+def get_lists(data="all", opening_hours="y", make_totals="y"):
     exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
     n_exc = len(exchanges)
-
-    if which_freq == 0 or which_freq == "day" or which_freq == "d":
-        freq = "daily"
-    elif which_freq == 1 or which_freq == "hour" or which_freq == "h":
-        freq = "hourly"
-    elif which_freq == 2 or which_freq == "min" or which_freq == "m":
-        freq = "minute"
-    else:
-        freq = "minute"
-    print("Fetching %s data..." % freq)
+    print("Fetching minute data..." )
 
     if opening_hours == "y":
         oh = ""
@@ -24,7 +15,7 @@ def get_lists(which_freq=2, data="all", opening_hours="y", make_totals="y"):
     else:
         oh = "_full_day"
 
-    file_name = "data/export_csv/" + freq + "_data" + oh + ".csv"
+    file_name = "data/export_csv/minute_data" + oh + ".csv"
     time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
 
     if make_totals == "y":

@@ -169,13 +169,25 @@ def easy_plot(y, label="My plot", show_plot=1):
         plt.show()
 
 
-def scatters(x, y, color="blue", areas=[], label="No name"):
+def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle=""):
+    if not xlims:
+        xlims = [min(x), max(x)]
+    if not ylims:
+        ylims = [min(y), max(y)]
     n = len(x)
     if not areas:
         areas = np.ones(n)
     plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
-    plt.legend()
-
+    plt.xlim(xlims)
+    plt.ylim(ylims)
+    if xtitle:
+        plt.xlabel(xtitle)
+    if ytitle:
+        plt.ylabel(ytitle)
+    if label:
+        plt.legend()
+    if show_plot == 1:
+        plt.show()
 
 def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
     # brukes til å sette de to aksene riktig skalert
@@ -199,7 +211,7 @@ def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, co
     else:
         if scale1 == 'auto':
             print('  Scale1: auto')
-        elif scale1 == 'custom':
+        else:
             print("  min(%s): %0.4f" % (title1, min(data1)))
             print("  max(%s): %0.4f" % (title1, max(data1)))
             minimum = input('   Set new min: ')
@@ -209,7 +221,7 @@ def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, co
         ax1.set_ylabel(title1)
         if scale2 == 'auto':
             print('  Scale2: auto')
-        elif scale2 == 'custom':
+        else:
             print("  min(%s): %0.4f" % (title2, min(data2)))
             print("  max(%s): %0.4f" % (title2, max(data2)))
             minimum = input('   Set new min: ')

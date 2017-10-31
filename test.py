@@ -1,20 +1,19 @@
-def addere(a,b):
-    c = a+b
-    return c
+ord = "kaffekopp"
 
-def multiplisere(a,b):
-    c = a*b
-    return c
+suffix = "opp"
 
-tall1 = 2
-tall2 = 2
+print(ord[len(ord)-len(suffix):len(ord)])
 
-tall3 = addere(tall1,tall2)
-print(tall3)
+print(ord[-3:])
 
-tall4 = multiplisere(tall2,tall3)
+ordliste = []
 
-print(tall4)
+ordliste.append("ord1")
+ordliste.append("ord2")
+ordliste.append("ord3")
+ordliste.append("ord4")
 
-mult1 = multiplisere(2,3)
-mult2 = multiplisere(4,5)
+print(ordliste)
+
+print(ordliste[-3:])
+print(ordliste[len(ordliste)-3:len(ordliste)])

@@ -27,11 +27,10 @@ for i in range(len(prices[0, :])):
 def rV(window):
     rvol=0
     teller=0
-    for j in range(len(prices_list)):
-        if j%window==0:
-            rvol = rvol + ((prices_list[j] - prices_list[j - window]) / prices_list[j]) ** 2
-            teller=teller+1
-    return np.sqrt(rvol*1440/(window*teller))
+    for j in range(window,len(prices_list)):
+        rvol = rvol + ((prices_list[j] - prices_list[j - window]) / prices_list[j]) ** 2
+        teller=teller+1
+    return np.sqrt(rvol*1440/(teller))
 
 def func(x,a,b,c):
     return a*np.exp(-b*x)+c
@@ -40,7 +39,7 @@ def plot_rV(windows):
     rvols = np.zeros(len(windows))
     for i in range(len(windows)):
         rvols[i] = rV(windows[i])
-        print(i)
+        print(i,": ",rvols[i])
     windows=np.array(windows,dtype=float)
     rvols=np.array(rvols,dtype=float)
     popt,pcov=scipy.optimize.curve_fit(func,windows,rvols)
@@ -55,7 +54,7 @@ def plot_rV(windows):
 
 
 windows=[]
-for i in range(1,10):
+for i in range(1,20):
     windows.append(i)
 
 print(plot_rV(windows))

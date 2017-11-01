@@ -14,8 +14,8 @@ exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
 
 # Importing data for all minutes of the day
 exchanges, time_list_min, prices_min, volumes_min = di.get_lists(opening_hours="n", make_totals="n")
-spread_hour = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=0, kill_output=1)[1] # Rolls
-spread_day = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=1, kill_output=1)[1] # Rolls
+spread_hour = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=0, kill_output=1)[1]  # Rolls
+spread_day = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=1, kill_output=1)[1]  # Rolls
 
 
 time_min = time_list_min

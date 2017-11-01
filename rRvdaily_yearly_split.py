@@ -35,17 +35,45 @@ def rV(window,prices_list):
 def func(x,a,b,c):
     return a*np.exp(-b*x)+c
 
-def plot_rV(windows,prices_list):
-    rvols = np.zeros(len(windows))
+def plot_rV(windows):
+
+    #plotting the years before 2017
+    yr_max = 5
+    for yr in range(yr_max):
+
+        rvols = np.zeros(shape=(yr_max, len(windows)))
+        year = 2017 - yr_max + yr
+        prices_list = np.zeros(1440*365)
+        start = len(prices[0, :]) - int((yr_max-yr+0.5) * 1440 * 365)
+
+        for i in range(len(prices_list)):
+            prices_list[i] = prices[0, i + start]
+
+
+
+        for i in range(len(windows)):
+            rvols[yr,i] = rV(windows[i],prices_list)
+
+        plt.plot(windows, rvols[yr, :],label="year: "+str(year))
+
+    # plotting H1 2017
+    rvols0 = np.zeros(len(windows))
+    prices_list = np.zeros(720 * 365)
+    start = len(prices[0, :]) - 720 * 365
+    for i in range(len(prices_list)):
+        prices_list[i] = prices[0, i + start]
     for i in range(len(windows)):
-        rvols[i] = rV(windows[i],prices_list)
-    plt.plot(windows, rvols,label="Rv")
+        rvols0[i] = rV(windows[i], prices_list)
+    plt.plot(windows, rvols0, label="year: " + str(2017))
+
     windows=np.array(windows,dtype=float)
-    rvols=np.array(rvols,dtype=float)
+    '''
+    rvols=np.array(rvols[0,:],dtype=float)
     popt,pcov=scipy.optimize.curve_fit(func,windows,rvols)
     print(popt)
     yEXP=func(windows,*popt)
-    plt.plot(windows,yEXP,label="curve_fit")
+    plt.plot(windows,yEXP)
+    '''
     plt.legend()
     plt.ylabel('Realised daily volatility')
     plt.xlabel('length of window (mins)')
@@ -53,15 +81,10 @@ def plot_rV(windows,prices_list):
     return 0
 
 
-
-
 '''
-prices_list=np.zeros(len(prices[0,:]))
-for i in range(len(prices_list)):
-    prices_list[i] = prices[0, i]
 windows=[]
 for i in range(1,30):
     windows.append(i)
 
-print(plot_rV(windows,prices_list))
+print(plot_rV(windows))
 '''

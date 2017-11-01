@@ -4,6 +4,7 @@ import numpy as np
 from datetime import date
 import math
 from matplotlib import pyplot as plt
+import scipy.stats as st
 
 
 def make_time_stamps():
@@ -328,13 +329,13 @@ def convert_to_hour(time_stamps, prices, volumes):
             if hour[i] == 13 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = np.average(prices[j, i:(i + 30)])
+                    prices_out[j, k] = prices[j, i + 29]  # The price at the last minute of the hour
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
                 k += 1
             elif minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = np.average(prices[j, i:(i + 60)])
+                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
                 k += 1
     else:
@@ -345,7 +346,7 @@ def convert_to_hour(time_stamps, prices, volumes):
             if minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = np.average(prices[j, i:(i + 60)])
+                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
                 k += 1
     return time_stamps_out, prices_out, volumes_out
@@ -372,7 +373,7 @@ def convert_to_day(time_stamps, prices, volumes):
             if hour[i] == 13 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = np.average(prices[j, i:(i + 390)])
+                    prices_out[j, k] = prices[j, i + 389]  # The price at the last minute of the hour
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 390)])
                 k += 1
     else:
@@ -383,7 +384,7 @@ def convert_to_day(time_stamps, prices, volumes):
             if hour[i] == 0 and minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = np.average(prices[j, i:(i + 1440)])
+                    prices_out[j, k] = prices[j, i + 1439]  # The price at the last minute of the hour
                     volumes_out[j, k] = np.sum(volumes[j, i:(i + 1440)])
                 k += 1
     return time_stamps_out, prices_out, volumes_out
@@ -568,4 +569,55 @@ def average_over_day(time_list, data, frequency="h"):
             num_list[index] += 1
     for i in range(n_out):
         out_data[i] = float(total_list[i]) / float(num_list[i])
-    return day_time, out_data
+
+    # Alternative way
+    n_out = len(day_time)
+    lower = np.zeros(n_out)
+    upper = np.zeros(n_out)
+    out_data_alt = np.zeros(n_out)
+    temp_list = np.zeros(n_out)
+    temp_matrix = []
+    indices = []
+    k = -1
+    if frequency == "h":
+        for i in range(n_entries):
+            index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            if index == 0:
+                temp_list[index] = data[i]
+                temp_matrix.append(temp_list)
+                k += 1
+                temp_list = np.zeros(n_out)
+            else:
+                temp_list[index] = data[i]
+    elif frequency == "m":
+        for i in range(n_entries):
+            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[
+                0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            if index == 0:
+                temp_list[index] = data[i]
+                temp_matrix.append(temp_list)
+                k += 1
+                temp_list = np.zeros(n_out)
+            else:
+                temp_list[index] = data[i]
+    elif frequency == "d":
+        for i in range(n_entries):
+            index = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+            if index == 0:
+                temp_list[index] = data[i]
+                temp_matrix.append(temp_list)
+                k += 1
+                temp_list = np.zeros(n_out)
+            else:
+                temp_list[index] = data[i]
+
+    temp_matrix = np.matrix(temp_matrix)
+
+    percentile = 0.95
+    for i in range(n_out):
+        out_data_alt[i] = np.mean(temp_matrix[:, i])
+        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i])-1, loc=np.mean(temp_matrix[:, i]), scale=st.sem(temp_matrix[:, i]))
+
+    print(out_data)
+    print(out_data_alt)
+    return day_time, out_data, lower, upper

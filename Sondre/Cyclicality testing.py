@@ -7,6 +7,8 @@ import data_import_support as dis
 import os
 import rolls
 from matplotlib import pyplot as plt
+import scipy.stats as st
+
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
@@ -24,7 +26,9 @@ volumes_min = volumes_min  # BitstampUSD
 
 # MINUTES ----------------------------------------------------------------------------------------------------
 returns_min = jake_supp.logreturn(prices_min[0, :])
-min_of_day, avg_returns_minute = dis.average_over_day(time_list_min, returns_min, frequency="m")
+min_of_day, avg_returns_minute, lower_minute, upper_minute = dis.average_over_day(time_list_min, returns_min, frequency="m")
+
+"""
 min_of_day, avg_volume_minute = dis.average_over_day(time_list_min, volumes_min[0, :], frequency="m")
 
 figcount = 1  # Making sure all graphs are in unique figures
@@ -170,3 +174,4 @@ mean = np.mean(spread_day)
 plt.ylim([mean-stdev, mean+stdev])
 
 plt.show()
+"""

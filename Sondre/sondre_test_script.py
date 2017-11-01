@@ -10,10 +10,8 @@ from matplotlib import pyplot as plt
 import rolls
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
-di.fetch_long_and_write(exchanges, opening_hours_only="n")
-di.fetch_long_and_write(exchanges, opening_hours_only="y")
 
+exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
 
 check_freq = 0
 if check_freq == 1:  # Verification of frequency consistency

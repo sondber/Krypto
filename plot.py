@@ -83,7 +83,7 @@ def time_of_day(in_list):
 
     while daycount < days:
         day_list = in_list[mincount:(mincount + 24 * 60)]
-        plt.plot(time, day_list)
+        plt.plot(time_list, day_list)
         daycount = daycount + 1
         mincount = daycount * 60 * 24
     avg_per_min = supp.average_at_time_of_day(in_list)
@@ -175,8 +175,16 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
     if not ylims:
         ylims = [min(y), max(y)]
     n = len(x)
-    if not areas:
+    if len(areas) == 0:
         areas = np.ones(n)
+    else:
+        scaling_factor = 50
+        max_area = max(areas)
+        for i in range(len(areas)):
+            if areas[i] == 0:
+                areas[i] += 1
+        for i in range(len(areas)):
+            areas[i] = scaling_factor * areas[i]/ max_area
     plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
     plt.xlim(xlims)
     plt.ylim(ylims)
@@ -246,3 +254,27 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     plt.show()
     print("Finished graphing")
     return None
+
+
+def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title=""):
+    fig, ax1 = plt.subplots()
+
+    n_entries = len(y1)
+
+    t = np.arange(0, n_entries, 1)
+
+    ax1.plot(t, y1, 'b-')
+    ax1.set_ylabel(y1_label, color='b')
+    ax1.tick_params('y', colors='b')
+    ax1.set_xlabel(x_label)
+
+    ax2 = ax1.twinx()
+    ax2.plot(t, y2, 'r-')
+    ax2.set_ylabel(y2_label, color='r')
+    ax2.tick_params('y', colors='r')
+
+    if title:
+        plt.title(title)
+    fig.tight_layout()
+    if show_plot == 1:
+        plt.show()

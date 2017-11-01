@@ -84,7 +84,7 @@ def read_long_csvs(file_name, time_list, price, volume):
         for row in reader:
             try:
                 time_list.append(int(row[0]))
-                price.append(float(row[7]))
+                price.append(float(row[4]))
                 volume.append(float(row[5]))
             except ValueError:
                 print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
@@ -176,7 +176,7 @@ def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
             currency = exc[len(exc) - 3: len(exc)]
             header1.append(exc)
             header1.append("")
-            header2.append("Price")
+            header2.append("Closing price")
             header2.append("Volume")
             header3.append(currency.upper())
             header3.append("BTC")
@@ -289,7 +289,7 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
 
-
+"""
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
     n_cols_high = len(time_stamps)
     n_exc = np.size(volumes, 0)
@@ -303,9 +303,8 @@ def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
             prices_low[j, i] = prices[j, i * conversion_rate]
             volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate: (i + 1) * conversion_rate])
     return time_stamps_low, prices_low, volumes_low
+"""
 
-
-# def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
 
 def convert_to_hour(time_stamps, prices, volumes):
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")

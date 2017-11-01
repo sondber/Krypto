@@ -10,16 +10,9 @@ from matplotlib import pyplot as plt
 import rolls
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
-
-exchanges, minute_time, min_prices, min_volumes = di.get_lists(opening_hours="n", make_totals="n")
-hour_time, hour_prices, hour_volumes = dis.convert_to_hour(minute_time, min_prices, min_volumes)
-hour_returns = jake_supp.logreturn(hour_prices[0, :])
-# day_time, day_prices, day_volumes = dis.convert_to_day(minute_time, min_prices, min_volumes)
-
-
-spread, spread_rel, time_list, count_value_error = rolls.rolls(min_prices[0, :], minute_time, calc_basis=0, kill_output=1) # 0 -> Hour
-
-print("Correlation coefficient = ", np.corrcoef(spread_rel, hour_returns)[0, 1])
+exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+di.fetch_long_and_write(exchanges, opening_hours_only="n")
+di.fetch_long_and_write(exchanges, opening_hours_only="y")
 
 
 check_freq = 0

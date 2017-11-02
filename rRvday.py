@@ -50,7 +50,6 @@ def plot_rV(windows,prices_list):
     plt.ylabel('Realised daily volatility')
     plt.xlabel('length of window (mins)')
     plt.show()
-    return 0
 
 
 

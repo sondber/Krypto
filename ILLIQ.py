@@ -8,6 +8,7 @@ from Sondre import sondre_support_formulas as supp
 import scipy
 from scipy.optimize import curve_fit
 import data_import as di
+import data_import_support as dis
 import os
 import datetime as dt
 
@@ -15,6 +16,10 @@ os.chdir("C:/Users/Marky/Documents/GitHub/krypto2")
 exchanges, time_list, prices, volumes= di.get_lists(opening_hours="n",make_totals="n")
 year, month, day, hour, minute = supp.fix_time_list(time_list)
 
+
+time_list_d, prices_days, volumes_days = dis.convert_to_day(time_list, prices, volumes)
+
+minute_price_list = prices[0, :]
 
 
 def daily_Rv(time_series, prices_list):
@@ -25,18 +30,18 @@ def daily_Rv(time_series, prices_list):
         mins=int(6.5*60)
 
     days = math.floor(len(prices_list) / (mins))
-    time_list_days=[]
+    #time_list_dates=[]
     window=15
     rvol = np.zeros(days)
     for i in range(1, days):
-        time_list_days.append(days[i*mins])
+        #time_list_dates.append(time_series[mins*i]) #for å få ut en datoliste: time_series[0]+the number of days later?
         for j in range(0, mins-window):
             if (j % window== 0):
                 rvol[i] = rvol[i] + ((prices_list[i * mins + j+window] - prices_list[i * mins + j]) / prices_list[
                     i * mins + j+window]) ** 2
-    return time_list_days, rvol
+    return time_series, rvol
 
-
+print(daily_Rv(time_list_d,minute_price_list))
 
 def abs_returns(prices):
     ret=np.zeros(len(prices))

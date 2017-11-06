@@ -37,6 +37,8 @@ def stats_for_single_list(in_list, name):
 
 
 def combined_stats(list1, list2, name1="List 1", name2="List 2"):
+    list1 = np.array(list1)
+    list2 = np.array(list2)
     stats_for_single_list(list1, name1)
     stats_for_single_list(list2, name2)
     print()

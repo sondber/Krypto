@@ -19,23 +19,23 @@ daily_scatters = 1
 if daily_scatters == 1:
     # Getting rolls estimator
     print("Prices: ", len(prices_minutes[0, :]))
-    print(prices_minutes[0, :])
     print("Time : ", len(time_list_minutes))
-    print(time_list_minutes[0:10])
     print("n days = ", len(time_list_daily))
 
+    spread_abs, spread_daily, time_list_rolls, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)
+    spread_daily = np.multiply(spread_daily, 100)  # <--- Percentage
 
-    spread_abs_day, spread_daily, time_list_rolls_day, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)
+    volatility_daily = ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :])
+    volatility_daily = np.multiply(volatility_daily, 100)  # <--- Percentage
 
-    spread_daily = spread_daily * 100  # <--- Percentage
-    print("Spread daily: ", len(spread_daily))
     # Extracing BitstampUSD
-    returns_daily = jake_supp.logreturn(prices_daily[0, :]) * 100  # <-- Percentage, bistamp only
-    volumes_daily = volumes_daily[0, :] # bitstamp only
+    returns_daily = jake_supp.logreturn(prices_daily[0, :])  # <-- bistamp only
+    returns_daily = np.multiply(returns_daily, 100)  # <--- Percentage
+    volumes_daily = volumes_daily[0, :]  # bitstamp only
     illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
-    print("n minutes: ", len(time_list_daily))
-    print("length of illiq: ", len(illiq_daily))
+    illiq_daily = np.multiply(illiq_daily, 100)  # <--- Percentage
     # --------------------
+
     spread_std_day = np.std(spread_daily)
     spread_mean_day = np.mean(spread_daily)
     volume_std_day = np.std(volumes_daily)
@@ -45,25 +45,43 @@ if daily_scatters == 1:
     illiq_std_day = np.std(illiq_daily)
     illiq_mean_day = np.mean(illiq_daily)
 
+    # Vil her utelate dag 330-335 fordi de er helt galemathias
+    vol_excluding_extremes = volatility_daily[0:330]
+    np.append(vol_excluding_extremes, volatility_daily[336:len(volatility_daily)])
+    volatility_std_day = np.std(vol_excluding_extremes)
+    volatility_mean_day = np.mean(vol_excluding_extremes)
+
+    plt.figure(40)
+    plt.plot(vol_excluding_extremes)
+
+    print("Inclusive: ", np.mean(volatility_daily), np.std(volatility_daily))
+    print("Exclusive: ", np.mean(vol_excluding_extremes), np.std(vol_excluding_extremes))
+
     y_mean = spread_mean_day
     y_std = spread_std_day
     y_lims = [0, y_mean + y_std]
 
     fig_count = 1
 
+
     # Rolls v Returns
     plt.figure(fig_count)
-
     x_mean = returns_mean_day
     x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
     plt.title("Bid/ask spread vs. Daily returns")
     plot.scatters(returns_daily, spread_daily, show_plot=0, xtitle="Returns daily (%)", ytitle="Spread daily (%)",
                   ylims=y_lims, xlims=x_lims)
+
+    # Preparing for regression lines  <-------------------------
+    alpha = -0.5
+    beta = 0.05
+    plot.regression_line(x_mean, x_std, alpha, beta)
     fig_count += 1
 
     # Rolls v Volumes
     plt.figure(fig_count)
+
 
     x_mean = volume_mean_day
     x_std = volume_std_day
@@ -72,6 +90,18 @@ if daily_scatters == 1:
     plot.scatters(volumes_daily, spread_daily, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Spread daily (%)",
                   ylims=y_lims, xlims=x_lims)
     fig_count += 1
+
+    # Rolls v Volatility
+    plt.figure(fig_count)
+
+    x_mean = volatility_mean_day
+    x_std = volatility_std_day
+    x_lims = [0, x_mean + x_std]
+    plt.title("Bid/ask spread vs. daily volatility")
+    plot.scatters(volatility_daily, spread_daily, show_plot=0, xtitle="Volatility daily (%)", ytitle="Spread daily (%)",
+                  ylims=y_lims, xlims=x_lims)
+    fig_count += 1
+
 
     # Returns v Volumes
     plt.figure(fig_count)
@@ -109,10 +139,10 @@ if daily_scatters == 1:
 
     x_mean = np.mean(illiq_daily)
     x_std = np.std(illiq_daily)
-    x_lims = [x_mean - x_std, x_mean + x_std]
+    x_lims = [0, x_mean + x_std]
 
     plt.title("Rolls vs. Amihud - Daily")
-    plot.scatters(illiq_daily, spread_daily, show_plot=0, xtitle="Amihud daily", ytitle="Spread daily (%)",
+    plot.scatters(illiq_daily, spread_daily, show_plot=0, xtitle="Amihud daily (%)", ytitle="Spread daily (%)",
                   ylims=y_lims, xlims=x_lims)
     fig_count += 1
 
@@ -125,18 +155,29 @@ if daily_scatters == 1:
     x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
     plt.title("Amihud vs. Daily returns")
-    plot.scatters(returns_daily, illiq_daily, show_plot=0, xtitle="Returns daily (%)", ytitle="Amihud daily",
+    plot.scatters(returns_daily, illiq_daily, show_plot=0, xtitle="Returns daily (%)", ytitle="Amihud daily (%)",
                   ylims=y_lims, xlims=x_lims)
     fig_count += 1
 
-    # Rolls v Volumes
+    # Amihud v Volumes
     plt.figure(fig_count)
 
     x_mean = volume_mean_day
     x_std = volume_std_day
     x_lims = [0, x_mean + x_std]
     plt.title("Amihud vs. daily traded volumes")
-    plot.scatters(volumes_daily, illiq_daily, show_plot=1, xtitle="Volumes daily [BTC]", ytitle="Illiq daily",
+    plot.scatters(volumes_daily, illiq_daily, show_plot=0, xtitle="Volumes daily (BTC)", ytitle="Amihud daily (%)",
+                  ylims=y_lims, xlims=x_lims)
+    fig_count += 1
+
+    # Amihud v Voatility
+    plt.figure(fig_count)
+
+    x_mean = volatility_mean_day
+    x_std = volatility_std_day
+    x_lims = [0, x_mean + x_std]
+    plt.title("Amihud vs. daily volatiltiy")
+    plot.scatters(volatility_daily, illiq_daily, show_plot=1, xtitle="Volatility daily (%)", ytitle="Amihud daily (%)",
                   ylims=y_lims, xlims=x_lims)
     fig_count += 1
 

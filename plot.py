@@ -176,16 +176,17 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
         ylims = [min(y), max(y)]
     n = len(x)
     if len(areas) == 0:
-        areas = np.ones(n)
+        areas_scaled = np.ones(n)
     else:
         scaling_factor = 50
         max_area = max(areas)
         for i in range(len(areas)):
             if areas[i] == 0:
                 areas[i] += 1
+        areas_scaled = np.zeros(len(areas))
         for i in range(len(areas)):
-            areas[i] = scaling_factor * areas[i]/ max_area
-    plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
+            areas_scaled[i] = scaling_factor * areas[i]/ max_area
+    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
     plt.xlim(xlims)
     plt.ylim(ylims)
     if xtitle:
@@ -263,18 +264,37 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
 
     t = np.arange(0, n_entries, 1)
 
-    ax1.plot(t, y1, 'b-')
+    ax1.plot(t, y1, 'b-', linewidth=0.5)
     ax1.set_ylabel(y1_label, color='b')
     ax1.tick_params('y', colors='b')
     ax1.set_xlabel(x_label)
 
     ax2 = ax1.twinx()
-    ax2.plot(t, y2, 'r-')
+    ax2.plot(t, y2, 'r-', linewidth=0.5)
     ax2.set_ylabel(y2_label, color='r')
     ax2.tick_params('y', colors='r')
+
+    if x:
+        n_labels = 5
+        labels = []
+        len_x = len(x)
+        for i in range(0, n_labels):
+            if i == n_labels - 1:
+                index = len_x - 1
+            else:
+                index = i * (len_x / (n_labels + 1))
+            index = int(index)
+            labels.append(x[index][0:11])
+        plt.xticks(np.arange(0, len(x) + 1, len(x)/(n_labels-1)), labels)
 
     if title:
         plt.title(title)
     fig.tight_layout()
     if show_plot == 1:
         plt.show()
+
+
+def regression_line(x_mean, x_std, alpha, beta):
+    x_vals = [x_mean - x_std,  x_mean + x_std]
+    y_vals = [alpha + beta*(x_mean - x_std) , alpha + beta*(x_mean + x_std)]
+    plt.plot(x_vals, y_vals, linestyle="--", color="black")

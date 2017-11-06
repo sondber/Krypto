@@ -1,4 +1,6 @@
 import pip
+
+
 def install(package):
     pip.main(['install', package])
 import numpy as np

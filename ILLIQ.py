@@ -43,14 +43,14 @@ def abs_returns(prices):
 
 
 
-def ILLIQ(prices, volume):
-    returns = abs_returns(prices)
+def ILLIQ(prices_min, volume_min):
+    returns = abs_returns(prices_min)
     illiq=np.zeros(math.floor(len(returns)/24))
     for i in range(len(illiq)):
         illiq_hour=0
         for j in range(24):
-            if (volume[24*i+j]!=0):
-                illiq_hour=illiq_hour+returns[24*i+j]/volume[24*i+j]
+            if (volume_min[24*i+j]!=0):
+                illiq_hour=illiq_hour+returns[24*i+j]/volume_min[24*i+j]
         illiq[i]=illiq_hour/24
     return illiq
 

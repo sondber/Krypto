@@ -8,18 +8,19 @@ import data_import_support as dis
 import os
 from matplotlib import pyplot as plt
 import rolls
+import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exchanges, minute_time, min_prices, min_volumes = di.get_lists(opening_hours="n", make_totals="n")
-hour_time, hour_prices, hour_volumes = dis.convert_to_hour(minute_time, min_prices, min_volumes)
-hour_returns = jake_supp.logreturn(hour_prices[0, :])
-# day_time, day_prices, day_volumes = dis.convert_to_day(minute_time, min_prices, min_volumes)
+exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
 
+exchanges, time_list, prices, volumes = di.get_lists(make_totals="n")
+time_list_d, prices, volumes = dis.convert_to_day(time_list, prices, volumes)
 
-spread, spread_rel, time_list, count_value_error = rolls.rolls(min_prices[0, :], minute_time, calc_basis=0, kill_output=1) # 0 -> Hour
+time_list_illiq, illiq_daily = ILLIQ.daily_Rv(time_list, prices[0, :])
 
-print("Correlation coefficient = ", np.corrcoef(spread_rel, hour_returns)[0, 1])
+print(time_list_illiq[0:10])
+print(time_list_d[0:10])
 
 
 check_freq = 0

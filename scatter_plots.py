@@ -10,18 +10,29 @@ import ILLIQ
 
 # Opening hours only
 # Bistamp only
+
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
+time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+time_list_daily, prices_daily, volumes_daily = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
 daily_scatters = 1
 if daily_scatters == 1:
-    time_list_daily, prices_daily, volumes_daily = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
     # Getting rolls estimator
+    print("Prices: ", len(prices_minutes[0, :]))
+    print(prices_minutes[0, :])
+    print("Time : ", len(time_list_minutes))
+    print(time_list_minutes[0:10])
+    print("n days = ", len(time_list_daily))
+
+
     spread_abs_day, spread_daily, time_list_rolls_day, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)
+
     spread_daily = spread_daily * 100  # <--- Percentage
+    print("Spread daily: ", len(spread_daily))
     # Extracing BitstampUSD
     returns_daily = jake_supp.logreturn(prices_daily[0, :]) * 100  # <-- Percentage, bistamp only
     volumes_daily = volumes_daily[0, :] # bitstamp only
-    illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_minutes[0, :], volumes_minutes[0, :])  # bitstamp only
+    illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
     print("n minutes: ", len(time_list_daily))
     print("length of illiq: ", len(illiq_daily))
     # --------------------

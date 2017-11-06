@@ -12,15 +12,6 @@ import data_import_support as dis
 import os
 import datetime as dt
 
-os.chdir("C:/Users/Marky/Documents/GitHub/krypto2")
-exchanges, time_list, prices, volumes= di.get_lists(opening_hours="n",make_totals="n")
-year, month, day, hour, minute = supp.fix_time_list(time_list)
-
-
-time_list_d, prices_days, volumes_days = dis.convert_to_day(time_list, prices, volumes)
-
-minute_price_list = prices[0, :]
-
 
 def daily_Rv(time_series, prices_list):
     year, month, day, hour, minute = supp.fix_time_list(time_series)
@@ -39,9 +30,8 @@ def daily_Rv(time_series, prices_list):
             if (j % window== 0):
                 rvol[i] = rvol[i] + ((prices_list[i * mins + j+window] - prices_list[i * mins + j]) / prices_list[
                     i * mins + j+window]) ** 2
-    return time_series, rvol
+    return rvol
 
-print(daily_Rv(time_list_d,minute_price_list))
 
 def abs_returns(prices):
     ret=np.zeros(len(prices))

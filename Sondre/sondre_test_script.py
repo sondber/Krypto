@@ -8,10 +8,20 @@ import data_import_support as dis
 import os
 from matplotlib import pyplot as plt
 import rolls
+import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+
+exchanges, time_list, prices, volumes = di.get_lists(make_totals="n")
+time_list_d, prices, volumes = dis.convert_to_day(time_list, prices, volumes)
+
+time_list_illiq, illiq_daily = ILLIQ.daily_Rv(time_list, prices[0, :])
+
+print(time_list_illiq[0:10])
+print(time_list_d[0:10])
+
 
 check_freq = 0
 if check_freq == 1:  # Verification of frequency consistency

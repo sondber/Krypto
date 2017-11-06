@@ -43,42 +43,31 @@ def abs_returns(prices):
 
 
 
-def ILLIQ(prices_min, volume_min):
-    returns = abs_returns(prices_min)
+def ILLIQ(prices_hour, volume_hour):
+    returns = abs_returns(prices_hour)
     illiq=np.zeros(math.floor(len(returns)/24))
     for i in range(len(illiq)):
         illiq_hour=0
         for j in range(24):
-            if (volume_min[24*i+j]!=0):
-                illiq_hour=illiq_hour+returns[24*i+j]/volume_min[24*i+j]
+            if (volume_hour[24*i+j]!=0):
+                illiq_hour=illiq_hour+returns[24*i+j]/volume_hour[24*i+j]
         illiq[i]=illiq_hour/24
+    print("Returning daily ILLIQ ")
     return illiq
 
 
-def ILLIQ_nyse_day(prices_min, volume_min):
-    returns=abs_returns(prices_min)
+def ILLIQ_nyse_day(prices_hour, volume_hour):
+    returns=abs_returns(prices_hour)
     illiq=np.zeros(math.floor(len(returns)/(7)))
     for i in range(len(illiq)):
         illiq_hour=0
         for j in range(7):
-            if (volume_min[7*i+j]!=0):
-                illiq_hour=illiq_hour+returns[7*i+j]/volume_min[7*i+j]
+            if (volume_hour[7*i+j]!=0):
+                illiq_hour=illiq_hour+returns[7*i+j]/volume_hour[7*i+j]
         illiq[i]=illiq_hour/7
+    print("Returning daily ILLIQ ")
     return illiq
 
 
 
 
-'''
-returns=[1,2,1,2,1,2,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,
-1,2,1,2,1,2,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4,1,2,3,-1,0,4]
-volume=[10,11,10,13,9,14,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,
-10,11,10,13,9,14,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2,6,8,9,6,0,2]
-print(ILLIQ_nyse_day(abs_returns(returns),volume))
-print(abs_returns(returns))
-tid=[]
-for i in range(len(ILLIQ_nyse_day(abs_returns(returns),volume))):
-    tid.append(i)
-plt.plot(tid,ILLIQ_nyse_day(abs_returns(returns),volume))
-plt.show()
-'''

@@ -546,38 +546,13 @@ def average_over_day(time_list, data, frequency="h"):
         return None
     # -----------------------------------
 
-    # Calculate average -----------------
-    n_out = len(day_time)
-    out_data = np.zeros(n_out)
-    num_list = np.zeros(n_out)
-    total_list = np.zeros(n_out)
-    if frequency == "h":
-        for i in range(n_entries):
-            index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
-            total_list[index] += data[i]
-            num_list[index] += 1
-    elif frequency == "m":
-        for i in range(n_entries):
-            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[
-                0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
-            total_list[index] += data[i]
-            num_list[index] += 1
-    elif frequency == "d":
-        for i in range(n_entries):
-            index = int(date(year[i], month[i], day[i]).isoweekday()) - 1
-            total_list[index] += data[i]
-            num_list[index] += 1
-    for i in range(n_out):
-        out_data[i] = float(total_list[i]) / float(num_list[i])
-
-    # Alternative way
+    # Calculating averages
     n_out = len(day_time)
     lower = np.zeros(n_out)
     upper = np.zeros(n_out)
-    out_data_alt = np.zeros(n_out)
+    out_data = np.zeros(n_out)
     temp_list = np.zeros(n_out)
     temp_matrix = []
-    indices = []
     k = -1
     if frequency == "h":
         for i in range(n_entries):
@@ -591,10 +566,15 @@ def average_over_day(time_list, data, frequency="h"):
                 temp_list[index] = data[i]
     elif frequency == "m":
         for i in range(n_entries):
-            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[
-                0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 13:30 vil vi også...
             if index == 0:
-                temp_list[index] = data[i]
+                try:
+                    temp_list[index] = data[i]
+                except ValueError:
+                    print("Error on index = %i and i = %i" % (index, i))
+                    print("Data: ", data[i])
+                    print("templist: ", temp_list[index])
+                    return
                 temp_matrix.append(temp_list)
                 k += 1
                 temp_list = np.zeros(n_out)
@@ -615,9 +595,7 @@ def average_over_day(time_list, data, frequency="h"):
 
     percentile = 0.95
     for i in range(n_out):
-        out_data_alt[i] = np.mean(temp_matrix[:, i])
+        out_data[i] = np.mean(temp_matrix[:, i])
         lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i])-1, loc=np.mean(temp_matrix[:, i]), scale=st.sem(temp_matrix[:, i]))
 
-    print(out_data)
-    print(out_data_alt)
     return day_time, out_data, lower, upper

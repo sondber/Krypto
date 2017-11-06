@@ -3,7 +3,7 @@ from Sondre import sondre_support_formulas as supp
 import data_import as di
 import numpy as np
 import matplotlib.pyplot as plt
-
+import linreg
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 
 
@@ -26,6 +26,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
     count_value_error = 0
     count_corr_below = 0
     corr_threshold = 0.2
+    #alpha = 0.05
+    #count_corr_alpha = 0
     if kill_output == 0:
         print("Calculating first price differences ...")
     price_differences = first_price_differences(prices_minute)  # calculates price difference
@@ -76,8 +78,13 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 list1 = price_differences[pos:pos + half_hour - 1]
                 list2 = price_differences[pos + 1:pos + half_hour]
                 corr = np.corrcoef(list1, list2)[0, 1]
+                #p_value = linreg.linreg_coeffs(list1,list2)[3]
+
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
+                #if p_value < alpha:
+                #    count_corr_alpha += 1
+
                 for i in range(pos + 1, pos + half_hour):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
@@ -97,8 +104,13 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 list1 = price_differences[pos:pos + window - 1]
                 list2 = price_differences[pos + 1:pos + window]
                 corr = np.corrcoef(list1, list2)[0, 1]
+                #p_value  = linreg.linreg_coeffs(list1, list2)[3]
+
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
+                #if p_value < alpha:
+                #    count_corr_alpha +=1
+
                 for i in range(pos + 1, pos + window):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
@@ -124,8 +136,13 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
             list1 = price_differences[i:i + minutes_in_window - 1]
             list2 = price_differences[i + 1:i + minutes_in_window]
             corr = np.corrcoef(list1, list2)[0, 1]
+            #p_value = linreg.linreg_coeffs(list1,list2)[3]
+
             if abs(corr) < corr_threshold:
                 count_corr_below += 1
+            #if p_value < alpha:
+             #   count_corr_alpha +=1
+
             for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
             try:
@@ -145,5 +162,20 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
               "value errors were counted when calculating Roll-spreads")
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
-
+        #print(count_corr_alpha, "linreg-correlations had a p-value below confidence level (", alpha, ") were counted(",
+        #      round(100 * (count_corr_alpha / len(spread_rel)), 2), "%)")
         return spread, spread_rel, time_list, count_value_error
+
+
+exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(make_totals="y")
+#prices = prices[0]
+prices = total_price
+time_list = time_list
+print(time_list[407550])
+prices  = total_price[407550:]
+time_list = time_list[407550:]
+spread, spread_rel, time_list, count_value_error = rolls(prices, time_list, calc_basis=0,
+                                                                           kill_output=0)
+#plt.plot(spread_rel)
+#plt.show()
+#407550

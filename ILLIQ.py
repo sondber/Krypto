@@ -65,14 +65,14 @@ def ILLIQ(prices_min, volume_min):
     return illiq
 
 
-def ILLIQ_nyse_day(prices, volume):
-    returns=abs_returns(prices)
+def ILLIQ_nyse_day(prices_min, volume_min):
+    returns=abs_returns(prices_min)
     illiq=np.zeros(math.floor(len(returns)/(7)))
     for i in range(len(illiq)):
         illiq_hour=0
         for j in range(7):
-            if (volume[7*i+j]!=0):
-                illiq_hour=illiq_hour+returns[7*i+j]/volume[7*i+j]
+            if (volume_min[7*i+j]!=0):
+                illiq_hour=illiq_hour+returns[7*i+j]/volume_min[7*i+j]
         illiq[i]=illiq_hour/7
     return illiq
 

@@ -150,10 +150,14 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
 
 
 exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(make_totals="y")
-prices = total_price[407550:]
+#prices = prices[0]
+prices = total_price
+time_list = time_list
+print(time_list[407550])
+prices  = total_price[407550:]
 time_list = time_list[407550:]
-
 spread, spread_rel, time_list, count_value_error = rolls(prices, time_list, calc_basis=0,
                                                                            kill_output=0)
-plt.plot(spread_rel)
-plt.show()
+#plt.plot(spread_rel)
+#plt.show()
+#407550

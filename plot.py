@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Sondre import sondre_support_formulas as supp, user_interface as ui
-
+import pandas
 
 def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume):
     number_of_ticks = 5
@@ -257,27 +257,33 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     return None
 
 
-def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[]):
+def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[], perc1=0, perc2=0):
     fig, ax1 = plt.subplots()
 
     n_entries = len(y1)
 
     t = np.arange(0, n_entries, 1)
 
-    ax1.plot(t, y1, 'b-', linewidth=0.5)
-    ax1.set_ylabel(y1_label, color='b')
-    ax1.tick_params('y', colors='b')
+    ax1.plot(t, y1, linewidth=0.5, linestyle="-", color="black", label=y1_label)
+    ax1.set_ylabel(y1_label)
+    ax1.tick_params('y')
     ax1.set_xlabel(x_label)
+    ax1.legend(bbox_to_anchor=(1, 0.93))
 
     ax2 = ax1.twinx()
-    ax2.plot(t, y2, 'r-', linewidth=0.5)
-    ax2.set_ylabel(y2_label, color='r')
-    ax2.tick_params('y', colors='r')
+    ax2.plot(t, y2, linewidth=0.5, linestyle="-", color="blue", label=y2_label)
+    ax2.set_ylabel(y2_label)
+    ax2.tick_params('y')
 
-    if y1lims:
-        ax1.set_ylim(y1lims)
-    if y2lims:
-        ax2.set_ylim(y2lims)
+    ax2.legend(bbox_to_anchor=(1, 1))
+    plt.legend()
+
+    if not y1lims:
+        y1lims =[min(y1), max(y1)]
+    if not y2lims:
+        y2lims = [min(y2), max(y2)]
+    ax1.set_ylim(y1lims)
+    ax2.set_ylim(y2lims)
 
     if x:
         n_labels = 5
@@ -292,11 +298,49 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
             labels.append(x[index][0:11])
         plt.xticks(np.arange(0, len(x) + 1, len(x)/(n_labels-1)), labels)
 
+    if perc1 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    if perc2 == 1:
+        vals = ax2.get_yticks()
+        ax2.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
+    plt.xlim([0, len(y1)])
+
     if title:
         plt.title(title)
     fig.tight_layout()
     if show_plot == 1:
         plt.show()
+
+
+def single_time_series_plot(day_list, data_daily, title, ylims=[], perc=0):
+    n_labels = 5
+    labels = []
+    len_x = len(day_list)
+    for i in range(0, n_labels):
+        if i == n_labels - 1:
+            index = len_x - 1
+        else:
+            index = i * (len_x / (n_labels + 1))
+        index = int(index)
+        labels.append(day_list[index][0:11])
+    plt.xticks(np.arange(0, len(day_list) + 1, len(day_list) / (n_labels - 1)), labels)
+    plt.plot(data_daily, linewidth=0.5, color="black")
+    if ylims:
+        ymin = ylims[0]
+        ymax = ylims[1]
+    else:
+        ymin = min(data_daily)
+        ymax = max(data_daily)*1.01
+    plt.ylim([ymin, ymax])
+    plt.xlim([0, len(day_list)])
+    plt.title(title)
+    if perc == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
 
 
 def regression_line(x_mean, x_std, alpha, beta, color="black"):

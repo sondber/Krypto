@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
 # HER ER DET NYE GREIER!
 
+
 def first_price_differences(prices):  # takes list of prices, returns equal length list of first price differences
     returnlist = [float(0)]
     for i in range(1, len(prices)):  # check the logic of setting first index to zero in relation to return calculation
@@ -120,7 +121,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
     else:
         sum_inside = 0
         for i in range(0, len(price_differences) - minutes_in_window if calc_basis == 2 else len(price_differences),
-                       minutes_in_window):
+                       minutes_in_window): # check this loop when weeks are monday-friday - at this point, the loop ends at the next last week
             list1 = price_differences[i:i + minutes_in_window - 1]
             list2 = price_differences[i + 1:i + minutes_in_window]
             corr = np.corrcoef(list1, list2)[0, 1]

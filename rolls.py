@@ -162,6 +162,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
               "value errors were counted when calculating Roll-spreads")
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
+        #print(count_corr_alpha, "linreg-correlations had a p-value below confidence level (", alpha, ") were counted(",
+        #      round(100 * (count_corr_alpha / len(spread_rel)), 2), "%)")
         return spread, spread_rel, time_list, count_value_error
 
 

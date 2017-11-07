@@ -12,15 +12,23 @@ import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
+time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-exchanges, time_list, prices, volumes = di.get_lists(make_totals="n")
-time_list_d, prices, volumes = dis.convert_to_day(time_list, prices, volumes)
+spread_abs, spread_daily, time_list_rolls, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes,
+                                                                           calc_basis=1, kill_output=1)
+returns_daily = jake_supp.logreturn(prices_day[0, :])
+volatility_day = ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :])
+anlzd_volatility_daily = np.multiply(volatility_day, 250**0.5)
+illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
 
-time_list_illiq, illiq_daily = ILLIQ.daily_Rv(time_list, prices[0, :])
 
-print(time_list_illiq[0:10])
-print(time_list_d[0:10])
+desc.stats_for_single_list(returns_daily, "Returns")
+desc.stats_for_single_list(volumes_day[0, :], "Volumes")
+desc.stats_for_single_list(spread_daily, "Roll's")
+desc.stats_for_single_list(illiq_daily, "Amihud")
+desc.stats_for_single_list(anlzd_volatility_daily, "RVol, annualized")
 
 
 check_freq = 0

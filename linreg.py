@@ -10,3 +10,10 @@ def linreg_coeffs(arr1, arr2):  # input is equal length one-dim arrays of measur
     stderr = parameters[4]  # standard error of the estimate
     return slope, intercept, r_value, p_value, stderr
 
+
+def stats(slope, intercept, r_value, p_value):
+    print("Intercept %0.3f:" % intercept)
+    print("Slope %0.3f:" % slope)
+    print("R-squared: %0.3f" % r_value ** 2)
+    print("P-value: %0.3f" % p_value)
+    print()

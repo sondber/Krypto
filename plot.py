@@ -257,7 +257,7 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     return None
 
 
-def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title=""):
+def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[]):
     fig, ax1 = plt.subplots()
 
     n_entries = len(y1)
@@ -273,6 +273,11 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
     ax2.plot(t, y2, 'r-', linewidth=0.5)
     ax2.set_ylabel(y2_label, color='r')
     ax2.tick_params('y', colors='r')
+
+    if y1lims:
+        ax1.set_ylim(y1lims)
+    if y2lims:
+        ax2.set_ylim(y2lims)
 
     if x:
         n_labels = 5
@@ -294,7 +299,19 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
         plt.show()
 
 
-def regression_line(x_mean, x_std, alpha, beta):
+def regression_line(x_mean, x_std, alpha, beta, color="black"):
     x_vals = [x_mean - x_std,  x_mean + x_std]
     y_vals = [alpha + beta*(x_mean - x_std) , alpha + beta*(x_mean + x_std)]
-    plt.plot(x_vals, y_vals, linestyle="--", color="black")
+    plt.plot(x_vals, y_vals, linestyle="--", color=color)
+
+
+def plot_x_zero(y_lims):
+    x_min = y_lims[0]
+    x_max = y_lims[1]
+    plt.plot([x_min, x_max], [0, 0], linewidth=0.2, color="black")
+
+
+def plot_y_zero(x_lims):
+    y_min = x_lims[0]
+    y_max = x_lims[1]
+    plt.plot([0, 10**(-10)], [y_min, y_max], linewidth=0.2, color="black")

@@ -18,21 +18,26 @@ time_list_daily, prices_daily, volumes_daily = dis.convert_to_day(time_list_minu
 
 daily_scatters = 1
 if daily_scatters == 1:
+    print("Generating scatters with daily data...")
+
     # Getting rolls estimator
-    print("n days = ", len(time_list_daily))
+    print("Number of days in set:", len(time_list_daily))
 
     spread_abs, spread_daily, time_list_rolls, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)
     spread_daily = np.multiply(spread_daily, 100)  # <--- Percentage
-
+    print(" Spread_daily is given as percentage")
     volatility_daily = ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :])
     volatility_daily = np.multiply(volatility_daily, 100)  # <--- Percentage
+    print(" Volatility_daily is given as percentage")
 
     # Extracing BitstampUSD
     returns_daily = jake_supp.logreturn(prices_daily[0, :])  # <-- bistamp only
     returns_daily = np.multiply(returns_daily, 100)  # <--- Percentage
+    print(" Returns_daily is given as percentage")
     volumes_daily = volumes_daily[0, :]  # bitstamp only
     illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
     illiq_daily = np.multiply(illiq_daily, 100)  # <--- Percentage
+    print(" Illiq_daily is given as percentage")
     # --------------------
 
     spread_std_day = np.std(spread_daily)
@@ -44,11 +49,18 @@ if daily_scatters == 1:
     illiq_std_day = np.std(illiq_daily)
     illiq_mean_day = np.mean(illiq_daily)
 
-    # Vil her utelate dag 330-335 fordi de er helt galemathias
+    # Vil her utelate dag 330-335 fordi de er helt trash
     vol_excluding_extremes = volatility_daily[0:330]
+    time_excl_extremes = time_list_daily[0:330]
+    spread_excl_extremes = spread_daily[0:330]
+    illiq_excl_extremes = illiq_daily[0:330]
     np.append(vol_excluding_extremes, volatility_daily[336:len(volatility_daily)])
-    volatility_std_day = np.std(vol_excluding_extremes)
-    volatility_mean_day = np.mean(vol_excluding_extremes)
+    np.append(time_excl_extremes, time_list_daily[336:len(volatility_daily)])
+    np.append(spread_excl_extremes, spread_daily[336:len(volatility_daily)])
+    np.append(illiq_excl_extremes, illiq_daily[336:len(volatility_daily)])
+
+    volatility_std_excl_extremes = np.std(vol_excluding_extremes)
+    volatility_mean_excl_extremes = np.mean(vol_excluding_extremes)
 
     y_mean = spread_mean_day
     y_std = spread_std_day
@@ -66,6 +78,9 @@ if daily_scatters == 1:
     roll_v_amihud = 1
     amihud_v_volatility = 1
 
+    print()
+    print()
+
     if roll_v_return == 1:
         # Rolls v Returns
         plt.figure(fig_count)
@@ -80,9 +95,11 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_daily, spread_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Roll - Return:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value**2)
+        print("P-value: %0.3f" % p_value)
         print()
+        plot.plot_y_zero(x_lims)
+
         fig_count += 1
 
     if roll_v_volumes == 1:
@@ -101,8 +118,8 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_daily, spread_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Roll - Volume:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
         fig_count += 1
 
@@ -110,8 +127,8 @@ if daily_scatters == 1:
         # Rolls v Volatility
         plt.figure(fig_count)
 
-        x_mean = volatility_mean_day
-        x_std = volatility_std_day
+        x_mean = volatility_mean_excl_extremes
+        x_std = volatility_std_excl_extremes
         x_lims = [0, x_mean + x_std]
         plt.title("Bid/ask spread vs. daily volatility")
         plot.scatters(volatility_daily, spread_daily, show_plot=0, xtitle="Volatility daily (%)", ytitle="Spread daily (%)",
@@ -121,9 +138,18 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volatility_daily, spread_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Roll - Volatility:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
+
+        # Without extreme volatitlity values
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(vol_excluding_extremes, spread_excl_extremes)
+        plot.regression_line(x_mean, x_std, intercept, slope, color="red")
+        print("Roll - Volatility (excl. extreme volatitlty):")
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
+        print()
+
         fig_count += 1
 
     if return_v_volumes == 1:
@@ -144,9 +170,10 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_daily, returns_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Return - Volume:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
+        plot.plot_x_zero(x_lims)
         fig_count += 1
 
     if roll_v_return_w_volumes == 1:
@@ -169,9 +196,11 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_daily, spread_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Roll - Return:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
+        plot.plot_y_zero(x_lims)
+
         fig_count += 1
 
     if roll_v_amihud == 1:
@@ -190,8 +219,8 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(illiq_daily, spread_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Roll - Amihud:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
         fig_count += 1
 
@@ -211,9 +240,11 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_daily, illiq_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Amihud - Return:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
+        plot.plot_y_zero(x_lims)
+
         fig_count += 1
 
     if amihud_v_volume == 1:
@@ -230,8 +261,8 @@ if daily_scatters == 1:
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_daily, illiq_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Amihud - Volume:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
         fig_count += 1
 
@@ -239,19 +270,28 @@ if daily_scatters == 1:
         # Amihud v Voatility
         plt.figure(fig_count)
 
-        x_mean = volatility_mean_day
-        x_std = volatility_std_day
+        x_mean = volatility_mean_excl_extremes
+        x_std = volatility_std_excl_extremes
         x_lims = [0, x_mean + x_std]
         plt.title("Amihud vs. daily volatiltiy")
-        plot.scatters(volatility_daily, illiq_daily, show_plot=1, xtitle="Volatility daily (%)", ytitle="Amihud daily (%)",
+        plot.scatters(volatility_daily, illiq_daily, show_plot=0, xtitle="Volatility daily (%)", ytitle="Amihud daily (%)",
                       ylims=y_lims, xlims=x_lims)
         # Regression lines
         slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volatility_daily, illiq_daily)
         plot.regression_line(x_mean, x_std, intercept, slope)
         print("Amihud - Volatility:")
-        print("R-squared: ", r_value**2)
-        print("P-value: ", p_value)
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
         print()
+
+        # Without extreme volatitlity values
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(vol_excluding_extremes, illiq_excl_extremes)
+        plot.regression_line(x_mean, x_std, intercept, slope, color="red")
+        print("Amihud - Volatility (excl. extreme volatitlty):")
+        print("R-squared: %0.3f" % r_value ** 2)
+        print("P-value: %0.3f" % p_value)
+        print()
+
         fig_count += 1
 
 plt.show()

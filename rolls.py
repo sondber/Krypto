@@ -146,14 +146,4 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
 
-        return spread, spread_rel, time_list, count_value_error
-
-
-exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(make_totals="y")
-prices = total_price[407550:]
-time_list = time_list[407550:]
-
-spread, spread_rel, time_list, count_value_error = rolls(prices, time_list, calc_basis=0,
-                                                                           kill_output=0)
-plt.plot(spread_rel)
-plt.show()
+    return spread, spread_rel, time_list, count_value_error

@@ -39,7 +39,7 @@ def daily_Rv(time_series, prices_list):
 def abs_returns(prices):
     ret=np.zeros(len(prices))
     for i in range(len(prices)-1):
-        ret[i]=prices[i+1]-prices[i]
+        ret[i]=(prices[i+1]-prices[i])/(prices[i+1])
         if (ret[i]<0):
             ret[i]=ret[i]*(-1)
     return ret
@@ -76,7 +76,7 @@ def ILLIQ_nyse_year(prices_day,volume_day):
     days = 261
 
     illiq=np.zeros(math.floor((len(returns))/(days))+1)
-    for i in range(illiq-1):
+    for i in range(len(illiq)-1):
         illiq_day=0
         count = 0
         for j in range(days):
@@ -100,7 +100,7 @@ def p_v(prices,volumes,window):
         if sum(volumes[(i-window):i])==0:
             p_v[i]=0
         else:
-            p_v[i]=np.average(prices[(i-30):i])/np.average(volumes[(i-30):i])
+            p_v[i]=np.average(prices[(i-window):i])/np.average(volumes[(i-window):i])
     plt.plot(p_v)
     plt.ylabel("monthly average rolling price/volume")
     plt.xlabel("time (2012-2017)")

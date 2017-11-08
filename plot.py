@@ -169,7 +169,7 @@ def easy_plot(y, label="My plot", show_plot=1):
         plt.show()
 
 
-def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle=""):
+def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle="", perc1=0, perc2=0):
     if not xlims:
         xlims = [min(x), max(x)]
     if not ylims:
@@ -189,6 +189,16 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
     plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
     plt.xlim(xlims)
     plt.ylim(ylims)
+    if perc1 == 1:
+        ax = plt.gca()
+        vals = ax.get_xticks()
+        ax.set_xticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
+    if perc2 == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
     if xtitle:
         plt.xlabel(xtitle)
     if ytitle:
@@ -197,6 +207,7 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
         plt.legend()
     if show_plot == 1:
         plt.show()
+
 
 def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
     # brukes til å sette de to aksene riktig skalert
@@ -342,11 +353,15 @@ def single_time_series_plot(day_list, data_daily, title, ylims=[], perc=0):
         ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
 
 
-
-def regression_line(x_mean, x_std, alpha, beta, color="black"):
-    x_vals = [x_mean - x_std,  x_mean + x_std]
-    y_vals = [alpha + beta*(x_mean - x_std) , alpha + beta*(x_mean + x_std)]
-    plt.plot(x_vals, y_vals, linestyle="--", color=color)
+def regression_line(alpha, beta, xlims=[], color="black"):
+    if xlims:
+        x_min = xlims[0]
+        x_max = xlims[1]
+    else:
+        print("No xlims")
+        return
+    y_vals = [alpha + beta*(x_min) , alpha + beta*(x_max)]
+    plt.plot(xlims, y_vals, linestyle="--", color=color)
 
 
 def plot_x_zero(y_lims):

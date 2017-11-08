@@ -44,7 +44,7 @@ plot.plt.figure(fignum)
 plot.single_time_series_plot(day_time, spread_rel_day, "Bid/ask spread", perc=1)
 fignum += 1
 plot.plt.figure(fignum)
-plot.single_time_series_plot(day_time, illiq_day, "Amihud", perc=1)
+plot.single_time_series_plot(day_time, illiq_day, "Amihud", perc=1, ylims=[0, 0.0003])
 fignum += 1
 plot.plt.figure(fignum)
 plot.single_time_series_plot(day_time, anlzd_volatility_day, "Realized volatility, annualized", ylims=[0, 0.79], perc=1)
@@ -64,7 +64,7 @@ if dual_plots == 1:
     plot.sondre_two_axes(spread_rel_day, day_volumes, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, perc1=1, perc2=0)
     title = "Spread and Amihud - Daily"
     y2_label = "Amihud's illiquidity"
-    plot.sondre_two_axes(spread_rel_day, illiq_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, perc1=1, perc2=1)
+    plot.sondre_two_axes(spread_rel_day, illiq_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, perc1=1, perc2=1, y2lims=[0, 0.0003])
     title = "Spread and Volatility - Daily"
     y2_label = "Realized volatility, annualized"
     plot.sondre_two_axes(spread_rel_day, anlzd_volatility_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, perc1=1, perc2=1)

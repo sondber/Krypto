@@ -30,6 +30,7 @@ desc.stats_for_single_list(spread_daily, "Roll's")
 desc.stats_for_single_list(illiq_daily, "Amihud")
 desc.stats_for_single_list(anlzd_volatility_daily, "RVol, annualized")
 
+desc.combined_stats(illiq_daily, spread_daily, name1="Amihud", name2="Rolls")
 
 check_freq = 0
 if check_freq == 1:  # Verification of frequency consistency

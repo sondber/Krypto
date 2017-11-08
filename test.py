@@ -28,11 +28,29 @@ def count(year_list,year):
         if year_list[i]==year:
             count=count+1
     return count
+<<<<<<< HEAD
 """
 
+=======
+
+fig_count = 1
+>>>>>>> f813c21a7ee4136e909adaf8aa01f53e4d2c3976
 # print(sum(1 if year[x]==2012 else 0 for x in year))
 #print(ILLIQ.ILLIQ_nyse_year(prices_day[0,:],volumes_day[0,:]))
 #plt.plot([year_list[0],year_list[261],year_list[261*2],year_list[261*3],year_list[261*4],year_list[261*5]],ILLIQ.ILLIQ_nyse_year(prices_day[0,:],volumes_day[0,:]))
+plt.figure(fig_count)
+#plt.plot(ILLIQ.ILLIQ_nyse_window(prices_day[0,:],volumes_day[0,:],30))
+
+#fig_count += 1
+#plt.figure(fig_count)
+plt.plot(ILLIQ.ILLIQ_nyse_window(prices_day[0,:],volumes_day[0,:],7,remove_outliers="yes"))
+plt.xlabel("week")
+plt.ylabel("ILLIQ")
+plt.ylim([0,0.00010])
+
+plt.show()
+
+
 #plt.plot(ILLIQ.ILLIQ_nyse_day(prices_day[0,:],volumes_day[0,:]))
 
 

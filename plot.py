@@ -169,7 +169,7 @@ def easy_plot(y, label="My plot", show_plot=1):
         plt.show()
 
 
-def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle="", perc1=0, perc2=0):
+def scatters(x, y, color="black", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle="", perc1=0, perc2=0):
     if not xlims:
         xlims = [min(x), max(x)]
     if not ylims:
@@ -186,7 +186,7 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
         areas_scaled = np.zeros(len(areas))
         for i in range(len(areas)):
             areas_scaled[i] = scaling_factor * areas[i]/ max_area
-    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label, color="black")
+    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
     plt.xlim(xlims)
     plt.ylim(ylims)
     if perc1 == 1:

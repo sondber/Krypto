@@ -186,7 +186,7 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
         areas_scaled = np.zeros(len(areas))
         for i in range(len(areas)):
             areas_scaled[i] = scaling_factor * areas[i]/ max_area
-    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
+    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label, color="black")
     plt.xlim(xlims)
     plt.ylim(ylims)
     if perc1 == 1:
@@ -333,7 +333,7 @@ def single_time_series_plot(day_list, data_daily, title, ylims=[], perc=0):
         if i == n_labels - 1:
             index = len_x - 1
         else:
-            index = i * (len_x / (n_labels + 1))
+            index = i * (len_x / (n_labels - 1))
         index = int(index)
         labels.append(day_list[index][0:11])
     plt.xticks(np.arange(0, len(day_list) + 1, len(day_list) / (n_labels - 1)), labels)

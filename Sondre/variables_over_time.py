@@ -1,5 +1,6 @@
 import data_import as di
 import data_import_support as dis
+from Sondre import sondre_support_formulas as supp
 from Jacob import jacob_support as jake_supp
 import rolls
 import plot
@@ -23,8 +24,8 @@ min_prices = min_prices[0, :]
 min_volumes = min_volumes[0, :]
 
 day_returns = jake_supp.logreturn(day_prices)
-spread, spread_rel_hour, rolls_time_list_hour, count_value_error = rolls.rolls(min_prices, minute_time, calc_basis=0, kill_output=1) # 0 -> Hour
-spread, spread_rel_day, rolls_time_list_day, count_value_error = rolls.rolls(min_prices, minute_time, calc_basis=1, kill_output=1) # 1 -> Day
+spread_abs_hour, spread_rel_hour, rolls_time_list_hour, count_value_error = rolls.rolls(min_prices, minute_time, calc_basis=0, kill_output=1) # 0 -> Hour
+spread_abs_day, spread_rel_day, rolls_time_list_day, count_value_error = rolls.rolls(min_prices, minute_time, calc_basis=1, kill_output=1) # 1 -> Day
 
 
 illiq_day = ILLIQ.ILLIQ_nyse_day(hour_prices, hour_volumes)
@@ -32,6 +33,9 @@ volatility_day = ILLIQ.daily_Rv(minute_time, min_prices)
 anlzd_volatility_day = np.multiply(volatility_day, 250**0.5)
 fignum = 1
 plot.plt.figure(fignum)
+
+#  Removing all the days with extreme Amihud from the four lists
+illiq_day_noextr, spread_rel_day_noextr, day_returns_noextr, day_time_noextr = supp.remove_list1_outliers_from_all_lists(illiq_day, spread_rel_day, day_returns, day_time)
 
 
 plot.single_time_series_plot(day_time, day_returns, "Daily return", ylims=[-0.35, 0.35], perc=1)
@@ -44,14 +48,17 @@ plot.plt.figure(fignum)
 plot.single_time_series_plot(day_time, spread_rel_day, "Bid/ask spread", perc=1)
 fignum += 1
 plot.plt.figure(fignum)
-plot.single_time_series_plot(day_time, illiq_day, "Amihud", perc=1, ylims=[0, 0.0003])
+plot.single_time_series_plot(day_time, illiq_day, "Amihud", perc=1)
 fignum += 1
 plot.plt.figure(fignum)
-plot.single_time_series_plot(day_time, anlzd_volatility_day, "Realized volatility, annualized", ylims=[0, 0.79], perc=1)
+plot.single_time_series_plot(day_time_noextr, illiq_day_noextr, "Amihud - no extremes", perc=1)
+fignum += 1
+plot.plt.figure(fignum)
+plot.single_time_series_plot(day_time, anlzd_volatility_day, "Realized volatility, annualized", ylims=[0, 0.8], perc=1)
 
 
 # Dual plots
-dual_plots = 1
+dual_plots = 0
 if dual_plots == 1:
     xlabel = "Time"
     y1_label = "Bid-ask spread"
@@ -69,6 +76,6 @@ if dual_plots == 1:
     y2_label = "Realized volatility, annualized"
     plot.sondre_two_axes(spread_rel_day, anlzd_volatility_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, perc1=1, perc2=1)
     title = "Spread and Volatility - Daily (excl. extremes)"
-    plot.sondre_two_axes(spread_rel_day, anlzd_volatility_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, y2lims=[0, 0.79], perc1=1, perc2=1)
+    plot.sondre_two_axes(spread_rel_day, anlzd_volatility_day, x=day_time, x_label=xlabel, y1_label=y1_label, y2_label=y2_label, title=title, show_plot=0, y2lims=[0, 0.8], perc1=1, perc2=1)
 
 plot.plt.show()

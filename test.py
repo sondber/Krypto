@@ -13,18 +13,22 @@ import datetime as dt
 import math
 import numpy as np
 import ILLIQ
-exchanges, time_list, prices, volumes=di.get_lists(make_totals="no")
+exchanges, time_list, prices, volumes = di.get_lists(make_totals="no")
 time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list, prices, volumes)
 year_list, month,day,hour, minute=supp.fix_time_list(time_list_day)
 
+for i in range(400000,410000):
+    print(i, time_list[i])
 
+
+"""
 def count(year_list,year):
     count = 0
     for i in range(len(year_list)):
         if year_list[i]==year:
             count=count+1
     return count
-
+"""
 
 # print(sum(1 if year[x]==2012 else 0 for x in year))
 #print(ILLIQ.ILLIQ_nyse_year(prices_day[0,:],volumes_day[0,:]))

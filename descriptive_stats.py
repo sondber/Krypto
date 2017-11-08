@@ -28,17 +28,17 @@ def stats_for_single_list(in_list, name):
     mean = np.mean(in_list)
     minimum = min(in_list)
     maximum = max(in_list)
-    print("Min: %0.3f" % minimum)
-    print("Max: %0.3f" % maximum)
-    print("Mean: %0.3f" % mean)
-    print("Standard deviation : %0.3f" % std)
+    print("Min: %0.4f" % minimum)
+    print("Max: %0.4f" % maximum)
+    print("Mean: %0.4f" % mean)
+    print("Standard deviation : %0.4f" % std)
     skew = sp.stats.skew(in_list)
     kurt = sp.stats.kurtosis(in_list)
-    print("Kurtosis: %0.3f" % kurt)
-    print("Skewness: %0.3f" % skew)
+    print("Kurtosis: %0.4f" % kurt)
+    print("Skewness: %0.4f" % skew)
     for t in [1, 10]:
         auto = np.corrcoef(np.array([in_list[0:len(in_list) - t], in_list[t:len(in_list)]]))[0, 1]
-        print("Autocorr. with %i periods lag: %0.3f" % (t, auto))
+        print("Autocorr. with %i periods lag: %0.4f" % (t, auto))
 
 
 def combined_stats(list1, list2, name1="List 1", name2="List 2"):

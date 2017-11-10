@@ -14,10 +14,13 @@ exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(ope
 time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
 time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
+
+mean_volume_2012 = np.mean(volumes_days[0, 0:261])
+
 n_days = len(time_list_days)
 n_hours = len(time_list_hours)
 n_mins = len(time_list_minutes)
-cutoff_day = 0
+cutoff_day = 261
 cutoff_hour = cutoff_day * 7
 cutoff_min = cutoff_day * 390
 print("Only including days after", time_list_days[cutoff_day])
@@ -31,98 +34,83 @@ prices_hours = prices_hours[0, cutoff_hour:n_hours]
 volumes_hours = volumes_hours[0, cutoff_hour:n_hours]
 prices_days = prices_days[0, cutoff_day:n_days]
 volumes_days = volumes_days[0, cutoff_day:n_days]
+time_list_days = time_list_days[cutoff_day:n_days]
 
 
 daily_scatters = 1
 if daily_scatters == 1:
     print("Generating scatters with daily data...")
 
-    # Getting rolls estimator and Amihud(ILLIQ)
-    print("Number of days in set:", len(time_list_days))
+    # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=1, kill_output=1)
+    # Realized volatility
     volatility_days = ILLIQ.daily_Rv(time_list_minutes, prices_minutes)
-    anlzd_volatility_days = np.multiply(volatility_days, 250 ** 0.5)
+    # Annualize the volatility
+    anlzd_volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    # Returns
     returns_days = jake_supp.logreturn(prices_days)
+    # Amihud's ILLIQ
     illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours, volumes_hours)
-    # --------------------
+    # --------------------------------------------
 
+    n_initial = len(time_list_days)
+    print("Total number of days:", n_initial)
+    # Removing all days where Volume is zero
+    volumes_days_no_zero, spread_days_no_zero, returns_days_no_zero, illiq_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(volumes_days, spread_days, returns_days, illiq_days)
+    volumes_days_no_zero, time_list_days_no_zero, anlzd_volatility_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(volumes_days, time_list_days, anlzd_volatility_days)
 
-    print("Before")
-    print("Time", len(time_list_days))
-    print("Spread", len(spread_days))
-    print("Volumes", len(volumes_days))
-    print("Returns", len(returns_days))
-    print("Illiq", len(illiq_days))
-    print()
+    n_no_zerovolume = len(time_list_days_no_zero)
+    print("Total number of days:", n_no_zerovolume)
 
     # Removing all days where ROll is zero
-    spread_days_no_roll_zero, volumes_days_no_roll_zero, returns_days_no_roll_zero, illiq_days_no_roll_zero = supp.remove_list1_zeros_from_all_lists(spread_days, volumes_days, returns_days, illiq_days)
-    spread_days_no_roll_zero, time_list_days_no_roll_zero, anlzd_volatility_days_no_roll_zero = supp.remove_list1_zeros_from_all_lists(spread_days, time_list_days, anlzd_volatility_days)
+    spread_days_no_zero, volumes_days_no_zero, returns_days_no_zero, illiq_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(spread_days_no_zero, volumes_days_no_zero, returns_days_no_zero, illiq_days_no_zero)
+    spread_days_no_zero, time_list_days_no_zero, anlzd_volatility_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(spread_days_no_zero, time_list_days_no_zero, anlzd_volatility_days_no_zero)
+
+    n_no_zeroroll = len(time_list_days_no_zero)
+    print("Total number of days:", n_no_zeroroll)
 
     # Removing all days where Volatility is zero from the lists where Roll=0 has already been removed
-    anlzd_volatility_days_no_rollvol_zero, volumes_days_no_rollvol_zero, returns_days_no_rollvol_zero, illiq_days_no_rollvol_zero = supp.remove_list1_zeros_from_all_lists(anlzd_volatility_days_no_roll_zero, volumes_days_no_roll_zero, returns_days_no_roll_zero, illiq_days_no_roll_zero)
-    anlzd_volatility_days_no_rollvol_zero, spread_days_no_rollvol_zero, time_list_days_no_rollvol_zero = supp.remove_list1_zeros_from_all_lists(anlzd_volatility_days_no_roll_zero, spread_days_no_roll_zero, time_list_days_no_roll_zero)
+    anlzd_volatility_days_no_zero, volumes_days_no_zero, returns_days_no_zero, illiq_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(anlzd_volatility_days_no_zero, volumes_days_no_zero, returns_days_no_zero, illiq_days_no_zero)
+    anlzd_volatility_days_no_zero, spread_days_no_zero, time_list_days_no_zero = \
+        supp.remove_list1_zeros_from_all_lists(anlzd_volatility_days_no_zero, spread_days_no_zero, time_list_days_no_zero)
 
+    n_no_zerorvol = len(time_list_days_no_zero)
+    print("Total number of days:", n_no_zerorvol)
 
-    print("After removing days with zero roll and zero volatility")
-    print("Time", len(time_list_days_no_rollvol_zero))
-    print("Spread", len(spread_days_no_rollvol_zero))
-    print("Volumes", len(volumes_days_no_rollvol_zero))
-    print("Returns", len(returns_days_no_rollvol_zero))
-    print("Illiq", len(illiq_days_no_rollvol_zero))
-    print()
+    # Turning ILLIQ, Volume and RVol into log
+    illiq_days_no_zero = np.log(illiq_days_no_zero)
+    anlzd_volatility_days_no_zero = np.log(anlzd_volatility_days_no_zero)
+    volumes_days_no_zero = dis.volume_transformation(volumes_days_no_zero, mean_volume_2012)
 
-    """
-    # For regressions with Amihud: removing all days where Amihud is more than 2 stds above mean
-    illiq_days_no_extreme, spread_days_no_extreme, volumes_days_no_extreme, returns_days_no_extreme = supp.remove_list1_outliers_from_all_lists(illiq_days, spread_days, volumes_days, returns_days)
-    illiq_days_no_extreme, time_list_days_no_extreme = supp.remove_list1_outliers_from_all_lists(illiq_days, time_list_days)  # Just to get time
-
-
-    print("No-extreme amihud")
-    print("Time", len(time_list_days_no_extreme))
-    print("Spread", len(spread_days_no_extreme))
-    print("Volumes", len(volumes_days_no_extreme))
-    print("Returns", len(returns_days_no_extreme))
-    print("Illiq", len(illiq_days_no_extreme))
-    print()
-
-
-    # For regression between Rolls and Amihud: remove both
-    spread_days_no_extreme_no_roll_zero, illiq_days_no_extreme_no_roll_zero, time_list_days_no_extreme_no_roll_zero = supp.remove_list1_zeros_from_all_lists(spread_days_no_extreme, illiq_days_no_extreme, time_list_days_no_extreme)
-
-    plt.figure(40)
-    plot.sondre_two_axes(spread_days_no_extreme_no_roll_zero, illiq_days_no_extreme_no_roll_zero,
-                         x=time_list_days_no_extreme_no_roll_zero, y1_label="Roll's", y2_label="Amihud",
-                         title="Extremes removed form Amihud, Zeros removed from Roll's", show_plot=0)
-    """
-
-    # Turning ILLIQ, and VOL into log
-    illiq_days_no_rollvol_zero = np.log(illiq_days_no_rollvol_zero)
-    anlzd_volatility_days_no_rollvol_zero = np.log(anlzd_volatility_days_no_rollvol_zero)
-
+    plt.plot(volumes_days_no_zero)
 
     # Getting stds and means for parameters:
-    spread_std_day = np.std(spread_days_no_rollvol_zero)
-    spread_mean_day = np.mean(spread_days_no_rollvol_zero)
-    volume_std_day = np.std(volumes_days_no_rollvol_zero)
-    volume_mean_day = np.mean(volumes_days_no_rollvol_zero)
-    returns_std_day = np.std(returns_days_no_rollvol_zero)
-    returns_mean_day = np.mean(returns_days_no_rollvol_zero)
-    illiq_std_day = np.std(illiq_days_no_rollvol_zero)
-    illiq_mean_day = np.mean(illiq_days_no_rollvol_zero)
-    anlzd_volatility_std = np.std(anlzd_volatility_days_no_rollvol_zero)
-    anlzd_volatility_mean = np.mean(anlzd_volatility_days_no_rollvol_zero)
+    spread_std_day = np.std(spread_days_no_zero)
+    spread_mean_day = np.mean(spread_days_no_zero)
+    volume_std_day = np.std(volumes_days_no_zero)
+    volume_mean_day = np.mean(volumes_days_no_zero)
+    returns_std_day = np.std(returns_days_no_zero)
+    returns_mean_day = np.mean(returns_days_no_zero)
+    illiq_std_day = np.std(illiq_days_no_zero)
+    illiq_mean_day = np.mean(illiq_days_no_zero)
+    anlzd_volatility_std = np.std(anlzd_volatility_days_no_zero)
+    anlzd_volatility_mean = np.mean(anlzd_volatility_days_no_zero)
 
     # Whether to run plots
-    roll_v_return = 1
+    roll_v_return = 0
     roll_v_volumes = 1
-    roll_v_volatility = 1
-    return_v_volumes = 1
-    amihud_v_volume = 1
-    roll_v_return_w_volumes = 1
-    amihud_v_return = 1
-    roll_v_amihud = 1
-    amihud_v_volatility = 1
+    roll_v_volatility = 0
+    return_v_volumes = 0
+    amihud_v_volume = 0
+    roll_v_return_w_volumes = 0
+    amihud_v_return = 0
+    roll_v_amihud = 0
+    amihud_v_volatility = 0
 
     y_mean = spread_mean_day
     y_std = spread_std_day
@@ -136,11 +124,11 @@ if daily_scatters == 1:
         x_std = returns_std_day
         x_lims = [x_mean - x_std, x_mean + x_std]
         plt.title("Bid/ask spread vs. Daily returns")
-        plot.scatters(returns_days_no_rollvol_zero, spread_days_no_rollvol_zero, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
+        plot.scatters(returns_days_no_zero, spread_days_no_zero, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
                       ylims=y_lims, xlims=x_lims, perc1=1, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_rollvol_zero, spread_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_zero, spread_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Roll - Return:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -155,13 +143,13 @@ if daily_scatters == 1:
 
         x_mean = volume_mean_day
         x_std = volume_std_day
-        x_lims = [0, x_mean + x_std]
+        x_lims = [min(volumes_days_no_zero), max(volumes_days_no_zero)]
         plt.title("Bid/ask spread vs. daily traded volumes")
-        plot.scatters(volumes_days_no_rollvol_zero, spread_days_no_rollvol_zero, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Spread daily",
+        plot.scatters(volumes_days_no_zero, spread_days_no_zero, show_plot=0, xtitle="Volumes daily (transformed)", ytitle="Spread daily",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_rollvol_zero, spread_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_zero, spread_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Roll - Volume:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -175,13 +163,13 @@ if daily_scatters == 1:
         x_mean = anlzd_volatility_mean
         x_std = anlzd_volatility_std
         #x_lims = [x_mean - x_std, x_mean + x_std]
-        x_lims = [min(anlzd_volatility_days_no_rollvol_zero), max(anlzd_volatility_days_no_rollvol_zero)]
+        x_lims = [min(anlzd_volatility_days_no_zero), max(anlzd_volatility_days_no_zero)]
         plt.title("Bid/ask spread vs. log volatility")
-        plot.scatters(anlzd_volatility_days_no_rollvol_zero, spread_days_no_rollvol_zero, show_plot=0, xtitle="Log volatility, annualized", ytitle="Spread daily",
+        plot.scatters(anlzd_volatility_days_no_zero, spread_days_no_zero, show_plot=0, xtitle="Log volatility, annualized", ytitle="Spread daily",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(anlzd_volatility_days_no_rollvol_zero, spread_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(anlzd_volatility_days_no_zero, spread_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Roll - Log volatility:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -197,13 +185,13 @@ if daily_scatters == 1:
         y_lims = [y_mean - y_std, y_mean + y_std]
         x_mean = volume_mean_day
         x_std = volume_std_day
-        x_lims = [0, x_mean + x_std]
+        x_lims = [min(volumes_days_no_zero), max(volumes_days_no_zero)]
         plt.title("Daily returns vs. Daily traded volumes")
-        plot.scatters(volumes_days_no_rollvol_zero, returns_days_no_rollvol_zero, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Returns daily",
+        plot.scatters(volumes_days_no_zero, returns_days_no_zero, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Returns daily",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_rollvol_zero, returns_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_zero, returns_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
 
         print("Return - Volume:")
@@ -225,11 +213,11 @@ if daily_scatters == 1:
         y_lims = [0, y_mean + y_std]
 
         plt.title("Bid/ask spread vs. Daily returns")
-        plot.scatters(returns_days_no_rollvol_zero, spread_days_no_rollvol_zero, show_plot=0, xtitle="Returns daily (%)", ytitle="Spread daily (%)",
-                      ylims=y_lims, xlims=x_lims, areas=volumes_days_no_rollvol_zero, label="Bubble size = traded volume", perc1=1, perc2=1)
+        plot.scatters(returns_days_no_zero, spread_days_no_zero, show_plot=0, xtitle="Returns daily (%)", ytitle="Spread daily (%)",
+                      ylims=y_lims, xlims=x_lims, areas=volumes_days_no_zero, label="Bubble size = traded volume", perc1=1, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_rollvol_zero, spread_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_zero, spread_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         plot.plot_y_zero(x_lims)
 
@@ -242,13 +230,13 @@ if daily_scatters == 1:
         x_mean = illiq_mean_day
         x_std = illiq_std_day
         #x_lims = [x_mean - x_std, x_mean + x_std]
-        x_lims = [min(illiq_days_no_rollvol_zero), max(illiq_days_no_rollvol_zero)]
+        x_lims = [min(illiq_days_no_zero), max(illiq_days_no_zero)]
         plt.title("Rolls vs. log ILLIQ")
-        plot.scatters(illiq_days_no_rollvol_zero, spread_days_no_rollvol_zero, show_plot=0, xtitle="Log ILLIQ", ytitle="Spread daily",
+        plot.scatters(illiq_days_no_zero, spread_days_no_zero, show_plot=0, xtitle="Log ILLIQ", ytitle="Spread daily",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=1)
 
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(illiq_days_no_rollvol_zero, spread_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(illiq_days_no_zero, spread_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Roll - Amihud:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -261,15 +249,15 @@ if daily_scatters == 1:
         y_mean = illiq_mean_day
         y_std = illiq_std_day
         #y_lims = [y_mean - y_std, y_mean + y_std]
-        y_lims = [min(illiq_days_no_rollvol_zero), max(illiq_days_no_rollvol_zero)]
+        y_lims = [min(illiq_days_no_zero), max(illiq_days_no_zero)]
         x_mean = returns_mean_day
         x_std = returns_std_day
         x_lims = [x_mean - x_std, x_mean + x_std]
         plt.title("Log ILLIQ vs. Daily returns")
-        plot.scatters(returns_days_no_rollvol_zero, illiq_days_no_rollvol_zero, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
+        plot.scatters(returns_days_no_zero, illiq_days_no_zero, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
                       ylims=y_lims, xlims=x_lims, perc1=1, perc2=0)
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_rollvol_zero, illiq_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_no_zero, illiq_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Amihud - Return:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -284,12 +272,12 @@ if daily_scatters == 1:
 
         x_mean = volume_mean_day
         x_std = volume_std_day
-        x_lims = [0, x_mean + x_std]
+        x_lims = [min(volumes_days_no_zero), max(volumes_days_no_zero)]
         plt.title("Log ILLIQ vs. daily traded volumes")
-        plot.scatters(volumes_days_no_rollvol_zero, illiq_days_no_rollvol_zero, show_plot=0, xtitle="Volumes daily (BTC)", ytitle="Log ILLIQ",
+        plot.scatters(volumes_days_no_zero, illiq_days_no_zero, show_plot=0, xtitle="Volumes daily (BTC)", ytitle="Log ILLIQ",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=0)
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_rollvol_zero, illiq_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(volumes_days_no_zero, illiq_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Log ILLIQ - Volume:")
         linreg.stats(slope, intercept, r_value, p_value)
@@ -303,12 +291,12 @@ if daily_scatters == 1:
         x_mean = anlzd_volatility_mean
         x_std = anlzd_volatility_std
         #x_lims = [x_mean - x_std, x_mean + x_std]
-        x_lims = [min(anlzd_volatility_days_no_rollvol_zero), max(anlzd_volatility_days_no_rollvol_zero)]
+        x_lims = [min(anlzd_volatility_days_no_zero), max(anlzd_volatility_days_no_zero)]
         plt.title("Log ILLIQ vs. Log volatiltiy")
-        plot.scatters(anlzd_volatility_days_no_rollvol_zero, illiq_days_no_rollvol_zero, show_plot=0, xtitle="Log volatility annualized", ytitle="Log ILLIQ",
+        plot.scatters(anlzd_volatility_days_no_zero, illiq_days_no_zero, show_plot=0, xtitle="Log volatility annualized", ytitle="Log ILLIQ",
                       ylims=y_lims, xlims=x_lims, perc1=0, perc2=0)
         # Regression lines
-        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(anlzd_volatility_days_no_rollvol_zero, illiq_days_no_rollvol_zero)
+        slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(anlzd_volatility_days_no_zero, illiq_days_no_zero)
         plot.regression_line(intercept, slope, xlims=x_lims)
         print("Log ILLIQ - Log volatility:")
         linreg.stats(slope, intercept, r_value, p_value)

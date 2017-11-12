@@ -11,9 +11,9 @@ def linreg_coeffs(arr1, arr2):  # input is equal length one-dim arrays of measur
     return slope, intercept, r_value, p_value, stderr
 
 
-def stats(slope, intercept, r_value, p_value):
+def stats(slope: float, intercept: float, r_value: float, p_value: float):
     print("Intercept %0.4f:" % intercept)
-    print("Slope %0.4f:" % slope)
+    print("Slope: %0.4f" % slope)
     print("R-squared: %0.4f" % r_value ** 2)
     print("P-value: %0.4f" % p_value)
     print()

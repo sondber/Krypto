@@ -5,6 +5,9 @@ from datetime import date
 import math
 from matplotlib import pyplot as plt
 import scipy.stats as st
+import rolls
+import ILLIQ
+from Jacob import jacob_support as jake_supp
 
 
 def make_time_stamps():
@@ -136,7 +139,6 @@ def get_lists_from_fulls(exchanges):
         single_price = remove_nan(single_price)
         single_price = supp.fill_blanks(single_price)
         single_volume = remove_nan(single_volume)
-
 
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_price)
@@ -289,6 +291,7 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     out_prices = np.transpose(np.matrix(out_prices))
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
+
 
 """
 def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
@@ -596,6 +599,108 @@ def average_over_day(time_list, data, frequency="h"):
     percentile = 0.95
     for i in range(n_out):
         out_data[i] = np.mean(temp_matrix[:, i])
-        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i])-1, loc=np.mean(temp_matrix[:, i]), scale=st.sem(temp_matrix[:, i]))
+        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=np.mean(temp_matrix[:, i]),
+                                           scale=st.sem(temp_matrix[:, i]))
 
     return day_time, out_data, lower, upper
+
+
+def volume_transformation(volume, initial_mean_volume):
+    n_entries = len(volume)
+    n_days_in_window = 252
+    out_volume = np.zeros(n_entries)
+    for i in range(0, n_days_in_window):
+        floating_mean = (initial_mean_volume * (n_days_in_window - i) + i * np.mean(volume[0: i])) / n_days_in_window
+        out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
+    for i in range(n_days_in_window, n_entries):
+        if volume[i] == 0 or np.mean(volume[i - n_days_in_window:i]) == 0:
+            out_volume[i] = 0
+        else:
+            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_days_in_window:i]))
+    out_volume[0] = np.log(volume[0]) - np.log(initial_mean_volume)
+    return out_volume
+
+
+def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
+    # Opening hours only
+    print("Transforming data series...")
+    time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
+                                                                   volumes_minutes)
+    time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+
+    mean_volume_2012 = np.mean(volumes_days[0, 0:261])
+
+    n_days = len(time_list_days)
+    n_hours = len(time_list_hours)
+    n_mins = len(time_list_minutes)
+    cutoff_day = 261
+    cutoff_hour = cutoff_day * 7
+    cutoff_min = cutoff_day * 390
+    print("Only including days after", time_list_days[cutoff_day])
+
+    # Bistamp only, cutoff day
+    prices_minutes = prices_minutes[0, cutoff_min:n_mins]
+    volumes_minutes = volumes_minutes[0, cutoff_min:n_mins]
+    prices_hours = prices_hours[0, cutoff_hour:n_hours]
+    volumes_hours = volumes_hours[0, cutoff_hour:n_hours]
+    prices_days = prices_days[0, cutoff_day:n_days]
+    volumes_days = volumes_days[0, cutoff_day:n_days]
+    time_list_days = time_list_days[cutoff_day:n_days]
+
+    # Rolls
+    spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
+                                                                              calc_basis=1, kill_output=1)
+    # Realized volatility
+    volatility_days = ILLIQ.daily_Rv(time_list_minutes, prices_minutes)
+    # Annualize the volatility
+    anlzd_volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    # Returns
+    returns_days = jake_supp.logreturn(prices_days)
+    # Amihud's ILLIQ
+    illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours, volumes_hours)
+    # --------------------------------------------
+
+    n_initial = len(time_list_days)
+    print("Total number of days:", n_initial)
+    time_list_removed = []  # Initialized
+
+    # Removing all days where Volume is zero
+    time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, illiq_days_clean, volatility_days_clean \
+        = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
+                                                 returns_days, illiq_days, volatility_days)
+    n_no_zerovolume = len(time_list_days_clean)
+    print("Days after removing zero-volume:", n_no_zerovolume)
+
+    # Removing all days where Roll is zero
+    time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
+    illiq_days_clean, volatility_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+                                                                                     time_list_removed,
+                                                                                     spread_days_clean,
+                                                                                     volumes_days_clean,
+                                                                                     returns_days_clean,
+                                                                                     illiq_days_clean,
+                                                                                     volatility_days_clean)
+
+    n_no_zeroroll = len(time_list_days_clean)
+    print("Days after removing zero-Roll:", n_no_zeroroll)
+
+    # Removing all days where Volatility is zero
+    time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
+    illiq_days_clean, spread_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+                                                                                 time_list_removed,
+                                                                                 volatility_days_clean,
+                                                                                 volumes_days_clean,
+                                                                                 returns_days_clean,
+                                                                                 illiq_days_clean,
+                                                                                 spread_days_clean)
+
+    n_no_zerorvol = len(time_list_days_clean)
+    print("Days after removing zero-volatility:", n_no_zerorvol)
+
+    # Turning ILLIQ, Volume and RVol into log
+    log_illiq_days_clean = np.log(illiq_days_clean)
+    log_volatility_days_clean = np.log(volatility_days_clean)
+    log_volumes_days_clean = volume_transformation(volumes_days_clean, mean_volume_2012)
+
+    return time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+           illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean

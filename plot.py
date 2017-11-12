@@ -169,7 +169,7 @@ def easy_plot(y, label="My plot", show_plot=1):
         plt.show()
 
 
-def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle="", perc1=0, perc2=0):
+def scatters(x, y, color="black", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle="", perc1=0, perc2=0, log1=0, log2=0):
     if not xlims:
         xlims = [min(x), max(x)]
     if not ylims:
@@ -192,12 +192,21 @@ def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylim
     if perc1 == 1:
         ax = plt.gca()
         vals = ax.get_xticks()
-        ax.set_xticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+        ax.set_xticklabels(['{:3.1f}%'.format(x * 100) for x in vals])
 
     if perc2 == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+        ax.set_yticklabels(['{:3.1f}%'.format(x * 100) for x in vals])
+
+    if log1 == 1:
+        ax = plt.gca()
+        vals = ax.get_xticks()
+        ax.set_xticklabels(['{:3.5f}'.format(10 ** x) for x in vals])
+    if log2 == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:3.5f}'.format(10 ** x) for x in vals])
 
     if xtitle:
         plt.xlabel(xtitle)
@@ -268,7 +277,7 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     return None
 
 
-def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[], perc1=0, perc2=0):
+def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[], perc1=0, perc2=0, log1=0, log2=0):
     fig, ax1 = plt.subplots()
 
     n_entries = len(y1)
@@ -315,6 +324,13 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
     if perc2 == 1:
         vals = ax2.get_yticks()
         ax2.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    if log1 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(10 ** x) for x in vals])
+    if log2 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(10 ** x) for x in vals])
+
 
     plt.xlim([0, len(y1)])
 
@@ -333,7 +349,7 @@ def single_time_series_plot(day_list, data_daily, title, ylims=[], perc=0):
         if i == n_labels - 1:
             index = len_x - 1
         else:
-            index = i * (len_x / (n_labels + 1))
+            index = i * (len_x / (n_labels - 1))
         index = int(index)
         labels.append(day_list[index][0:11])
     plt.xticks(np.arange(0, len(day_list) + 1, len(day_list) / (n_labels - 1)), labels)

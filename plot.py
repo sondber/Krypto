@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 import pandas
+from matplotlib.ticker import FormatStrFormatter
 
 def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume):
     number_of_ticks = 5
@@ -189,24 +190,42 @@ def scatters(x, y, color="black", areas=[], label="", show_plot=1, xlims=[], yli
     plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
     plt.xlim(xlims)
     plt.ylim(ylims)
-    if perc1 == 1:
-        ax = plt.gca()
-        vals = ax.get_xticks()
-        ax.set_xticklabels(['{:3.1f}%'.format(x * 100) for x in vals])
-
-    if perc2 == 1:
-        ax = plt.gca()
-        vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.1f}%'.format(x * 100) for x in vals])
 
     if log1 == 1:
         ax = plt.gca()
         vals = ax.get_xticks()
-        ax.set_xticklabels(['{:3.5f}'.format(10 ** x) for x in vals])
+        if perc1 ==1:
+            format_list = []
+            for i in range(0, len(vals)):
+                n_zeros = max(-int(vals[i]) - 2, 0)
+                format_string = '{:3.' + str(n_zeros) + 'f}%'
+                format_list.append(format_string.format(100*(np.exp(vals[i]))))  # NBNBNBB Log vs Ln
+            ax.set_xticklabels(format_list)
+        else:
+            ax.set_xticklabels(['{:3.2f}'.format(10 ** x) for x in vals])
     if log2 == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.5f}'.format(10 ** x) for x in vals])
+        if perc2 == 1:
+            format_list = []
+            for i in range(0, len(vals)):
+                n_zeros = max(-int(vals[i]) - 2, 0)
+                format_string = '{:3.' + str(n_zeros) + 'f}%'
+                format_list.append(format_string.format(100*(10 ** vals[i])))
+            ax.set_yticklabels(format_list)
+        else:
+            ax.set_yticklabels(['{:3.2f}'.format(10 ** x) for x in vals])
+
+    if perc1 == 1 and log1 == 0:
+        ax = plt.gca()
+        vals = ax.get_xticks()
+        ax.set_xticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
+    if perc2 == 1 and log2 == 0:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
 
     if xtitle:
         plt.xlabel(xtitle)

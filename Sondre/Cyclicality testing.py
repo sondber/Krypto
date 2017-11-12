@@ -10,73 +10,36 @@ from matplotlib import pyplot as plt
 import scipy.stats as st
 
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
-
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
-
-# Importing data for all minutes of the day
-exchanges, time_list_min, prices_min, volumes_min = di.get_lists(opening_hours="n", make_totals="n")
-
-spread_hour = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=0, kill_output=1)[1]  # Rolls
-spread_day = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=1, kill_output=1)[1]  # Rolls
-
-
-time_min = time_list_min
-
-minutes = 1
-hours = 1
-days = 1
-figcount = 1  # Making sure all graphs are in unique figures
-if minutes == 1:
-    min_of_day, avg_volumes_minute, low_volumes_minute, upper_volumes_minute = dis.average_over_day(time_list_min, volumes_min[0, :], frequency="m")
-    plt.figure(figcount)
-    # MINUTES ----------------------------------------------------------------------------------------------------
-    returns_min = jake_supp.logreturn(prices_min[0, :])
-    min_of_day, avg_returns_minute, low_returns_minute, upper_returns_minute = dis.average_over_day(time_list_min, returns_min, frequency="m")
-
-    avg_returns_minute = avg_returns_minute * 100  # Converting to percentage
-    plt.plot(avg_returns_minute, label="Logreturns - Minute", linewidth=0.5)
-
-    stdev = np.std(returns_min) * 100  # Converting to percentage
-    plt.ylim([-stdev, stdev])
-
-    # Generating x-ticks
+def hour_of_day_ticks():
     labels = ["00:00\n20:00\n09:00", "06:00\n02:00\n15:00", "12:00\n08:00\n21:00", "18:00\n14:00\n03:00",
               "23:59\n19:59\n08:59"]
     plt.xticks(np.arange(0, 1441, 6 * 60), labels)
     plt.title("Average return per minute over the course of a day")
-    plt.ylabel("Minute logreturn (%)")
+    plt.ylabel("Minute logreturn")
     plt.figtext(0.01, 0.068, "London")
     plt.figtext(0.01, 0.036, "New York")
     plt.figtext(0.01, 0.005, "Tokyo")
 
-    plt.legend()
 
-    figcount += 1
-    plt.figure(figcount)
+os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-    # Volume
-    plt.plot(avg_volumes_minute, label="Volume per minute")
-    plt.xticks(np.arange(0, 1441, 6 * 60), labels)
-    plt.title("Average volume per minute over the course of a day")
-    plt.ylabel("Minute volume [BTC]")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
+time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
+    time_list_minutes, prices_minutes,
+    volumes_minutes)
 
-    stdev = np.std(volumes_min[0, :])
-    mean = np.mean(volumes_min[0, :])
-    mean_test = np.mean(avg_volumes_minute)
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
+spread_hour = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
 
-    figcount += 1
-    plt.figure(figcount)
+
+hours = 1
+days = 0
+figcount = 1  # Making sure all graphs are in unique figures
 
 if hours == 1:
     # HOURS ----------------------------------------------------------------------------------------------------
     # Converting to hourly data
-    time_list_hour, prices_hour, volumes_hour = dis.convert_to_hour(time_list_min, prices_min, volumes_min)
+    time_list_hour, prices_hour, volumes_hour = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
     returns_hour = jake_supp.logreturn(prices_hour[0, :])
 
     # Finding average for every hour of the day
@@ -153,7 +116,7 @@ if days == 1:
     # DAYS ----------------------------------------------------------------------------------------------------
     # Converting to daily data
 
-    time_list_day, prices_day, volumes_day = dis.convert_to_day(time_min, prices_min, volumes_min)
+    time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
     returns_day = jake_supp.logreturn(prices_day[0, :])
 
     # Finding average for every day of the week

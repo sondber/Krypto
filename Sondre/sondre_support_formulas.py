@@ -365,3 +365,14 @@ def autocorr(in_list, lag):
     list2 = in_list[lag : n]
     corr = np.corrcoef(list1, list2)[0, 1]
     return corr
+
+def mean_for_n_entries(in_list, n_lag):
+    n_in = len(in_list)
+    out_list = np.zeros(n_in - n_lag)
+    initial_mean = np.mean(in_list[0:n_lag])
+    out_list[0] = initial_mean
+    for i in range(1, n_lag):
+        out_list[i] = (initial_mean * (n_lag - i) + i * np.mean(in_list[n_lag - 1:n_lag - 1 + i]))/(n_lag-1)
+    for i in range(n_lag, n_in - n_lag):
+        out_list[i] =  np.mean(in_list[i: i + n_lag])
+    return out_list

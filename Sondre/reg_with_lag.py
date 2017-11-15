@@ -35,7 +35,7 @@ illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_da
     time_list_minutes, prices_minutes,
     volumes_minutes)
 
-autoreg = 1
+autoreg = 0
 if autoreg == 1:
     print_n(20)
     print("Rolls regression:")
@@ -44,7 +44,7 @@ if autoreg == 1:
     print("Log-ILLIQ regression:")
     linreg.autocorr_linreg(log_illiq_days_clean, 12)
 
-har = 1
+har = 0
 if har == 1:
     print_n(20)
     print("Rolls regression:")
@@ -52,6 +52,55 @@ if har == 1:
     print_n(15)
     print("Log-ILLIQ regression:")
     HAR_model(log_illiq_days_clean)
+
+
+rolls_reg = 1
+if rolls_reg == 1:
+    lags = [1, 5, 44]
+    max_lag = 44  # Locked at 44! <-------------------
+
+    Y = spread_days_clean[max_lag: len(spread_days_clean)]
+    print_n(20)
+    n_entries = len(Y)
+    n_lags = len(lags)
+    n_others = 5
+    n_explanatory = n_lags + n_others
+    X = np.zeros([n_entries, n_explanatory])
+    print("--------------EXPLANATORY VARIABLES--------------")
+    for j in range(n_lags):
+        print("x%i: %i days lag" % (j + 1, lags[j]))
+        x = supp.mean_for_n_entries(spread_days_clean, lags[j])
+        x = x[len(x) - n_entries: len(x)]
+        for i in range(0, n_entries):
+            X[i, j] = x[i]
+
+    j = n_lags
+    print("x%i: Returns" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = returns_days_clean[i]
+
+    j += 1
+    print("x%i: Realized Volatility" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = volatility_days_clean[i]
+
+    j += 1
+    print("x%i: Log Realized Volatility" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volatility_days_clean[i]
+
+    j += 1
+    print("x%i: Volumes" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = volumes_days_clean[i]
+
+    j += 1
+    print("x%i: Log Volumes (normalized)" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volumes_days_clean[i]
+
+    print()
+    linreg.reg_multiple_pandas(Y, X)
 
 
 test_multilinreg = 0

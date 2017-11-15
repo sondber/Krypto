@@ -478,7 +478,7 @@ def get_month(month_string):
     return month_num
 
 
-def average_over_day(time_list, data, frequency="h"):
+def cyclical_average(time_list, data, frequency="h"):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -504,7 +504,7 @@ def average_over_day(time_list, data, frequency="h"):
                 day_time.append(hs + ":" + "00")
                 h_list.append(h)
         else:
-            print("di.average_over_day: Something was wrong with the time_list....")
+            print("dis.cyclical_average: Something was wrong with the time_list....")
             return None
     elif frequency == "m":
         if hour[0] == 13:

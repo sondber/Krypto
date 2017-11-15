@@ -17,10 +17,6 @@ illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_da
     time_list_minutes, prices_minutes,
     volumes_minutes)
 
-plt.plot(illiq_days_clean)
-plt.show()
-plt.plot(log_illiq_days_clean)
-plt.show()
 
 # Getting stds and means for parameters:
 spread_std_day = np.std(spread_days_clean)
@@ -38,12 +34,32 @@ log_volatility_mean = np.mean(log_volatility_days_clean)
 roll_v_return = 0
 roll_v_volumes = 0
 roll_v_volatility = 0
-return_v_volumes = 1
-amihud_v_volume = 1
+return_v_volumes = 0
+amihud_v_volume = 0
 roll_v_return_w_volumes = 0
-amihud_v_return = 1
-roll_v_amihud = 1
-amihud_v_volatility = 1
+amihud_v_return = 0
+roll_v_amihud = 0
+amihud_v_volatility = 0
+
+
+x_data = volatility_days_clean
+y_data = spread_days_clean
+
+x_lims = [min(x_data), max(x_data)]
+y_lims = [min(y_data), max(y_data)]
+plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims)
+
+
+plt.figure(2)
+x_data = log_volatility_days_clean
+
+plot.scatters(x_data, y_data, x_perc=1, y_perc=1)
+
+plt.show()
+
+
+
+
 
 y_mean = spread_mean_day
 y_std = spread_std_day
@@ -58,7 +74,7 @@ if roll_v_return == 1:
     x_lims = [x_mean - x_std, x_mean + x_std]
     plt.title("Bid/ask spread vs. Daily returns")
     plot.scatters(returns_days_clean, spread_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims, perc1=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_perc=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, spread_days_clean)
@@ -67,7 +83,7 @@ if roll_v_return == 1:
     print("Roll - Return:")
     linreg.stats(slope, intercept, r_value, p_value)
 
-    plot.plot_y_zero(x_lims)
+    plot.plot_x_zero(x_lims)
 
     fig_count += 1
 
@@ -79,7 +95,7 @@ if roll_v_volumes == 1:
     plt.title("Bid/ask spread vs. daily traded volumes")
     plot.scatters(log_volumes_days_clean, spread_days_clean, show_plot=0, xtitle="Volumes daily (transformed)",
                   ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims, log1=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, spread_days_clean)
@@ -97,7 +113,7 @@ if roll_v_volatility == 1:
     plt.title("Bid/ask spread vs. log volatility")
     plot.scatters(log_volatility_days_clean, spread_days_clean, show_plot=0, xtitle="Log volatility, annualized",
                   ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims, log1=1, perc1=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, spread_days_clean)
@@ -118,7 +134,7 @@ if return_v_volumes == 1:
     plt.title("Daily returns vs. Volumes (transformed)")
     plot.scatters(log_volumes_days_clean, returns_days_clean, show_plot=0, xtitle="Volumes daily (transformed)",
                   ytitle="Returns daily",
-                  ylims=y_lims, xlims=x_lims, log1=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, returns_days_clean)
@@ -126,7 +142,7 @@ if return_v_volumes == 1:
 
     print("Return - Volume (transformed):")
     linreg.stats(slope, intercept, r_value, p_value)
-    plot.plot_x_zero(x_lims)
+    plot.plot_y_zero(x_lims)
 
     fig_count += 1
 
@@ -140,7 +156,7 @@ if roll_v_amihud == 1:
     y_lims = [0, y_mean + y_std]
     plt.title("Spread vs. log ILLIQ")
     plot.scatters(log_illiq_days_clean, spread_days_clean, show_plot=0, xtitle="Log ILLIQ", ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims, log1=1, perc1=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_illiq_days_clean, spread_days_clean)
@@ -159,14 +175,14 @@ if amihud_v_return == 1:
     x_lims = [x_mean - x_std, x_mean + x_std]
     plt.title("Log ILLIQ vs. Daily returns")
     plot.scatters(returns_days_clean, log_illiq_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
-                  ylims=y_lims, xlims=x_lims, perc1=1, log2=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_perc=1, y_log=1, y_perc=1)
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("log ILLIQ - Return:")
     linreg.stats(slope, intercept, r_value, p_value)
 
-    plot.plot_y_zero(x_lims)
+    plot.plot_x_zero(x_lims)
 
     fig_count += 1
 
@@ -177,7 +193,7 @@ if amihud_v_volume == 1:
     x_lims = [min(log_volumes_days_clean), max(log_volumes_days_clean)]
     plt.title("Log ILLIQ vs. log traded volumes")
     plot.scatters(log_volumes_days_clean, log_illiq_days_clean, show_plot=0, xtitle="Log volumes", ytitle="Log ILLIQ",
-                  ylims=y_lims, xlims=x_lims, log1=1, log2=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, y_log=1, y_perc=1)
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
@@ -193,7 +209,7 @@ if amihud_v_volatility == 1:
     plt.title("Log ILLIQ vs. Log volatiltiy")
     plot.scatters(log_volatility_days_clean, log_illiq_days_clean, show_plot=0, xtitle="Log volatility annualized",
                   ytitle="Log ILLIQ",
-                  ylims=y_lims, xlims=x_lims, log1=1, perc1=1, log2=1, perc2=1)
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_log=1, y_perc=1)
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)

@@ -7,6 +7,7 @@ import descriptive_stats as desc
 import data_import_support as dis
 import os
 from matplotlib import pyplot as plt
+import matplotlib.ticker as mtick
 import rolls
 import ILLIQ
 
@@ -25,12 +26,23 @@ anlzd_volatility_daily = np.multiply(volatility_day, 250**0.5)
 illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
 """
 
-a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-n = 5
-l = len(a)
-for i in range(n, l):
-    print(a[i], a[i -n:i])
+
+x = [0, 1, 2, 3, 4, 5]
+y = [10, 100, 1000, 500, 100, 50]
+logy = np.log10(y)
+
+ax = plt.figure(1)
+plt.plot(x, y)
+plt.yscale("log", basey=np.exp(1))
+
+
+
+plt.figure(2)
+plt.show()
+
+
+
 
 
 
@@ -40,9 +52,9 @@ if check_freq == 1:  # Verification of frequency consistency
     hour_time, hour_prices, hour_volumes = dis.convert_to_hour(minute_time, min_prices, min_volumes)
     day_time, day_prices, day_volumes = dis.convert_to_day(minute_time, min_prices, min_volumes)
 
-    k_time_m, avg_vol_m = dis.average_over_day(minute_time, min_volumes[0, :], frequency="m")
-    k_time_h, avg_vol_h = dis.average_over_day(hour_time, hour_volumes[0, :], frequency="h")
-    k_time_d, avg_vol_d = dis.average_over_day(day_time, day_volumes[0, :], frequency="d")
+    k_time_m, avg_vol_m = dis.cyclical_average(minute_time, min_volumes[0, :], frequency="m")
+    k_time_h, avg_vol_h = dis.cyclical_average(hour_time, hour_volumes[0, :], frequency="h")
+    k_time_d, avg_vol_d = dis.cyclical_average(day_time, day_volumes[0, :], frequency="d")
 
     print("Minute: ")
     print(" ", minute_time[0], minute_time[len(minute_time) - 1])

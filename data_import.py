@@ -62,7 +62,6 @@ def fetch_long_and_write(exchanges, opening_hours_only="y"):
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
 
-
 def import_gold_lists(s_year=2012, s_month=1, e_year=2017, e_month=9):
     date = []
     time_NYC = []

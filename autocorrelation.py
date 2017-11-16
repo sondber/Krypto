@@ -26,3 +26,4 @@ write_autocorr(illiq_days_clean, "ILLIQ")
 write_autocorr(log_illiq_days_clean, "Log ILLIQ")
 write_autocorr(volatility_days_clean, "Volatility")
 write_autocorr(log_volatility_days_clean, "Log volatility")
+

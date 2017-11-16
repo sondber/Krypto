@@ -39,18 +39,16 @@ def stats_for_single_list(in_list, name):
     print("Autocorrelation:")
     for t in range(1, 11):
         auto = np.corrcoef(np.array([in_list[0:len(in_list) - t], in_list[t:len(in_list)]]))[0, 1]
-        print(" %i periods lag: %0.3f%%" % (t, auto*100))
+        print(" %i periods lag: %0.1f%%" % (t, auto*100))
 
 
 def combined_stats(list1, list2, name1="List 1", name2="List 2"):
     list1 = np.array(list1)
     list2 = np.array(list2)
-    stats_for_single_list(list1, name1)
-    stats_for_single_list(list2, name2)
     print()
     print("\033[32;0;0mCombined statistics for %s and %s \033[0;0;0m" % (name1, name2))
     corr = np.corrcoef(list1, list2)[0, 1]
-    print("Correlation coefficient: %0.1f%%" % corr*100)
+    print("Correlation coefficient: %0.1f%%" % (corr*100))
 
     # Does list1 precede list2?
     for t in [1, 3, 5, 10]:

@@ -18,7 +18,7 @@ hours = 1
 days = 1
 # daily
 non_transformed = 1
-transformed = 0
+transformed = 1
 figcount = 0  # Making sure all graphs are in unique figures
 
 # Converting to hourly data

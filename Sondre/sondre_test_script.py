@@ -13,39 +13,14 @@ import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-"""
+
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
-time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
+    time_list_minutes, prices_minutes,
+    volumes_minutes)
 
-spread_abs, spread_daily, time_list_rolls, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes,
-                                                                           calc_basis=1, kill_output=1)
-returns_daily = jake_supp.logreturn(prices_day[0, :])
-volatility_day = ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :])
-anlzd_volatility_daily = np.multiply(volatility_day, 250**0.5)
-illiq_daily = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])  # bitstamp only
 """
-
-
-
-x = [0, 1, 2, 3, 4, 5]
-y = [10, 100, 1000, 500, 100, 50]
-logy = np.log10(y)
-
-ax = plt.figure(1)
-plt.plot(x, y)
-plt.yscale("log", basey=np.exp(1))
-
-
-
-plt.figure(2)
-plt.show()
-
-
-
-
-
-
 check_freq = 0
 if check_freq == 1:  # Verification of frequency consistency
     exchanges, minute_time, min_prices, min_volumes = di.get_lists(opening_hours="n", make_totals="n")
@@ -74,3 +49,5 @@ if check_freq == 1:  # Verification of frequency consistency
     print(" Average volume: ", np.average(day_volumes[0, :]))
     print(" Alternative average: ", np.average(avg_vol_d))
     print()
+
+"""

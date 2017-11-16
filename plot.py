@@ -4,62 +4,6 @@ from Sondre import sondre_support_formulas as supp, user_interface as ui
 import pandas
 from matplotlib.ticker import FormatStrFormatter
 
-def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume):
-    number_of_ticks = 5
-    n_exc = len(exchanges)
-    fig_count = 1  # Ensures that each graph has its own unique figure
-    x, myticks = supp.get_ticks(time_list, number_of_ticks)
-    volumeplots, priceplots, varplots, dataplots = ui.plots()
-
-    number_of_ticks = 5
-    x, myticks = supp.get_ticks(time_list, number_of_ticks)
-
-    if volumeplots or priceplots or varplots or dataplots:
-        print("\nPLOTS")
-        print("---------------------------------------------------------------------------------\n")
-
-    if volumeplots:
-        print("Drawing volume plots...")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        volume_plots(total_volume, volumes, exchanges)
-
-    if priceplots:
-        print("Drawing price plots...")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        plt.xticks(x, myticks)
-        price_plots(total_prices, prices, exchanges)
-
-    if varplots:
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        plt.xticks(x, myticks)
-        var_plots(prices, exchanges, "Minute-to-minute variance of prices")
-
-    if dataplots:
-        print("Drawing histograms... \n")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        hist_plot(total_volume, "Total volume distribution")
-
-        if n_exc > 1:
-            inp = input("\033[33;0;0mWould you like distribution plots for each individual exchange?\
-    [1=Yes, 0=No]: \033[0;0;0m\n")
-            if inp == 1 or inp == 'y' or inp == 'yes':
-                individual_plots = True
-            else:
-                individual_plots = False
-            if individual_plots is True:
-                for i in range(0, n_exc):
-                    plt.figure(fig_count)
-                    fig_count = fig_count + 1
-                    description = "Distribution of volume for " + exchanges[i]
-                    hist_plot(volumes[i, :], description)
-                    avg_min = supp.average_at_time_of_day(volumes[i, :])
-
-    plt.show()  # Denne må stå etter alle plots for at de skal vises sammen
-
 
 def hist_plot(in_list, description):
     n_bins = 20
@@ -116,58 +60,6 @@ def plot_for_exchanges(matrix, exchanges):
     plt.figtext(0.01, 0.036, "New York")
     plt.figtext(0.01, 0.005, "Tokyo")
     plt.legend()
-
-
-def volume_plots(total_volume, volumes, exchanges):
-    total_day = supp.average_at_time_of_day(total_volume)
-    plt.plot(total_day, label='Total volume')
-    plot_for_exchanges(volumes, exchanges)
-
-
-def price_plots(total_prices, prices, exchanges):
-    n_exc = len(exchanges)
-    if n_exc > 1:
-        for i in range(0, n_exc):
-            plt.plot(prices[i, :], label=exchanges[i])
-    else:
-        plt.plot(prices, label=exchanges[0])
-    plt.title("Price chart")
-    plt.ylabel("USD/BTC")
-    if n_exc > 1:
-        plt.plot(total_prices, label="Volume weighted average price, USD/BTC", linewidth=0.5, color="black")
-    plt.legend()
-
-
-def var_plots(prices, exchanges,
-              title):  # Denne må skrives om så den tar inn en liste med varianse og plotter det i stedet
-    n_exc = len(exchanges)
-    mins = [1]
-    mins[0] = int(input("How many mintues rolling average would you like? "))
-    print("Working on variance plots, this may take some time...")
-    for m in mins:
-        for i in range(0, n_exc):
-            if n_exc > 1:
-                mov_var = supp.moving_variance(prices[i, :], m)
-            else:
-                mov_var = supp.moving_variance(prices, m)
-            exc = exchanges[i]
-            if m > 60:
-                interval = " " + str(m / 60) + " hours"
-            else:
-                interval = " " + str(m) + " minutes"
-            plot_label = exc + interval + " moving average " + title
-            plt.plot(mov_var, label=plot_label)
-
-    plt.legend()
-    plt.title(title)
-
-
-def easy_plot(y, label="My plot", show_plot=1):
-    label = str(label)
-    plt.plot(y, label=label)
-    plt.legend()
-    if show_plot == 1:
-        plt.show()
 
 
 def scatters(x, y, color="black", areas=[], label="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
@@ -397,8 +289,8 @@ def plot_x_zero(x_lims):
 
 
 def hour_of_day_ticks():
-    labels = ["00:00\n20:00\n09:00", "06:00\n02:00\n15:00", "12:00\n08:00\n21:00", "18:00\n14:00\n03:00",
-              "23:59\n19:59\n08:59"]
+    labels = ["00:00\n19:00\n09:00", "06:00\n01:00\n15:00", "12:00\n07:00\n21:00", "18:00\n13:00\n03:00",
+              "23:59\n18:59\n08:59"]
     plt.xticks(np.arange(0, 25, 6), labels)
     plt.figtext(0.01, 0.068, "London")
     plt.figtext(0.01, 0.036, "NYC")

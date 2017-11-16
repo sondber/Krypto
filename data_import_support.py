@@ -263,7 +263,7 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
     for i in range(n_mins):
         w_day = int(date(year[i], month[i], day[i]).isoweekday())
         if w_day != 6 and w_day != 7:
-            if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            if 15 <= hour[i] <= 20 or (hour[i] == 14 and minute[i] >= 30):
                 out_excel_stamps.append(in_excel_stamps[i])
                 out_prices.append(in_prices[:, i])
                 out_volumes.append(in_volumes[:, i])
@@ -284,7 +284,7 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
 
     for i in range(n_mins):
         w_day = int(date(year[i], month[i], day[i]).isoweekday())
-        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+        if 15 <= hour[i] <= 20 or (hour[i] == 14 and minute[i] >= 30):
             out_excel_stamps.append(in_excel_stamps[i])
             out_prices.append(in_prices[:, i])
             out_volumes.append(in_volumes[:, i])
@@ -329,7 +329,7 @@ def convert_to_hour(time_stamps, prices, volumes):
         prices_out = np.zeros([n_exc, n_hours])
         volumes_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
-            if hour[i] == 13 and minute[i] == 30:
+            if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     prices_out[j, k] = prices[j, i + 29]  # The price at the last minute of the hour
@@ -373,7 +373,7 @@ def convert_to_day(time_stamps, prices, volumes):
         prices_out = np.zeros([n_exc, n_days])
         volumes_out = np.zeros([n_exc, n_days])
         for i in range(n_mins - 59):
-            if hour[i] == 13 and minute[i] == 30:
+            if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     prices_out[j, k] = prices[j, i + 389]  # The price at the last minute of the hour
@@ -487,8 +487,8 @@ def cyclical_average(time_list, data, frequency="h"):
 
     # Generating day_time ---------------
     if frequency == "h":
-        if hour[0] == 13:
-            for h in range(13, 20):
+        if hour[0] == 14:
+            for h in range(14, 21):
                 if h < 10:
                     hs = "0" + str(h)
                 else:
@@ -507,13 +507,13 @@ def cyclical_average(time_list, data, frequency="h"):
             print("dis.cyclical_average: Something was wrong with the time_list....")
             return None
     elif frequency == "m":
-        if hour[0] == 13:
-            for h in range(13, 20):
+        if hour[0] == 14:
+            for h in range(14, 21):
                 if h < 10:
                     hs = "0" + str(h)
                 else:
                     hs = str(h)
-                if h == 13:
+                if h == 14:
                     mins_in_hour = 30
                 else:
                     mins_in_hour = 60
@@ -559,7 +559,7 @@ def cyclical_average(time_list, data, frequency="h"):
     k = -1
     if frequency == "h":
         for i in range(n_entries):
-            index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            index = hour[i] - hour[0]  # Hvis dagen starter på 14:30 vil vi også at indexen skal starte der
             if index == 0:
                 temp_list[index] = data[i]
                 temp_matrix.append(temp_list)
@@ -569,7 +569,7 @@ def cyclical_average(time_list, data, frequency="h"):
                 temp_list[index] = data[i]
     elif frequency == "m":
         for i in range(n_entries):
-            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 13:30 vil vi også...
+            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 14:30 vil vi også...
             if index == 0:
                 try:
                     temp_list[index] = data[i]
@@ -637,15 +637,21 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     cutoff_hour = cutoff_day * 7
     cutoff_min = cutoff_day * 390
     print("Only including days after", time_list_days[cutoff_day])
+    print("Only including days after", time_list_hours[cutoff_hour])
+    print("Only including days after", time_list_minutes[cutoff_min])
 
     # Bistamp only, cutoff day
     prices_minutes = prices_minutes[0, cutoff_min:n_mins]
     volumes_minutes = volumes_minutes[0, cutoff_min:n_mins]
+    time_list_minutes = time_list_minutes[cutoff_min:n_mins]
     prices_hours = prices_hours[0, cutoff_hour:n_hours]
     volumes_hours = volumes_hours[0, cutoff_hour:n_hours]
     prices_days = prices_days[0, cutoff_day:n_days]
     volumes_days = volumes_days[0, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
+
+    print("prices_minutes", len(prices_minutes))
+    print("time_minutes", len(time_list_minutes))
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
@@ -653,7 +659,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     # Realized volatility
     volatility_days = ILLIQ.daily_Rv(time_list_minutes, prices_minutes)
     # Annualize the volatility
-    anlzd_volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    volatility_days = np.multiply(volatility_days, 252 ** 0.5)
     # Returns
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
@@ -665,6 +671,14 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     time_list_removed = []  # Initialized
 
     # Removing all days where Volume is zero
+    print("dis: ")
+    print("time:", len(time_list_days))
+    print("volume:", len(volumes_days))
+    print("spread:", len(spread_days))
+    print("returns:", len(returns_days))
+    print("illiq:", len(illiq_days))
+    print("volatility:", len(volumes_days))
+
     time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, illiq_days_clean, volatility_days_clean \
         = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
                                                  returns_days, illiq_days, volatility_days)

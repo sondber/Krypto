@@ -324,15 +324,24 @@ def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, lis
     time_list_removed = time_list_removed_previous # from previous
     time_list_out = []
     n_in = len(list1)
+    print("supp: len(list1)", n_in)
     out_list1= []
     if t_list2:
         out_list2 = []
+        if len(list2) != n_in:
+            print("Wrong length of list2!", len(list2))
     if t_list3:
         out_list3 = []
+        if len(list2) != n_in:
+            print("Wrong length of list3!", len(list3))
     if t_list4:
         out_list4 = []
+        if len(list2) != n_in:
+            print("Wrong length of list4!", len(list4))
     if t_list5:
         out_list5 = []
+        if len(list2) != n_in:
+            print("Wrong length of list5!", len(list5))
     for i in range(0, n_in):
         if list1[i] != 0:
             time_list_out.append(time_list[i])

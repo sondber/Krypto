@@ -637,8 +637,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     cutoff_hour = cutoff_day * 7
     cutoff_min = cutoff_day * 390
     print("Only including days after", time_list_days[cutoff_day])
-    print("Only including days after", time_list_hours[cutoff_hour])
-    print("Only including days after", time_list_minutes[cutoff_min])
+
 
     # Bistamp only, cutoff day
     prices_minutes = prices_minutes[0, cutoff_min:n_mins]
@@ -650,8 +649,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     volumes_days = volumes_days[0, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
-    print("prices_minutes", len(prices_minutes))
-    print("time_minutes", len(time_list_minutes))
+
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
@@ -666,24 +664,22 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours, volumes_hours)
     # --------------------------------------------
 
-    n_initial = len(time_list_days)
-    print("Total number of days:", n_initial)
+    remove_crazy_week = 1  # Removes the week starting at 08.04.2013
+    if remove_crazy_week == 1:
+        time_list_days = np.delete(time_list_days, range(69, 74))
+        returns_days = np.delete(returns_days, range(69, 74))
+        volumes_days = np.delete(volumes_days, range(69, 74))
+        spread_days = np.delete(spread_days, range(69, 74))
+        volatility_days = np.delete(volatility_days, range(69, 74))
+        illiq_days = np.delete(illiq_days, range(69, 74))
+
     time_list_removed = []  # Initialized
 
     # Removing all days where Volume is zero
-    print("dis: ")
-    print("time:", len(time_list_days))
-    print("volume:", len(volumes_days))
-    print("spread:", len(spread_days))
-    print("returns:", len(returns_days))
-    print("illiq:", len(illiq_days))
-    print("volatility:", len(volumes_days))
 
     time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, illiq_days_clean, volatility_days_clean \
         = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
                                                  returns_days, illiq_days, volatility_days)
-    n_no_zerovolume = len(time_list_days_clean)
-    print("Days after removing zero-volume:", n_no_zerovolume)
 
     # Removing all days where Roll is zero
     time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \

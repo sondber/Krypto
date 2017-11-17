@@ -243,6 +243,7 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
             index = i * (len_x / (n_labels - 1))
         index = int(index)
         labels.append(time_list[index][0:11])
+    plt.figure(figsize=(6, 4))
     plt.xticks(np.arange(0, len(time_list) + 1, len(time_list) / (n_labels - 1)), labels)
     plt.plot(data, linewidth=0.5, color="black")
     if ylims:
@@ -253,7 +254,6 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
         ymax = max(data) * 1.01
     plt.ylim([ymin, ymax])
     plt.xlim([0, len(time_list)])
-    plt.title(title)
 
     if logy == 1:
         ax = plt.gca()
@@ -263,6 +263,10 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
         ax = plt.gca()
         vals = ax.get_yticks()
         ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    ax = plt.gca()
+    title = title.lower()
+    location = "figures/variables_over_time/" + title + ".png"
+    plt.savefig(location)
 
 
 def regression_line(alpha, beta, xlims=[], color="black"):
@@ -289,18 +293,17 @@ def plot_x_zero(x_lims):
 
 
 def hour_of_day_ticks():
-    labels = ["00:00\n19:00\n09:00", "06:00\n01:00\n15:00", "12:00\n07:00\n21:00", "18:00\n13:00\n03:00",
-              "23:59\n18:59\n08:59"]
+    labels = ["00:00\n19:00", "06:00\n01:00", "12:00\n07:00", "18:00\n13:00",
+              "23:59\n18:59"]
     plt.xticks(np.arange(0, 25, 6), labels)
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "NYC")
-    plt.figtext(0.01, 0.005, "Tokyo")
+    plt.figtext(0.005, 0.055, "London", fontsize=10)
+    plt.figtext(0.005, 0.010, "NYC", fontsize=10)
     plt.xlim([0, 24])
 
 
-def plot_for_day(average, low, high, name="no name", perc=0):
-    plt.title(name)
-    plt.plot(average, label=name, color="black")
+def plot_for_day(average, low, high, title="no_title", perc=0):
+    plt.figure(figsize=[6, 2])
+    plt.plot(average, label=title, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
 
@@ -309,13 +312,18 @@ def plot_for_day(average, low, high, name="no name", perc=0):
         vals = ax.get_yticks()
         ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
 
+    ax = plt.gca()
+    #ax.margins(x=0.5, y=1, tight=False)
     hour_of_day_ticks()
     plt.legend()
+    title=title.lower()
+    location = "figures/seasonality/day/" + title + ".png"
+    plt.savefig(location)
 
 
-def plot_for_week(average, low, high, name="no name", perc=0, logy=0, weekends=1):
-    plt.title(name)
-    plt.plot(average, label=name, color="black")
+def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1):
+    plt.figure()
+    plt.plot(average, label=title, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
 
@@ -334,4 +342,7 @@ def plot_for_week(average, low, high, name="no name", perc=0, logy=0, weekends=1
         ax = plt.gca()
         vals = ax.get_yticks()
         ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    title = title.lower()
     plt.legend()
+    location = "figures/seasonality/week/" + title + ".png"
+    plt.savefig(location)

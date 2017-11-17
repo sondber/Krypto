@@ -324,7 +324,6 @@ def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, lis
     time_list_removed = time_list_removed_previous # from previous
     time_list_out = []
     n_in = len(list1)
-    print("supp: len(list1)", n_in)
     out_list1= []
     if t_list2:
         out_list2 = []

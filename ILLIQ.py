@@ -73,6 +73,44 @@ def ILLIQ_nyse_day(prices_hour, volume_hour):
     print("Returning daily ILLIQ ")
     return illiq
 
+# SONDRE JOBBER I DENNE
+def ILLIQ_nyse_hour(time_list_minutes, prices_minutes, volumes_minutes):
+    year, month, day, hour, minute = supp.fix_time_list(time_list_minutes)
+    returns = abs_returns(prices_minutes)
+    n_minutes =len(returns)
+    n_hours = math.floor(n_minutes/390*7)
+    illiq_hours = np.zeros(n_hours)
+
+    i = 0
+    j = 0
+
+    while i < n_minutes:
+        if hour[i] == 14:
+            illiq_temp = 0
+            for k in range(30):
+                count_non_zero = 0
+                if volumes_minutes[i + k] != 0:
+                    illiq_temp += returns[i + k]/volumes_minutes[i + k]
+                    count_non_zero += 1
+            if count_non_zero > 0:
+                illiq_hours[j] = illiq_temp / count_non_zero
+            j += 1
+            i += 30
+        else:
+            illiq_temp = 0
+            for k in range(60):
+                count_non_zero = 0
+                if volumes_minutes[i + k] != 0:
+                    illiq_temp += returns[i + k] / volumes_minutes[i + k]
+                    count_non_zero += 1
+            if count_non_zero > 0:
+                illiq_hours[j] = illiq_temp / count_non_zero
+
+            j += 1
+            i += 60
+    print("Length of illiq_hours:", len(illiq_hours))
+    return illiq_hours
+
 
 def ILLIQ_nyse_year(prices_day, volume_day):
     returns = abs_returns(prices_day)

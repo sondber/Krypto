@@ -12,7 +12,7 @@ exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(ope
 
 
 unedited = 1
-minute = 1
+minute = 0
 day = 1
 transformed = 1
 
@@ -36,42 +36,19 @@ if unedited == 1:
     volatility_days = np.multiply(ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :]), 252 ** 0.5)
 
     if minute == 1:
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_minutes, prices_minutes[0, :], "Price")
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_minutes, volumes_minutes[0, :], "Volume")
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_minutes, returns_minutes, "Return", perc=1)
     if day == 1:
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_days, prices_days[0, :], "Price")
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_days, volumes_days[0, :], "Volume")
-        fig_count += 1
-        plot.plt.figure(fig_count)
-        plot.time_series_single(time_list_days, returns_days, "Returns", perc=1)
-        fig_count += 1
-        plot.plt.figure(fig_count)
-        plot.time_series_single(time_list_days, volatility_days, "Realized Volatility", perc=1)
-        fig_count += 1
-        plot.plt.figure(fig_count)
+        plot.time_series_single(time_list_days, returns_days, "Return", perc=1)
+        plot.time_series_single(time_list_days, volatility_days, "Realized_Volatility", perc=1)
         plot.time_series_single(time_list_days, spread_days, "Spread", perc=1)
-        fig_count += 1
-        plot.plt.figure(fig_count)
         plot.time_series_single(time_list_days, illiq_days, "ILLIQ", perc=1)
 
 if transformed == 1:
-    fig_count += 1
-    plot.plt.figure(fig_count)
-    plot.time_series_single(time_list_days_clean, illiq_days_clean, "Log ILLIQ", logy=1, perc=1)
-    fig_count += 1
-    plot.plt.figure(fig_count)
-    plot.time_series_single(time_list_days_clean, volatility_days_clean, "Log volatility", logy=1, perc=1)
-
-
-plot.plt.show()
+    plot.time_series_single(time_list_days_clean, illiq_days_clean, "Log_ILLIQ", logy=1, perc=1)
+    plot.time_series_single(time_list_days_clean, volatility_days_clean, "Log_volatility", logy=1, perc=1)
+    plot.time_series_single(time_list_days_clean, log_volumes_days_clean, "Log_volume",  perc=1)
+    plot.time_series_single(time_list_days_clean, returns_days_clean, "Return_clean",  perc=1)

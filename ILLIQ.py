@@ -111,7 +111,7 @@ def ILLIQ_nyse_hour(time_list_minutes, prices_minutes, volumes_minutes):
     print("Length of illiq_hours:", len(illiq_hours))
     return illiq_hours
 
-
+"""
 def ILLIQ_nyse_year(prices_day, volume_day):
     returns = abs_returns(prices_day)
     days = 261
@@ -135,6 +135,7 @@ def ILLIQ_nyse_year(prices_day, volume_day):
     print("Returning yearly ILLIQ ")
     return illiq
 
+"""
 
 def p_v(prices, volumes, window):
     p_v = np.zeros(len(prices))

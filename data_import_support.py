@@ -618,7 +618,7 @@ def volume_transformation(volume, initial_mean_volume):
         if volume[i] == 0 or np.mean(volume[i - n_days_in_window:i]) == 0:
             out_volume[i] = 0
         else:
-            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_days_in_window:i]))
+            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_days_in_window:i - 1]))
     out_volume[0] = np.log(volume[0]) - np.log(initial_mean_volume)
     return out_volume
 
@@ -640,6 +640,8 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     cutoff_min = cutoff_day * 390
     print("Only including days after", time_list_days[cutoff_day])
 
+    n_total = 1978
+    n_0 = n_days # Mon-Friday
 
     # Bistamp only, cutoff day
     prices_minutes = prices_minutes[0, cutoff_min:n_mins]
@@ -651,7 +653,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     volumes_days = volumes_days[0, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
-
+    n_1 = len(time_list_days) # After removing 2013
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
@@ -668,20 +670,24 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
 
     remove_crazy_week = 1  # Removes the week starting at 08.04.2013
     if remove_crazy_week == 1:
+        time_list_removed = time_list_days[69:74]
         time_list_days = np.delete(time_list_days, range(69, 74))
         returns_days = np.delete(returns_days, range(69, 74))
         volumes_days = np.delete(volumes_days, range(69, 74))
         spread_days = np.delete(spread_days, range(69, 74))
         volatility_days = np.delete(volatility_days, range(69, 74))
         illiq_days = np.delete(illiq_days, range(69, 74))
+    else:
+        time_list_removed = []
 
-    time_list_removed = []  # Initialized
+    n_2 = len(time_list_days) # After removing the crazy week
 
     # Removing all days where Volume is zero
-
     time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, illiq_days_clean, volatility_days_clean \
         = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
                                                  returns_days, illiq_days, volatility_days)
+
+    n_3 = len(time_list_days_clean) # After removing the zero-volume
 
     # Removing all days where Roll is zero
     time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
@@ -693,8 +699,8 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
                                                                                      illiq_days_clean,
                                                                                      volatility_days_clean)
 
-    n_no_zeroroll = len(time_list_days_clean)
-    print("Days after removing zero-Roll:", n_no_zeroroll)
+    n_4 = len(time_list_days_clean) # After removing the zero-roll
+
 
     # Removing all days where Volatility is zero
     time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
@@ -706,8 +712,15 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
                                                                                  illiq_days_clean,
                                                                                  spread_days_clean)
 
-    n_no_zerorvol = len(time_list_days_clean)
-    print("Days after removing zero-volatility:", n_no_zerorvol)
+    n_5 = len(time_list_days_clean) # After removing the zero-volatility
+
+    print("Total days:", n_total)
+    print("Week only:", n_0)
+    print("Removing 2012:", n_1)
+    print("Removing extreme week:", n_2)
+    print("Removing zero-volume:", n_3)
+    print("Removing zero-roll:", n_4)
+    print("Removing zero-volatility:", n_5)
 
     # Turning ILLIQ, Volume and RVol into log
     log_illiq_days_clean = np.log(illiq_days_clean)

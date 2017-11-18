@@ -293,17 +293,15 @@ def plot_x_zero(x_lims):
 
 
 def hour_of_day_ticks():
-    labels = ["00:00\n19:00", "06:00\n01:00", "12:00\n07:00", "18:00\n13:00",
-              "23:59\n18:59"]
-    plt.xticks(np.arange(0, 25, 6), labels)
-    plt.figtext(0.005, 0.055, "London", fontsize=10)
-    plt.figtext(0.005, 0.010, "NYC", fontsize=10)
-    plt.xlim([0, 24])
+    labels = ["03/22", "09/04", "15/10", "21/16"]
+    plt.xticks([3, 9, 15, 21], labels)
+    plt.figtext(0.005, 0.010, "UTC/UTC-5", fontsize=10)
+    plt.xlim([0, 23])
 
 
 def plot_for_day(average, low, high, title="no_title", perc=0):
     plt.figure(figsize=[6, 2])
-    plt.plot(average, label=title, color="black")
+    plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
 
@@ -322,8 +320,8 @@ def plot_for_day(average, low, high, title="no_title", perc=0):
 
 
 def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1):
-    plt.figure()
-    plt.plot(average, label=title, color="black")
+    plt.figure(figsize=[6, 2])
+    plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
 

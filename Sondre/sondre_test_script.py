@@ -13,35 +13,60 @@ import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
+
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
 illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
     time_list_minutes, prices_minutes,
     volumes_minutes)
 
 
+#time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+#time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+
+#return_days = jake_supp.logreturn(prices_days[0, :])
 
 
-time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
 
-#plt.plot(volumes_days[0,:], label=exchanges[0])
-plt.plot(volumes_days[1,:], label=exchanges[1])
-#plt.plot(volumes_days[2,:], label=exchanges[2])
-#plt.plot(volumes_days[3,:], label=exchanges[3])
-plt.legend()
-plt.show()
 
-illiq_hour = ILLIQ.ILLIQ_nyse_hour(time_list_minutes, prices_minutes[0,:], volumes_minutes[0, :])
-illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours[0,:], volumes_hours[0,:])
 
-print("hours:", len(time_list_hours))
-plt.plot(illiq_hour)
-plt.ylim([0, 0.08])
-plt.figure()
-plt.plot(illiq_days)
-plt.ylim([0, 0.08])
-plt.show()
+
+test_rvol= 0
+if test_rvol == 1:
+    start_day = 265
+    end_day = 600
+
+    print(time_list_days[start_day:start_day+5])
+    for i in range(0, 20):
+        print(time_list_days_clean[i])
+
+
+    volatility_days = np.multiply(ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :]), 252 ** 0.5)
+    plt.plot(volatility_days[start_day:end_day], color="black", linewidth=0.5)
+    plt.plot(volatility_days_clean[0:300], color="red", linewidth=0.5)
+    plt.show()
+
+test_illiq = 0
+if test_illiq == 1:
+    illiq_hour = ILLIQ.ILLIQ_nyse_hour(time_list_minutes, prices_minutes[0,:], volumes_minutes[0, :])
+    illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours[0,:], volumes_hours[0,:])
+
+    print("Correct number of hours:", len(time_list_hours))
+    print("Illiq number of days:", len(illiq_hour))
+    print("Correct number of days:", len(time_list_days))
+    print("Illiq number of days:", len(illiq_days))
+
+    plt.hist(illiq_hour)
+    plt.figure()
+    plt.hist(illiq_days)
+    plt.figure()
+    plt.plot(illiq_hour, linewidth=0.5)
+    plt.ylim([0, 0.15])
+    plt.figure()
+    plt.plot(illiq_days, linewidth=0.5)
+    plt.ylim([0, 0.15])
+    plt.show()
 
 
 check_freq = 0

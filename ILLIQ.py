@@ -1,5 +1,8 @@
 from Sondre import sondre_support_formulas as supp
 
+# Illiq as described in Amihud.
+# Cuts any volumes less than "volume_limit". If all minutes in a window is zero, the window is omitted, resulting in a time-gap in the return-vector.
+
 
 def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
               kill_output=1):  # day=1 indicates daily measure, day_or_hour=0 indicates hourly measure

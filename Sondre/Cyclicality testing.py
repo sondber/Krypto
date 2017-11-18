@@ -8,7 +8,7 @@ import os
 import rolls
 from matplotlib import pyplot as plt
 import scipy.stats as st
-import ILLIQ
+import ILLIQ_old
 
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
@@ -49,7 +49,7 @@ if days == 1:
     time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
     returns_day = jake_supp.logreturn(prices_day[0, :])
     spread_day = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]  # Rolls
-    illiq_day = ILLIQ.ILLIQ_nyse_day(prices_hour[0, :], volumes_hour[0, :])
+    illiq_day = ILLIQ_old.ILLIQ_nyse_day(prices_hour[0, :], volumes_hour[0, :])
 
     if non_transformed == 1:
         # Finding average for every day of the week

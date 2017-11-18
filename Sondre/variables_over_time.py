@@ -4,7 +4,7 @@ import plot
 import numpy as np
 import os
 import rolls
-import ILLIQ
+import ILLIQ_old
 from Jacob import jacob_support as jake_supp
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
@@ -32,8 +32,8 @@ if unedited == 1:
     returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
     returns_days = jake_supp.logreturn(prices_days[0, :])
     spread_days = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]
-    illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])
-    volatility_days = np.multiply(ILLIQ.daily_Rv(time_list_minutes, prices_minutes[0, :]), 252 ** 0.5)
+    illiq_days = ILLIQ_old.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])
+    volatility_days = np.multiply(ILLIQ_old.daily_Rv(time_list_minutes, prices_minutes[0, :]), 252 ** 0.5)
 
     if minute == 1:
         plot.time_series_single(time_list_minutes, prices_minutes[0, :], "Price")

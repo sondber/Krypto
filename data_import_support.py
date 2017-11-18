@@ -6,7 +6,7 @@ import math
 from matplotlib import pyplot as plt
 import scipy.stats as st
 import rolls
-import ILLIQ
+import ILLIQ_old
 from Jacob import jacob_support as jake_supp
 
 
@@ -655,13 +655,13 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
                                                                               calc_basis=1, kill_output=1)
     # Realized volatility
-    volatility_days = ILLIQ.daily_Rv(time_list_minutes, prices_minutes)
+    volatility_days = ILLIQ_old.daily_Rv(time_list_minutes, prices_minutes)
     # Annualize the volatility
     volatility_days = np.multiply(volatility_days, 252 ** 0.5)
     # Returns
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours, volumes_hours)
+    illiq_days = ILLIQ_old.ILLIQ_nyse_day(prices_hours, volumes_hours)
     # --------------------------------------------
 
     remove_crazy_week = 1  # Removes the week starting at 08.04.2013

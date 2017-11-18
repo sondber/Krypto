@@ -6,7 +6,7 @@ from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 from matplotlib import pyplot as plt
-import ILLIQ
+import ILLIQ_old
 import linreg
 
 # Opening hours only

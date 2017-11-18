@@ -9,7 +9,7 @@ import os
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import rolls
-import ILLIQ
+import ILLIQ_old
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
@@ -32,8 +32,8 @@ plt.plot(volumes_days[1,:], label=exchanges[1])
 plt.legend()
 plt.show()
 
-illiq_hour = ILLIQ.ILLIQ_nyse_hour(time_list_minutes, prices_minutes[0,:], volumes_minutes[0, :])
-illiq_days = ILLIQ.ILLIQ_nyse_day(prices_hours[0,:], volumes_hours[0,:])
+illiq_hour = ILLIQ_old.ILLIQ_nyse_hour(time_list_minutes, prices_minutes[0, :], volumes_minutes[0, :])
+illiq_days = ILLIQ_old.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])
 
 print("hours:", len(time_list_hours))
 plt.plot(illiq_hour)

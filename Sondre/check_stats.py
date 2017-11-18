@@ -8,7 +8,7 @@ import data_import_support as dis
 import os
 from matplotlib import pyplot as plt
 import rolls
-import ILLIQ
+import ILLIQ_old
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 

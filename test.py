@@ -12,7 +12,7 @@ import datetime as dt
 
 import math
 import numpy as np
-import ILLIQ
+import ILLIQ_old
 exchanges, time_list, prices, volumes = di.get_lists(make_totals="no")
 time_list_day, prices_day, volumes_day = dis.convert_to_day(time_list, prices, volumes)
 year_list, month,day,hour, minute=supp.fix_time_list(time_list_day)
@@ -43,7 +43,7 @@ plt.figure(fig_count)
 
 #fig_count += 1
 #plt.figure(fig_count)
-plt.plot(ILLIQ.ILLIQ_nyse_window(prices_day[0,:],volumes_day[0,:],7,remove_outliers="yes"))
+plt.plot(ILLIQ_old.ILLIQ_nyse_window(prices_day[0, :], volumes_day[0, :], 7, remove_outliers="yes"))
 plt.xlabel("week")
 plt.ylabel("ILLIQ")
 plt.ylim([0,0.00010])

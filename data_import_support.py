@@ -386,14 +386,14 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     return out_excel_stamps, out_prices, out_volumes
 
 
-
-def convert_to_hour(time_stamps, prices, volumes):
+def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
+    # basis=0 --> start/end     basis=1 --> sum
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
     time_stamps_out = []
     k = 0
-    n_exc = np.size(prices, 0)
+    n_exc = np.size(list1, 0)
 
     if hour[0] == 0:
         opening_hours_only = 0
@@ -403,33 +403,45 @@ def convert_to_hour(time_stamps, prices, volumes):
 
     if opening_hours_only == 1:
         n_hours = int(math.ceil(n_mins * (7 / 390)))
-        prices_out = np.zeros([n_exc, n_hours])
-        volumes_out = np.zeros([n_exc, n_hours])
+        list1_out = np.zeros([n_exc, n_hours])
+        list2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
             if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 29]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
+                    if list1_basis == 0:
+                        list1_out[j, k] = list1[j, i + 29]  # The price at the last minute of the hour
+                    else:
+                        list1_out[j, k] = np.sum(list1[j, i:(i + 30)]) * 2  # The price at the last minute of the hour
+                    if list2_basis == 0:
+                        list2_out[j, k] = list2[j, i + 29]    # To make up for missing half hour
+                    else:
+                        list2_out[j, k] = np.sum(list2[j, i:(i + 30)]) * 2  # To make up for missing half hour
                 k += 1
             elif minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                    list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
     else:
         n_hours = int(n_mins / 60)
-        prices_out = np.zeros([n_exc, n_hours])
-        volumes_out = np.zeros([n_exc, n_hours])
+        list1_out = np.zeros([n_exc, n_hours])
+        list2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
             if minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                    if list1_basis == 0:
+                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        list1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                    if list2_basis == 0:
+                        list2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
-    return time_stamps_out, prices_out, volumes_out
+    return time_stamps_out, list1_out, list2_out
 
 
 def convert_to_day(time_stamps, prices, volumes):
@@ -732,14 +744,14 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
                                                                               calc_basis=1, kill_output=1)
     # Realized volatility
     volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)
-    print(rVol_time[0:4]) ############
     # Annualize the volatility
     volatility_days = np.multiply(volatility_days, 252 ** 0.5)
     # Returns
     returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)[1] # Already clean
+    illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes) # Already clean
+
     # --------------------------------------------
 
     remove_crazy_week = 1  # Removes the week starting at 08.04.2013
@@ -750,7 +762,8 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
         volumes_days = np.delete(volumes_days, range(69, 74))
         spread_days = np.delete(spread_days, range(69, 74))
         volatility_days = np.delete(volatility_days, range(69, 74))
-        #illiq_days = np.delete(illiq_days, range(69, 74))
+        illiq_days_clean = np.delete(illiq_days_clean, range(69, 74))
+        illiq_time = np.delete(illiq_time, range(69, 74))
     else:
         time_list_removed = []
 
@@ -765,27 +778,30 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
 
     # Removing all days where Roll is zero
     time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
-    volatility_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+    volatility_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
                                                                                      time_list_removed,
                                                                                      spread_days_clean,
                                                                                      volumes_days_clean,
                                                                                      returns_days_clean,
-                                                                                     volatility_days_clean)
+                                                                                     volatility_days_clean,
+                                                                                    illiq_days_clean)
 
     n_4 = len(time_list_days_clean) # After removing the zero-roll
 
 
     # Removing all days where Volatility is zero
     time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
-    spread_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+    spread_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
                                                                                  time_list_removed,
                                                                                  volatility_days_clean,
                                                                                  volumes_days_clean,
                                                                                  returns_days_clean,
-                                                                                 spread_days_clean)
+                                                                                 spread_days_clean, illiq_days_clean)
 
     n_5 = len(time_list_days_clean) # After removing the zero-volatility
 
+    print()
+    print()
     print("Total days:", n_total)
     print("Week only:", n_0)
     print("Removing 2012:", n_1)
@@ -811,15 +827,15 @@ def fetch_aggregate_csv_hilo(file_name, n_exc):
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
         i = 0
         time_list = []
-        prices = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
-        volumes = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        high = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        low = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
         next(reader)
         next(reader)
         next(reader)
         for row in reader:
             time_list.append(row[0])
             for j in range(0, n_exc):
-                prices[j, i] = row[1+2*j]
-                volumes[j, i] = row[2 + 2 * j]
+                high[j, i] = row[1 + 2 * j]
+                low[j, i] = row[2 + 2 * j]
             i = i + 1
-    return time_list, prices, volumes
+    return time_list, high, low

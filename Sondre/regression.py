@@ -63,12 +63,12 @@ if rolls_reg == 1:
     print_n(20)
     n_entries = len(Y)
     n_lags = len(lags)
-    n_others = 5
+    n_others = 6
     n_explanatory = n_lags + n_others
     X = np.zeros([n_entries, n_explanatory])
     print("--------------EXPLANATORY VARIABLES--------------")
     for j in range(n_lags):
-        print("x%i: %i days lag" % (j + 1, lags[j]))
+        print("x%i: Rolls with %i days lag" % (j + 1, lags[j]))
         x = supp.mean_for_n_entries(spread_days_clean, lags[j])
         x = x[len(x) - n_entries: len(x)]
         for i in range(0, n_entries):
@@ -80,9 +80,19 @@ if rolls_reg == 1:
         X[i, j] = returns_days_clean[i]
 
     j += 1
-    print("x%i: Realized Volatility" % (j+1))
+    print("x%i: Returns with 1 lag" % (j+1))
     for i in range(0, n_entries):
-        X[i, j] = volatility_days_clean[i]
+        X[i, j] = returns_days_clean[i - 1]
+
+    j += 1
+    print("x%i: Log Volumes (normalized)" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volumes_days_clean[i]
+
+    j += 1
+    print("x%i: Log Volumes (normalized) with 1 lag" % (j + 1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volumes_days_clean[i]
 
     j += 1
     print("x%i: Log Realized Volatility" % (j+1))
@@ -90,14 +100,63 @@ if rolls_reg == 1:
         X[i, j] = log_volatility_days_clean[i]
 
     j += 1
-    print("x%i: Volumes" % (j+1))
+    print("x%i: Log Realized Volatility with 1 lag" % (j + 1))
     for i in range(0, n_entries):
-        X[i, j] = volumes_days_clean[i]
+        X[i, j] = log_volatility_days_clean[i - 1]
+
+
+    print()
+    linreg.reg_multiple_pandas(Y, X)
+
+illiq_reg = 1
+if illiq_reg == 1:
+    lags = [1, 5, 44]
+    max_lag = 44  # Locked at 44! <-------------------
+
+    Y = log_illiq_days_clean[max_lag: len(log_illiq_days_clean)]
+    print_n(20)
+    n_entries = len(Y)
+    n_lags = len(lags)
+    n_others = 6
+    n_explanatory = n_lags + n_others
+    X = np.zeros([n_entries, n_explanatory])
+    print("--------------EXPLANATORY VARIABLES--------------")
+    for j in range(n_lags):
+        print("x%i: Log ILLIQ with %i days lag" % (j + 1, lags[j]))
+        x = supp.mean_for_n_entries(log_illiq_days_clean, lags[j])
+        x = x[len(x) - n_entries: len(x)]
+        for i in range(0, n_entries):
+            X[i, j] = x[i]
+
+    j = n_lags
+    print("x%i: Returns" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = returns_days_clean[i]
+
+    j += 1
+    print("x%i: Returns with 1 lag" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = returns_days_clean[i - 1]
 
     j += 1
     print("x%i: Log Volumes (normalized)" % (j+1))
     for i in range(0, n_entries):
         X[i, j] = log_volumes_days_clean[i]
+
+    j += 1
+    print("x%i: Log Volumes (normalized) with 1 lag" % (j + 1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volumes_days_clean[i]
+
+    j += 1
+    print("x%i: Log Realized Volatility" % (j+1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volatility_days_clean[i]
+
+    j += 1
+    print("x%i: Log Realized Volatility with 1 lag" % (j + 1))
+    for i in range(0, n_entries):
+        X[i, j] = log_volatility_days_clean[i - 1]
 
     print()
     linreg.reg_multiple_pandas(Y, X)

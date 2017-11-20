@@ -9,7 +9,6 @@ import os
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import rolls
-import ILLIQ_old
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 

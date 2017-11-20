@@ -421,8 +421,14 @@ def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
             elif minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
-                    list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
+                    if list1_basis == 0:
+                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        list1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                    if list2_basis == 0:
+                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
     else:
         n_hours = int(n_mins / 60)

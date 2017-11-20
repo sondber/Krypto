@@ -23,8 +23,8 @@ def reg_multiple_pandas(Y, X):
     print(reg_model.summary())
 
 
-def linreg_coeffs(arr1, arr2):  # input is equal length one-dim arrays of measurements
-    parameters = scistat.linregress(arr1, arr2)
+def linreg_coeffs(x, y):  # input is equal length one-dim arrays of measurements
+    parameters = scistat.linregress(x, y)
     slope = parameters[0]  # slope of the regression line
     intercept = parameters[1]  # intercept of the regression line
     r_value = parameters[2]  # correlation coefficient, remember to square for R-squared
@@ -49,3 +49,4 @@ def autocorr_linreg(in_list, n_lags):
             X[i, lag] = in_list[i + lag + 1]
     Y = in_list[0: len(in_list) - n_lags]
     reg_multiple_pandas(Y, X)
+

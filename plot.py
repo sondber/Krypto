@@ -63,6 +63,7 @@ def plot_for_exchanges(matrix, exchanges):
 
 
 def scatters(x, y, color="black", areas=[], label="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
+    plt.figure()
     if not xlims:
         xlims = [min(x), max(x)]
     if not ylims:

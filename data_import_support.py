@@ -81,7 +81,7 @@ def make_time_stamps():
     return unix_stamps, excel_stamps
 
 
-def read_long_csvs(file_name, time_list, price, volume):
+def price_volume_from_raw(file_name, time_list, price, volume):
     with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
@@ -96,6 +96,24 @@ def read_long_csvs(file_name, time_list, price, volume):
                 print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
         return time_list, price, volume
+
+
+def hilo_from_raw(file_name, time_list, high, low):
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            try:
+                time_list.append(int(row[0]))
+                high.append(float(row[2]))
+                low.append(float(row[3]))
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+        return time_list, high, low
+
 
 
 def make_excel_stamp(y, mo, d, h, mi):
@@ -120,14 +138,13 @@ def make_excel_stamp(y, mo, d, h, mi):
     return stamp
 
 
-def get_lists_from_fulls(exchanges):
+def get_price_volume_from_fulls(exchanges):
     n_exc = len(exchanges)
     print("Number of exchanges: ", n_exc)
     raw_folder = "data/long_raw_data/"
     unix_stamps, excel_stamps = make_time_stamps()
     n_cols = len(excel_stamps)
     prices = np.zeros([n_exc, n_cols])
-    prices_usd = np.zeros([n_exc, n_cols])
     volumes = np.zeros([n_exc, n_cols])
     for i in range(0, n_exc):
         print("Working on exchange %i/%i" % ((i + 1), n_exc))
@@ -135,7 +152,7 @@ def get_lists_from_fulls(exchanges):
         single_volume = []
         time_list = []
         file_name = raw_folder + exchanges[i] + ".csv"
-        time_list, single_price, single_volume = read_long_csvs(file_name, time_list, single_price, single_volume)
+        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price, single_volume)
 
         # Gjør om nan til 0 og så fyller inn tomme priser
         single_price = remove_nan(single_price)
@@ -163,6 +180,48 @@ def get_lists_from_fulls(exchanges):
             prices[i, j] = single[j]
 
     return excel_stamps, unix_stamps, prices, volumes
+
+
+def get_hilo_from_fulls(exchanges):
+    n_exc = len(exchanges)
+    print("Number of exchanges: ", n_exc)
+    raw_folder = "data/long_raw_data/"
+    unix_stamps, excel_stamps = make_time_stamps()
+    n_cols = len(excel_stamps)
+    high = np.zeros([n_exc, n_cols])
+    low = np.zeros([n_exc, n_cols])
+    for i in range(0, n_exc):
+        print("Working on exchange %i/%i" % ((i + 1), n_exc))
+        single_high = []
+        single_low = []
+        time_list = []
+        file_name = raw_folder + exchanges[i] + ".csv"
+        time_list, single_high, single_low = hilo_from_raw(file_name, time_list, single_high, single_low)
+
+
+        # Gjør om nan til 0 og så fyller inn tomme priser
+        single_high = remove_nan(single_high)
+        single_low = remove_nan(single_low)
+        single_high = supp.fill_blanks(single_high)
+        single_low = supp.fill_blanks(single_low)
+
+
+        # Må nå finne hvilken rad vi skal lime inn på
+        n = len(single_high)
+        r = 0
+
+        # Check whether the first entry in time_list is before the start of the unix_stamps
+        start_j = 0
+        while time_list[start_j] < unix_stamps[0]:
+            start_j += 1
+
+        for j in range(start_j, n):
+            while unix_stamps[r] != time_list[j]:
+                r = r + 1
+            high[i, r] = single_high[j]
+            low[i, r] = single_low[j]
+
+    return excel_stamps, unix_stamps, high, low
 
 
 def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
@@ -194,6 +253,38 @@ def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
             for j in range(0, n_exc):
                 rowdata.append(prices[j, i])
                 rowdata.append(volumes[j, i])
+            writ.writerow(rowdata)
+    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
+def write_hilo_to_csv(high, low, excel_stamps, exchanges, filename):
+    time_list = excel_stamps  # <-- Kun for å kunne bruke gammel syntax
+    n_exc = len(exchanges)
+    print("Exporting data to csv-files...")
+    with open(filename, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        n_rows = np.size(high, 1)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        for exc in exchanges:
+            currency = exc[len(exc) - 3: len(exc)]
+            header1.append(exc)
+            header1.append("")
+            header2.append("High")
+            header2.append("Low")
+            header3.append(currency.lower())
+            header3.append(currency.lower())
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+        for i in range(0, n_rows):
+            rowdata = [time_list[i]]
+            for j in range(0, n_exc):
+                rowdata.append(high[j, i])
+                rowdata.append(low[j, i])
             writ.writerow(rowdata)
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
@@ -253,12 +344,12 @@ def write_to_gold_csvs(excel_stamps, volume, price, bid, ask, filename):
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
 
-def opening_hours(in_excel_stamps, in_prices, in_volumes):
+def opening_hours(in_excel_stamps, in_matrix1, in_matrix2):
     year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
     n_mins = len(in_excel_stamps)
     out_excel_stamps = []
-    out_prices = []
-    out_volumes = []
+    out_matrix1 = []
+    out_matrix2 = []
 
     # Kan sette inn en funksjon som sjekker om det er helligdag
 
@@ -267,11 +358,11 @@ def opening_hours(in_excel_stamps, in_prices, in_volumes):
         if w_day != 6 and w_day != 7:
             if 15 <= hour[i] <= 20 or (hour[i] == 14 and minute[i] >= 30):
                 out_excel_stamps.append(in_excel_stamps[i])
-                out_prices.append(in_prices[:, i])
-                out_volumes.append(in_volumes[:, i])
-    out_prices = np.transpose(np.matrix(out_prices))
-    out_volumes = np.transpose(np.matrix(out_volumes))
-    return out_excel_stamps, out_prices, out_volumes
+                out_matrix1.append(in_matrix1[:, i])
+                out_matrix2.append(in_matrix2[:, i])
+    out_matrix1 = np.transpose(np.matrix(out_matrix1))
+    out_matrix2 = np.transpose(np.matrix(out_matrix2))
+    return out_excel_stamps, out_matrix1, out_matrix2
 
 
 # Denne er kun et eksperiment
@@ -294,22 +385,6 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
 
-
-"""
-def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    n_cols_high = len(time_stamps)
-    n_exc = np.size(volumes, 0)
-    n_cols_low = int(n_cols_high / conversion_rate)
-    time_stamps_low = []
-    prices_low = np.zeros([n_exc, n_cols_low])
-    volumes_low = np.zeros([n_exc, n_cols_low])
-    for i in range(0, n_cols_low):
-        time_stamps_low.append(time_stamps[i * conversion_rate])
-        for j in range(0, n_exc):
-            prices_low[j, i] = prices[j, i * conversion_rate]
-            volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate: (i + 1) * conversion_rate])
-    return time_stamps_low, prices_low, volumes_low
-"""
 
 
 def convert_to_hour(time_stamps, prices, volumes):
@@ -497,7 +572,7 @@ def cyclical_average(time_list, data, frequency="h"):
                     hs = str(h)
                 day_time.append(hs + ":" + "00")
                 h_list.append(h)
-        elif hour[0] == 0:
+        else:
             for h in range(0, 24):
                 if h < 10:
                     hs = "0" + str(h)
@@ -505,9 +580,6 @@ def cyclical_average(time_list, data, frequency="h"):
                     hs = str(h)
                 day_time.append(hs + ":" + "00")
                 h_list.append(h)
-        else:
-            print("dis.cyclical_average: Something was wrong with the time_list....")
-            return None
     elif frequency == "m":
         if hour[0] == 14:
             for h in range(14, 21):
@@ -527,7 +599,7 @@ def cyclical_average(time_list, data, frequency="h"):
                     day_time.append(hs + ":" + ms)
                     h_list.append(h)
                     m_list.append(m)
-        elif hour[0] == 0:
+        else:
             for h in range(0, 24):
                 if h < 10:
                     hs = "0" + str(h)
@@ -659,13 +731,15 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
                                                                               calc_basis=1, kill_output=1)
     # Realized volatility
-    volatility_days = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)[0]
+    volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)
+    print(rVol_time[0:4]) ############
     # Annualize the volatility
     volatility_days = np.multiply(volatility_days, 252 ** 0.5)
     # Returns
+    returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_days = ILLIQ.illiq(time_list_minutes, prices_minutes, volumes_minutes)[1]
+    illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)[1] # Already clean
     # --------------------------------------------
 
     remove_crazy_week = 1  # Removes the week starting at 08.04.2013
@@ -676,27 +750,26 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
         volumes_days = np.delete(volumes_days, range(69, 74))
         spread_days = np.delete(spread_days, range(69, 74))
         volatility_days = np.delete(volatility_days, range(69, 74))
-        illiq_days = np.delete(illiq_days, range(69, 74))
+        #illiq_days = np.delete(illiq_days, range(69, 74))
     else:
         time_list_removed = []
 
     n_2 = len(time_list_days) # After removing the crazy week
 
     # Removing all days where Volume is zero
-    time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, illiq_days_clean, volatility_days_clean \
+    time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, volatility_days_clean \
         = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
-                                                 returns_days, illiq_days, volatility_days)
+                                                 returns_days, volatility_days)
 
     n_3 = len(time_list_days_clean) # After removing the zero-volume
 
     # Removing all days where Roll is zero
     time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
-    illiq_days_clean, volatility_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+    volatility_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
                                                                                      time_list_removed,
                                                                                      spread_days_clean,
                                                                                      volumes_days_clean,
                                                                                      returns_days_clean,
-                                                                                     illiq_days_clean,
                                                                                      volatility_days_clean)
 
     n_4 = len(time_list_days_clean) # After removing the zero-roll
@@ -704,12 +777,11 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
 
     # Removing all days where Volatility is zero
     time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
-    illiq_days_clean, spread_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+    spread_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
                                                                                  time_list_removed,
                                                                                  volatility_days_clean,
                                                                                  volumes_days_clean,
                                                                                  returns_days_clean,
-                                                                                 illiq_days_clean,
                                                                                  spread_days_clean)
 
     n_5 = len(time_list_days_clean) # After removing the zero-volatility
@@ -729,3 +801,25 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
 
     return time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
            illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
+
+
+def fetch_aggregate_csv_hilo(file_name, n_exc):
+    n_rows = supp.count_rows(file_name)
+    n_exc = int(n_exc)
+    print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        i = 0
+        time_list = []
+        prices = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        volumes = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            time_list.append(row[0])
+            for j in range(0, n_exc):
+                prices[j, i] = row[1+2*j]
+                volumes[j, i] = row[2 + 2 * j]
+            i = i + 1
+    return time_list, prices, volumes

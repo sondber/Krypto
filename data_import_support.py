@@ -393,6 +393,7 @@ def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
     n_mins = len(time_stamps)
     time_stamps_out = []
     k = 0
+
     n_exc = np.size(list1, 0)
 
     if hour[0] == 0:
@@ -403,51 +404,51 @@ def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
 
     if opening_hours_only == 1:
         n_hours = int(math.ceil(n_mins * (7 / 390)))
-        list1_out = np.zeros([n_exc, n_hours])
-        list2_out = np.zeros([n_exc, n_hours])
+        matrix1_out = np.zeros([n_exc, n_hours])
+        matrix2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
             if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     if list1_basis == 0:
-                        list1_out[j, k] = list1[j, i + 29]  # The price at the last minute of the hour
+                        matrix1_out[j, k] = list1[j, i + 29]  # The price at the last minute of the hour
                     else:
-                        list1_out[j, k] = np.sum(list1[j, i:(i + 30)]) * 2  # The price at the last minute of the hour
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 30)]) * 2  # The price at the last minute of the hour
                     if list2_basis == 0:
-                        list2_out[j, k] = list2[j, i + 29]    # To make up for missing half hour
+                        matrix2_out[j, k] = list2[j, i + 29]    # To make up for missing half hour
                     else:
-                        list2_out[j, k] = np.sum(list2[j, i:(i + 30)]) * 2  # To make up for missing half hour
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 30)]) * 2  # To make up for missing half hour
                 k += 1
             elif minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     if list1_basis == 0:
-                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
                     else:
-                        list1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
                     if list2_basis == 0:
-                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
                     else:
-                        list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
     else:
         n_hours = int(n_mins / 60)
-        list1_out = np.zeros([n_exc, n_hours])
-        list2_out = np.zeros([n_exc, n_hours])
+        matrix1_out = np.zeros([n_exc, n_hours])
+        matrix2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
             if minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     if list1_basis == 0:
-                        list1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
                     else:
-                        list1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
                     if list2_basis == 0:
-                        list2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
+                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
                     else:
-                        list2_out[j, k] = np.sum(list2[j, i:(i + 60)])
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
-    return time_stamps_out, list1_out, list2_out
+    return time_stamps_out, matrix1_out, matrix2_out
 
 
 def convert_to_day(time_stamps, prices, volumes):
@@ -806,15 +807,17 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
 
     n_5 = len(time_list_days_clean) # After removing the zero-volatility
 
-    print()
-    print()
-    print("Total days:", n_total)
-    print("Week only:", n_0)
-    print("Removing 2012:", n_1)
-    print("Removing extreme week:", n_2)
-    print("Removing zero-volume:", n_3)
-    print("Removing zero-roll:", n_4)
-    print("Removing zero-volatility:", n_5)
+    show_days_table = 0
+    if show_days_table == 1:
+        print()
+        print()
+        print("Total days:", n_total)
+        print("Week only:", n_0)
+        print("Removing 2012:", n_1)
+        print("Removing extreme week:", n_2)
+        print("Removing zero-volume:", n_3)
+        print("Removing zero-roll:", n_4)
+        print("Removing zero-volatility:", n_5)
 
     # Turning ILLIQ, Volume and RVol into log
     log_illiq_days_clean = np.log(illiq_days_clean)

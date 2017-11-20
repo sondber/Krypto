@@ -28,12 +28,35 @@ def HAR_model(in_list):
     linreg.reg_multiple_pandas(Y, X)
 
 
+def univariate_with_print(y, x):
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(x, y)
+    linreg.stats(slope, intercept, r_value, p_value)
+
+
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
 illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
     time_list_minutes, prices_minutes,
     volumes_minutes)
+
+univariate_regs = 1
+if univariate_regs == 1:
+    max_lag = 44  # Locked at 44! <-------------------
+    Y = spread_days_clean[max_lag: len(spread_days_clean)]
+    n_entries = len(Y)
+    start_index = len(x) - n_entries
+    total length = lenx
+    lags = [1, 5, 44]
+    n_lags = len(lags)
+    for j in range(n_lags):
+        x = supp.mean_for_n_entries(spread_days_clean, lags[j])
+        x = x[len(x) - n_entries: len(x)]
+        print("Spread - Average spread for last %i days" % lags[j])
+        univariate_with_print(Y, x)
+
+    x = returns_days_clean[len(returns_days_clean) - n_entries]
+
 
 autoreg = 0
 if autoreg == 1:
@@ -54,7 +77,7 @@ if har == 1:
     HAR_model(log_illiq_days_clean)
 
 
-rolls_reg = 1
+rolls_reg = 0
 if rolls_reg == 1:
     lags = [1, 5, 44]
     max_lag = 44  # Locked at 44! <-------------------
@@ -108,7 +131,7 @@ if rolls_reg == 1:
     print()
     linreg.reg_multiple_pandas(Y, X)
 
-illiq_reg = 1
+illiq_reg = 0
 if illiq_reg == 1:
     lags = [1, 5, 44]
     max_lag = 44  # Locked at 44! <-------------------

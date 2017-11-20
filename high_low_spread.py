@@ -57,7 +57,7 @@ def hi_lo_spread(timestamps, highs, lows,
     na_spread = 0
 
     freq_desc = "daily"
-    if hours_yesno == 0:
+    if hour_yesno == 0:
         resolution_desc = "minute"
     else:
         resolution_desc = "hour"
@@ -67,7 +67,7 @@ def hi_lo_spread(timestamps, highs, lows,
     # determine trading day yes/no
     if hour[0] == 0:  # this indicates that full day is being investigated
         hours_in_day = 24
-        if hours_yesno == 0:
+        if hour_yesno == 0:
             window = int(hours_in_day * 60)
         else:
             window = int(hours_in_day)
@@ -75,12 +75,10 @@ def hi_lo_spread(timestamps, highs, lows,
     else:
         hours_in_day = 6.5
         day_desc = "trading day"
-        if hours_yesno == 0:
+        if hour_yesno == 0:
             window = int(hours_in_day * 60)
         else:
-            print("NEED TO MAKE FREQUENCY CONVERTER TAKING HALF HOURS INTO ACCOUNT")
-            return
-
+            window = int(hours_in_day+0.5)
 
     if kill_output == 0:
         print("Calculating Hi/Lo-spread on a/an", freq_desc, "basis using", day_desc, "data, with", resolution_desc)

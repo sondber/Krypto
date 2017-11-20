@@ -8,16 +8,21 @@ os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 exchanges, time_list, hi, lo = di.get_hilo(opening_hours="y")
 
-timestamps = time_list[101790:]
-highs = hi[0][101790:]
-lows = lo[0][101790:]
+hour_time, hi_hour, lo_hour = dis.convert_to_hour(time_list,hi,lo,list2_basis=0)
 
-hour_time, hi_hour, lo_hour = dis.convert_to_hour(timestamps,highs,lows,list2_basis=0)
+
+timestamps = hour_time[1827:]
+highs = hi_hour[0][1827:]
+lows = lo_hour[0][1827:]
+
 
 
 print(len(highs))
 print(len(lows))
 print(len(timestamps))
+
+for i in range(len(lows)):
+    print(timestamps[i],lows[i])
 
 count_hi = 0
 count_low = 0
@@ -45,11 +50,11 @@ print("Total", count_hi+count_low+count_same)
 print("Errors", count_error)
 print("Opposite", count_opposite)
 
-timelist, spreads = hilo.hi_lo_spread(timestamps, highs, lows)
+#timelist, spreads = hilo.hi_lo_spread(timestamps, highs, lows)
 
-count_neg = 0
-for i in range(len(spreads)):
-    if spreads[i] < 0:
-        count_neg += 1
+#count_neg = 0
+#for i in range(len(spreads)):
+#    if spreads[i] < 0:
+#        count_neg += 1
 
-print("NEgative spreads:", count_neg)
+#print("NEgative spreads:", count_neg)

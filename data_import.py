@@ -30,29 +30,26 @@ def get_lists(data="all", opening_hours="y", make_totals="y"):
         return exchanges, time_list, prices, volumes
 
 
+def get_hilo(opening_hours="y"):
+    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    n_exc = len(exchanges)
+    print("Fetching minute data...")
+
+    if opening_hours == "y":
+        oh = ""
+        print(" \033[32;0;0mOnly fetching data for NYSE opening hours...\033[0;0;0m")
+    else:
+        oh = "_full_day"
+
+    file_name = "data/export_csv/hilo_minute_data" + oh + ".csv"
+    time_list, high, low = dis.fetch_aggregate_csv_hilo(file_name, n_exc)
+    return exchanges, time_list, high, low
+
+
 def fetch_long_and_write(exchanges, opening_hours_only="y"):
     n_exc = len(exchanges)
-    excel_stamps, unix_stamps, prices, volumes = dis.get_lists_from_fulls(exchanges)
+    excel_stamps, unix_stamps, prices, volumes = dis.get_price_volume_from_fulls(exchanges)
 
-    # Convert currencies
-    """
-    print()
-    print("Currency conversion:---------")
-    prices_usd = []
-    for i in range(0, n_exc):
-        # sjekker valuta
-        exc = exchanges[i]
-        l_exc = len(exc)
-        currency = exc[l_exc - 3:l_exc]
-        if currency != "usd":
-            print(" Converting currency of %s from %s to USD..." % (exc, currency.upper()))
-            print("  This may take several minutes for a single conversion")
-            single_price_usd = curr.convert_to_usd(excel_stamps, prices[i,:], currency)
-            prices_usd.append(single_price_usd)
-        else:
-            print(" %s is already USD" % exc)
-            prices_usd.append(prices[i,:])
-    """
     if opening_hours_only == "y":
         excel_stamps, prices, volumes = dis.opening_hours(excel_stamps, prices, volumes)
         filename = "data/export_csv/minute_data.csv"
@@ -60,6 +57,20 @@ def fetch_long_and_write(exchanges, opening_hours_only="y"):
         filename = "data/export_csv/minute_data_full_day.csv"
 
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
+
+
+def fetch_long_and_write_hilo(exchanges, opening_hours_only="y"):
+    n_exc = len(exchanges)
+    excel_stamps, unix_stamps, high, low = dis.get_hilo_from_fulls(exchanges)
+
+    if opening_hours_only == "y":
+        excel_stamps, high, low = dis.opening_hours(excel_stamps, high, low)
+        filename = "data/export_csv/hilo_minute_data.csv"
+    else:
+        filename = "data/export_csv/hilo_minute_data_full_day.csv"
+
+    dis.write_hilo_to_csv(high, low, excel_stamps, exchanges, filename)#####
+
 
 
 def import_gold_lists(s_year=2012, s_month=1, e_year=2017, e_month=9):

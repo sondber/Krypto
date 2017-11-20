@@ -13,6 +13,12 @@ import ILLIQ_old
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+
+exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+di.fetch_long_and_write_hilo(exchanges, opening_hours_only="n")
+
+
+"""
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
 illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
@@ -43,6 +49,7 @@ plt.plot(illiq_days)
 plt.ylim([0, 0.08])
 plt.show()
 
+"""
 
 check_freq = 0
 if check_freq == 1:  # Verification of frequency consistency

@@ -12,7 +12,7 @@ timestamps = time_list[101790:]
 highs = hi[0][101790:]
 lows = lo[0][101790:]
 
-
+hour_time, hi_hour, lo_hour = dis.convert_to_hour(timestamps,highs,lows,list2_basis=0)
 
 
 print(len(highs))

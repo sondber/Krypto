@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-exchanges, time_list, prices, volumes = di.get_lists(data="all", opening_hours="y", make_totals="n")
+exchanges, time_list, prices, volumes = di.get_lists(data="all", opening_hours="n", make_totals="n")
 
 prices = prices[0]  # exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"
 volumes = volumes[0]
@@ -17,7 +17,7 @@ print("length of volume",len(volumes))
 print("length of returns", len(returns))
 
 
-time_illiq, illiq = ilq.illiq(time_list, returns, volumes, day_or_hour=1, kill_output=0)
+time_illiq, illiq = ilq.illiq(time_list, returns, volumes, day_or_hour=0, kill_output=0)
 
 plt.plot(illiq)
 plt.show()

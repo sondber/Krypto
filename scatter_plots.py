@@ -27,28 +27,70 @@ log_volatility_std = np.std(log_volatility_days_clean)
 log_volatility_mean = np.mean(log_volatility_days_clean)
 
 # Whether to run plots
-roll_v_return = 1
-roll_v_volumes = 1
-roll_v_volatility = 1
-return_v_volumes = 1
-amihud_v_volume = 1
-amihud_v_return = 1
-roll_v_illiq = 1
-amihud_v_volatility = 1
+roll_v_return = 0
+roll_v_volumes = 0
+roll_v_volatility = 0
+return_v_volumes = 0
+illiq_v_volume = 0
+illiq_v_return = 0
+roll_v_illiq = 0
+illiq_v_volatility = 0
 
+print()
+
+y_data = spread_days_clean
+y_lims = [min(y_data), max(y_data)]
 
 x_data = volatility_days_clean
-y_data = spread_days_clean
 x_lims = [min(x_data), max(x_data)]
-y_lims = [min(y_data), max(y_data)]
-plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims)
+plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_vol")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Annualized Volatility")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
+x_data = returns_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_returns")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Returns")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = log_volumes_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=0, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_volume")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Normalized Volumes")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+
+y_data = illiq_days_clean
+y_lims = [min(y_data), max(y_data)]
+
+x_data = volatility_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_vol")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Annualized Volatility")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = returns_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_log=1,  y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_returns")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Returns")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = log_volumes_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=0,  y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_volumes")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Normalized Volumes")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 if roll_v_return == 1:
     x_mean = returns_mean_day
     x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
-    plt.title("Bid/ask spread vs. Daily returns")
     plot.scatters(returns_days_clean, spread_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
                   ylims=y_lims, xlims=x_lims, x_perc=1, y_perc=1)
 
@@ -64,7 +106,6 @@ if roll_v_return == 1:
 
 if roll_v_volumes == 1:
     x_lims = [min(log_volumes_days_clean), max(log_volumes_days_clean)]
-    plt.title("Bid/ask spread vs. daily traded volumes")
     plot.scatters(log_volumes_days_clean, spread_days_clean, show_plot=0, xtitle="Volumes daily (transformed)",
                   ytitle="Spread daily",
                   ylims=y_lims, xlims=x_lims, x_log=0, y_perc=1)
@@ -77,14 +118,13 @@ if roll_v_volumes == 1:
 
 if roll_v_volatility == 1:
     x_lims = [min(volatility_days_clean), max(volatility_days_clean)]
-    plt.title("Bid/ask spread vs. log volatility")
     plot.scatters(volatility_days_clean, spread_days_clean, show_plot=0, xtitle="Log volatility, annualized",
                   ytitle="Spread daily",
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
     # Regression lines
     slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, spread_days_clean)
-    plot.regression_line(intercept, slope, xlims=x_lims)
+    #plot.regression_line(intercept, slope, xlims=x_lims)
     print("Roll - Log volatility:")
     linreg.stats(slope, intercept, r_value, p_value)
 
@@ -95,7 +135,6 @@ if roll_v_illiq == 1:
     y_mean = spread_mean_day
     y_std = spread_std_day
     y_lims = [0, y_mean + y_std]
-    plt.title("Spread vs. log ILLIQ")
     plot.scatters(illiq_days_clean, spread_days_clean, show_plot=0, xtitle="Log ILLIQ", ytitle="Spread daily",
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
@@ -105,12 +144,11 @@ if roll_v_illiq == 1:
     print("Spread - log ILLIQ:")
     linreg.stats(slope, intercept, r_value, p_value)
 
-if amihud_v_return == 1:
+if illiq_v_return == 1:
     y_lims = [min(illiq_days_clean), max(illiq_days_clean)]
     x_mean = returns_mean_day
     x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
-    plt.title("Log ILLIQ vs. Daily returns")
     plot.scatters(returns_days_clean, illiq_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_perc=1, y_log=1, y_perc=1)
     # Regression lines
@@ -121,10 +159,9 @@ if amihud_v_return == 1:
 
     plot.plot_x_zero(x_lims)
 
-if amihud_v_volume == 1:
+if illiq_v_volume == 1:
 
     x_lims = [min(log_volumes_days_clean), max(log_volumes_days_clean)]
-    plt.title("Log ILLIQ vs. log traded volumes")
     plot.scatters(log_volumes_days_clean, illiq_days_clean, show_plot=0, xtitle="Log volumes", ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_log=0, y_log=1, y_perc=1)
     # Regression lines
@@ -133,10 +170,9 @@ if amihud_v_volume == 1:
     print("Log ILLIQ - Log Volume:")
     linreg.stats(slope, intercept, r_value, p_value)
 
-if amihud_v_volatility == 1:
+if illiq_v_volatility == 1:
 
     x_lims = [min(volatility_days_clean), max(volatility_days_clean)]
-    plt.title("Log ILLIQ vs. Log volatiltiy")
     plot.scatters(volatility_days_clean, illiq_days_clean, show_plot=0, xtitle="Log volatility annualized",
                   ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_log=1, y_perc=1)

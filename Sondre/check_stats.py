@@ -8,7 +8,7 @@ import data_import_support as dis
 import os
 from matplotlib import pyplot as plt
 import rolls
-import ILLIQ_old
+import ILLIQ
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
@@ -19,10 +19,16 @@ illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_da
     time_list_minutes, prices_minutes,
     volumes_minutes)
 
-
+print()
+print(len(volumes_days_clean))
+desc.stats_for_single_list(volumes_days_clean, "Volumes")
 desc.stats_for_single_list(returns_days_clean, "Returns")
-desc.stats_for_single_list(log_volumes_days_clean, "Volumes")
+desc.stats_for_single_list(volatility_days_clean, "RVol, annualized")
 desc.stats_for_single_list(spread_days_clean, "Roll's")
+desc.stats_for_single_list(illiq_days_clean, "ILLIQ")
+
+
+desc.stats_for_single_list(log_volumes_days_clean, "Volumes")
 desc.stats_for_single_list(log_illiq_days_clean, "Amihud")
 desc.stats_for_single_list(log_volatility_days_clean, "RVol, annualized")
 

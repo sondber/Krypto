@@ -715,13 +715,15 @@ def volume_transformation(volume, initial_mean_volume):
 
 
 def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
+
     # Opening hours only
     print("Transforming data series...")
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
                                                                    volumes_minutes)
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    mean_volume_2012 = np.mean(volumes_days[0, 0:261])
+    exhange = 0  # Bitstamp!
+    mean_volume_2012 = np.mean(volumes_days[exhange, 0:261])  # <-- Bitstamp
 
     n_days = len(time_list_days)
     n_hours = len(time_list_hours)
@@ -734,14 +736,14 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     n_total = 1978
     n_0 = n_days # Mon-Friday
 
-    # Bistamp only, cutoff day
-    prices_minutes = prices_minutes[0, cutoff_min:n_mins]
-    volumes_minutes = volumes_minutes[0, cutoff_min:n_mins]
+    # Bistamp only, cutoff day # <-- Bitstamp
+    prices_minutes = prices_minutes[exhange, cutoff_min:n_mins]
+    volumes_minutes = volumes_minutes[exhange, cutoff_min:n_mins]
     time_list_minutes = time_list_minutes[cutoff_min:n_mins]
-    prices_hours = prices_hours[0, cutoff_hour:n_hours]
-    volumes_hours = volumes_hours[0, cutoff_hour:n_hours]
-    prices_days = prices_days[0, cutoff_day:n_days]
-    volumes_days = volumes_days[0, cutoff_day:n_days]
+    prices_hours = prices_hours[exhange, cutoff_hour:n_hours]
+    volumes_hours = volumes_hours[exhange, cutoff_hour:n_hours]
+    prices_days = prices_days[exhange, cutoff_day:n_days]
+    volumes_days = volumes_days[exhange, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
     n_1 = len(time_list_days) # After removing 2013

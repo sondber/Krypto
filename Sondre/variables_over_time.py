@@ -6,7 +6,7 @@ import os
 
 import realized_volatility
 import rolls
-import ILLIQ_old
+import ILLIQ
 from Jacob import jacob_support as jake_supp
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
@@ -34,8 +34,12 @@ if unedited == 1:
     returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
     returns_days = jake_supp.logreturn(prices_days[0, :])
     spread_days = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]
-    illiq_days = ILLIQ_old.ILLIQ_nyse_day(prices_hours[0, :], volumes_hours[0, :])
-    volatility_days = np.multiply(realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[0, :]), 252 ** 0.5)
+    illiq_days_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[0, :], day_or_hour=1)
+
+    # Realized volatility
+    volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[0, :])
+    # Annualize the volatility
+    volatility_days = np.multiply(volatility_days, 252 ** 0.5)
 
     if minute == 1:
         plot.time_series_single(time_list_minutes, prices_minutes[0, :], "Price")
@@ -52,5 +56,5 @@ if unedited == 1:
 if transformed == 1:
     plot.time_series_single(time_list_days_clean, illiq_days_clean, "Log_ILLIQ", logy=1, perc=1)
     plot.time_series_single(time_list_days_clean, volatility_days_clean, "Log_volatility", logy=1, perc=1)
-    plot.time_series_single(time_list_days_clean, log_volumes_days_clean, "Log_volume",  perc=1)
+    plot.time_series_single(time_list_days_clean, log_volumes_days_clean, "Log_volume",  perc=0)
     plot.time_series_single(time_list_days_clean, returns_days_clean, "Return_clean",  perc=1)

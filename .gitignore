@@ -27,3 +27,6 @@ data/long_raw_data/btceusd.csv
 data/long_raw_data/coinbaseusd.csv
 data/long_raw_data/krakenusd.csv
 >>>>>>> Sondre
+*.pyc
+*.pyc
+*.pyc

@@ -9,6 +9,7 @@ import rolls
 from matplotlib import pyplot as plt
 import scipy.stats as st
 import ILLIQ
+import realized_volatility
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
@@ -53,6 +54,10 @@ if days == 1:
     returns_day = jake_supp.logreturn(prices_day[0, :])
     spread_day = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]  # Rolls
     illiq_days_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[0, :], day_or_hour=1)
+    # Realized volatility
+    volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[0, :])
+    # Annualize the volatility
+    volatility_days = np.multiply(volatility_days, 252 ** 0.5)
 
     if non_transformed == 1:
         # Finding average for every day of the week
@@ -66,11 +71,15 @@ if days == 1:
                                                                                              frequency="d")
         day_of_week, avg_illiq_day, low_illiq_day, upper_illiq_day = dis.cyclical_average(illiq_days_time, illiq_days,
                                                                                           frequency="d")
+        day_of_week, avg_volatility_day, low_volatility_day, upper_volatility_day = dis.cyclical_average(time_list_day, volatility_days,
+                                                                                             frequency="d")
+
 
         plot.plot_for_week(avg_returns_day, low_returns_day, upper_returns_day, title="Return", perc=1)
         plot.plot_y_zero([0, 7])
         plot.plot_for_week(avg_volumes_day, low_volumes_day, upper_volumes_day, title="Volume", perc=0)
         plot.plot_for_week(avg_spread_day, low_spread_day, upper_spread_day, title="Spread", perc=1)
+        plot.plot_for_week(avg_volatility_day, low_volatility_day, upper_volatility_day, title="Volatility", perc=1)
         plot.plot_for_week(avg_illiq_day, low_illiq_day, upper_illiq_day, title="ILLIQ", perc=1)
 
     if transformed == 1:

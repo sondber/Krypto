@@ -62,7 +62,7 @@ def plot_for_exchanges(matrix, exchanges):
     plt.legend()
 
 
-def scatters(x, y, color="black", areas=[], label="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
+def scatters(x, y, color="black", areas=[], title="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
     plt.figure()
     if not xlims:
         xlims = [min(x), max(x)]
@@ -80,7 +80,7 @@ def scatters(x, y, color="black", areas=[], label="", show_plot=0, xlims=[], yli
         areas_scaled = np.zeros(len(areas))
         for i in range(len(areas)):
             areas_scaled[i] = scaling_factor * areas[i]/ max_area
-    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5, label=label)
+    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5)
     plt.xlim(xlims)
     plt.ylim(ylims)
 
@@ -104,8 +104,8 @@ def scatters(x, y, color="black", areas=[], label="", show_plot=0, xlims=[], yli
         plt.xlabel(xtitle)
     if ytitle:
         plt.ylabel(ytitle)
-    if label:
-        plt.legend()
+    location = "figures/scatters/" + title + ".png"
+    plt.savefig(location)
     if show_plot == 1:
         plt.show()
 

@@ -384,3 +384,12 @@ def mean_for_n_entries(in_list, n_lag):
     for i in range(n_lag, n_in - n_lag):
         out_list[i] =  np.mean(in_list[i: i + n_lag])
     return out_list
+
+
+def standardize(in_list):
+    mean = np.mean(in_list)
+    out_list = in_list - mean
+    std = np.std(in_list)
+    out_list = np.divide(out_list, std)
+
+    return out_list

@@ -233,7 +233,7 @@ def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_l
         plt.show()
 
 
-def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
+def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0, ndigits=2):
     n_labels = 5
     labels = []
     len_x = len(time_list)
@@ -244,7 +244,7 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
             index = i * (len_x / (n_labels - 1))
         index = int(index)
         labels.append(time_list[index][0:11])
-    plt.figure(figsize=(6, 4))
+    plt.figure(figsize=(8, 2), dpi=1000)
     plt.xticks(np.arange(0, len(time_list) + 1, len(time_list) / (n_labels - 1)), labels)
     plt.plot(data, linewidth=0.5, color="black")
     if ylims:
@@ -260,10 +260,15 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0):
         ax = plt.gca()
         plt.yscale("log", basey=np.exp(1))
         plt.ylim([0, ymax])
+        if perc == 0:
+            vals = ax.get_yticks()
+            frmt = '{:3.'+str(ndigits)+'f}'
+            ax.set_yticklabels([frmt.format(x) for x in vals])
     if perc == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+        frmt = '{:3.'+str(ndigits)+'f}%'
+        ax.set_yticklabels([frmt.format(x * 100) for x in vals])
     ax = plt.gca()
     title = title.lower()
     location = "figures/variables_over_time/" + title + ".png"
@@ -287,41 +292,59 @@ def plot_y_zero(y_lims):
     plt.plot([x_min, x_max], [0, 0], linewidth=0.2, color="black")
 
 
-def plot_x_zero(x_lims):
-    y_min = x_lims[0]
-    y_max = x_lims[1]
+def plot_x_zero(y_lims):
+    y_min = y_lims[0]
+    y_max = y_lims[1]
     plt.plot([0, 10**(-10)], [y_min, y_max], linewidth=0.2, color="black")
 
 
 def hour_of_day_ticks():
-    labels = ["03/22", "09/04", "15/10", "21/16"]
-    plt.xticks([3, 9, 15, 21], labels)
-    plt.figtext(0.005, 0.010, "UTC/UTC-5", fontsize=10)
+    labels = [ "06:00", "12:00", "18:00"]
+    plt.xticks([5.5, 11.5, 17.5], labels)
+    plt.figtext(0.005, 0.010, "Time (UTC-5)", fontsize=10)
     plt.xlim([0, 23])
 
 
-def plot_for_day(average, low, high, title="no_title", perc=0):
-    plt.figure(figsize=[6, 2])
+def utc_nyc(in_list):
+    outlist = np.zeros(24)
+    for london in range(5, 24):
+        nyc = london - 5
+        outlist[nyc] = in_list[london]
+    for london in range(0, 5):
+        nyc = london + 19
+        outlist[nyc] = in_list[london]
+    return outlist
+
+
+def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0):
+    # converting to NYC time (UTC-5)
+    average = utc_nyc(average)
+    low = utc_nyc(low)
+    high = utc_nyc(high)
+    plt.figure(figsize=[7, 2], dpi=750)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
-
+    plt.ylim([min(low)*0.99, max(high)*1.01])
     if perc == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+        frmt = '{:3.' + str(ndigits) + 'f}%'
+        ax.set_yticklabels([frmt.format(x*100) for x in vals])
 
-    ax = plt.gca()
-    #ax.margins(x=0.5, y=1, tight=False)
     hour_of_day_ticks()
-    plt.legend()
     title=title.lower()
+    # Plotting NYSE opening hours
+    plt.plot([9, 9.0001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
+    plt.plot([15.5, 15.5001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
+    if yzero==1:
+        plot_y_zero([0, 24])
     location = "figures/seasonality/day/" + title + ".png"
     plt.savefig(location)
 
 
-def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1):
-    plt.figure(figsize=[6, 2])
+def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1, ndigits=2):
+    plt.figure(figsize=[7, 2], dpi=1000)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
@@ -337,11 +360,14 @@ def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends
     if logy == 1:
         ax = plt.gca()
         plt.yscale("log", basey=np.exp(1))
+        ylabels=[min(low), min(low)+ (max(high)-min(low))/2, max(high)]
+        plt.yticks(ylabels, ylabels)
     if perc == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
-        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+        frmt = '{:3.' + str(ndigits) + 'f}%'
+        ax.set_yticklabels([frmt.format(x * 100) for x in vals])
     title = title.lower()
-    plt.legend()
+    #plt.legend()
     location = "figures/seasonality/week/" + title + ".png"
     plt.savefig(location)

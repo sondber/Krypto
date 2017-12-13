@@ -28,7 +28,7 @@ def HAR_model(in_list):
         for i in range(0, n_entries):
             X[i, j] = x[i]
 
-    linreg.reg_multiple_pandas(Y, X)
+    linreg.reg_multiple(Y, X)
 
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
@@ -38,10 +38,10 @@ illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_da
     time_list_minutes, prices_minutes,
     volumes_minutes)
 
-univariate_regs = 1
-rolls_uni = 1
-illiq_uni = 1
-autoreg = 0
+multivariate_regs = 0
+rolls_multi = 1
+illiq_multi = 1
+autoreg = 1
 har = 0
 
 # standardize all variables
@@ -51,8 +51,8 @@ log_illiq_days_clean =  supp.standardize(log_illiq_days_clean)
 returns_days_clean = supp.standardize(returns_days_clean)
 log_volatility_days_clean = supp.standardize(log_volatility_days_clean)
 
-if univariate_regs == 1:
-    if rolls_uni == 1:
+if multivariate_regs == 1:
+    if rolls_multi == 1:
         max_lag = 44  # Locked at 44! <-------------------
         Y = spread_days_clean[max_lag: len(spread_days_clean)]
         n_entries = len(Y)
@@ -75,7 +75,7 @@ if univariate_regs == 1:
         X_contemporary = X_benchmark
         X_lagged = X_benchmark
         print_n(20)
-        linreg.reg_multiple_pandas(Y, X_benchmark)
+        linreg.reg_multiple(Y, X_benchmark)
 
         print("Spread - Return")
         print("x_4 = " + "Return")
@@ -84,7 +84,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
     
         print("Spread - Return with 1 lag")
         print("x_4 = " + "Return with 1 lag ")
@@ -93,7 +93,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("Spread - Volume")
         print("x_4 = " + "log-Volume")
@@ -102,7 +102,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("Spread - Volume with lag")
         print("x_4 = " + "volume with lag")
@@ -111,7 +111,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("Spread - Volatility")
         print("x_4 = " + "Log-RVol")
@@ -120,7 +120,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("Spread - Volatility with lag")
         print("x_4 = " + "Log_RVol with lag")
@@ -129,24 +129,25 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
-        print("Contemporary")
+        print("Contemporaneous")
         print("x_1-x_3 = " + "lagged Rolls")
         print("x_4 = " + "Return")
         print("x_5 = " + "Volume")
         print("x_6 = " + "Volatility")
-        linreg.reg_multiple_pandas(Y, X_contemporary)
+        linreg.reg_multiple(Y, X_contemporary)
+
         print("Lagged")
         print("x_1-x_3 = " + "lagged Rolls")
         print("x_4 = " + "Return with 1 lag")
         print("x_5 = " + "Volume with 1 lag")
         print("x_6 = " + "Volatility with 1 lag")
-        linreg.reg_multiple_pandas(Y, X_lagged)
+        linreg.reg_multiple(Y, X_lagged)
         print("TOTAL")
-        linreg.reg_multiple_pandas(Y, X_total)
+        linreg.reg_multiple(Y, X_total)
 
-    if illiq_uni == 1:
+    if illiq_multi == 1:
         max_lag = 44  # Locked at 44! <-------------------
         Y = log_illiq_days_clean[max_lag: len(log_illiq_days_clean)]
         n_entries = len(Y)
@@ -180,7 +181,7 @@ if univariate_regs == 1:
         X_contemporary = X_benchmark
         X_lagged = X_benchmark
         print_n(15)
-        linreg.reg_multiple_pandas(Y, X_benchmark)
+        linreg.reg_multiple(Y, X_benchmark)
 
         print("ILLIQ - Return")
         print("x_4 = " + "Return")
@@ -189,7 +190,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Return with 1 lag")
         print("x_4 = " + "Return with 1 lag ")
@@ -198,7 +199,8 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
+
 
         print("ILLIQ - Volume")
         print("x_4 = " + "log-Volume")
@@ -207,7 +209,8 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
+
 
         print("ILLIQ - Volume with lag")
         print("x_4 = " + "volume with lag")
@@ -216,7 +219,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Volatility")
         print("x_4 = " + "Log-RVol")
@@ -225,7 +228,7 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_contemporary = np.append(X_contemporary, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Volatility with lag")
         print("x_4 = " + "Log_RVol with lag")
@@ -234,30 +237,32 @@ if univariate_regs == 1:
         X = np.append(X_benchmark, x, axis=1)
         X_total = np.append(X_total, x, axis=1)
         X_lagged = np.append(X_lagged, x, axis=1)
-        linreg.reg_multiple_pandas(Y, X)
+        linreg.reg_multiple(Y, X)
 
-        print("Contemporary")
+        print("Contemporaneous")
         print("x_1-x_3 = " + "lagged ILLIQ")
         print("x_4 = " + "Return")
         print("x_5 = " + "Volume")
         print("x_6 = " + "Volatility")
-        linreg.reg_multiple_pandas(Y, X_contemporary)
+        linreg.reg_multiple(Y, X_contemporary)
+
         print("Lagged")
         print("x_1-x_3 = " + "lagged ILLIQ")
         print("x_4 = " + "Return with 1 lag")
         print("x_5 = " + "Volume with 1 lag")
         print("x_6 = " + "Volatility with 1 lag")
-        linreg.reg_multiple_pandas(Y, X_lagged)
+        linreg.reg_multiple(Y, X_lagged)
+
         print("TOTAL")
-        linreg.reg_multiple_pandas(Y, X_total)
+        linreg.reg_multiple(Y, X_total)
 
 if autoreg == 1:
     print_n(20)
     print("Rolls regression:")
-    linreg.autocorr_linreg(spread_days_clean, 12)
+    linreg.autocorr_linreg(spread_days_clean, 15)
     print_n(5)
     print("Log-ILLIQ regression:")
-    linreg.autocorr_linreg(log_illiq_days_clean, 12)
+    linreg.autocorr_linreg(log_illiq_days_clean, 15)
 
 if har == 1:
     print_n(20)
@@ -290,8 +295,8 @@ if test_multilinreg == 1:
         X3[i, j] = x3[i]
 
     print_n(5)
-    linreg.reg_multiple_pandas(y, x1)
+    linreg.reg_multiple(y, x1)
     print_n(5)
-    linreg.reg_multiple_pandas(y, X2)
+    linreg.reg_multiple(y, X2)
     print_n(5)
-    linreg.reg_multiple_pandas(y, X3)
+    linreg.reg_multiple(y, X3)

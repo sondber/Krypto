@@ -1,6 +1,7 @@
 import scipy.stats as scistat
 import numpy as np
 import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 
 def print_n(n):
@@ -8,11 +9,13 @@ def print_n(n):
         print()
 
 
-def reg_multiple(Y, X):
-    X = sm.add_constant(X)
+def reg_multiple(Y, X, intercept=1):
+    if intercept ==1:
+        X = sm.add_constant(X)
     reg_model = sm.OLS(Y, X).fit(cov_type="HC0")
     print(reg_model.summary())
     print_n(13)
+
 
 
 def linreg_coeffs(x, y):  # input is equal length one-dim arrays of measurements
@@ -33,13 +36,17 @@ def stats(slope: float, intercept: float, r_value: float, p_value: float):
     print()
 
 
-def autocorr_linreg(in_list, n_lags):
-    n_entries = len(in_list) - n_lags
+def autocorr_linreg(in_list, n_lags, max_lag=0):
+    if max_lag == 0:
+        adj = 0
+    else:
+        adj = max_lag - n_lags
+    n_entries = len(in_list) - n_lags - adj
     X = np.zeros([n_entries, n_lags])
     for lag in range(0, n_lags):
         for i in range(0, n_entries):
             X[i, lag] = in_list[i + lag + 1]
-    Y = in_list[0: len(in_list) - n_lags]
+    Y = in_list[0: n_entries]
     reg_multiple(Y, X)
 
 

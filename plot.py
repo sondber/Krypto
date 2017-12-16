@@ -321,7 +321,7 @@ def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=
     average = utc_nyc(average)
     low = utc_nyc(low)
     high = utc_nyc(high)
-    plt.figure(figsize=[7, 2], dpi=750)
+    plt.figure(figsize=[8, 2], dpi=750)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
@@ -344,7 +344,13 @@ def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=
 
 
 def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1, ndigits=2):
-    plt.figure(figsize=[7, 2], dpi=1000)
+
+    if perc ==1 :
+        average = average*100
+        low = low*100
+        high = high*100
+
+    plt.figure(figsize=[8, 2], dpi=1000)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
@@ -358,15 +364,17 @@ def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends
         plt.xticks(np.arange(0, 5, 1), labels)
         plt.xlim([0, 4])
     if logy == 1:
-        ax = plt.gca()
+        y_min = max(0.00001, min(low))
+        y_max = max(high)
+        ylims = [y_min * 0.99, y_max * 1.01]
         plt.yscale("log", basey=np.exp(1))
-        ylabels=[min(low), min(low)+ (max(high)-min(low))/2, max(high)]
-        plt.yticks(ylabels, ylabels)
+        labels = [ylims[0], y_min + 0.3 * (y_max - y_min), y_min + 0.5 * (y_max - y_min), ylims[1]]
+        plt.yticks(labels, labels)
     if perc == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
         frmt = '{:3.' + str(ndigits) + 'f}%'
-        ax.set_yticklabels([frmt.format(x * 100) for x in vals])
+        ax.set_yticklabels([frmt.format(x) for x in vals])
     title = title.lower()
     #plt.legend()
     location = "figures/seasonality/week/" + title + ".png"

@@ -700,7 +700,7 @@ def cyclical_average(time_list, data, frequency="h"):
 
 def volume_transformation(volume, initial_mean_volume):
     n_entries = len(volume)
-    n_days_in_window = 252
+    n_days_in_window = 365
     out_volume = np.zeros(n_entries)
     for i in range(0, n_days_in_window):
         floating_mean = (initial_mean_volume * (n_days_in_window - i) + i * np.mean(volume[0: i])) / n_days_in_window
@@ -714,7 +714,7 @@ def volume_transformation(volume, initial_mean_volume):
     return out_volume
 
 
-def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
+def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_week=1):
 
     # Opening hours only
     print("Transforming data series...")
@@ -722,28 +722,34 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
                                                                    volumes_minutes)
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    exhange = 0  # Bitstamp!
-    mean_volume_2012 = np.mean(volumes_days[exhange, 0:261])  # <-- Bitstamp
+    exchange = 0  # Bitstamp!
 
+    if full_week == 0:
+        cutoff_day = 261
+        cutoff_hour = cutoff_day * 7
+        cutoff_min = cutoff_day * 390
+    else:
+        cutoff_day = 366
+        cutoff_hour = cutoff_day * 24
+        cutoff_min = cutoff_day * 1440
+
+    mean_volume_2012 = np.mean(volumes_days[exchange, 0:cutoff_day])  # <-- Bitstamp
     n_days = len(time_list_days)
     n_hours = len(time_list_hours)
     n_mins = len(time_list_minutes)
-    cutoff_day = 261
-    cutoff_hour = cutoff_day * 7
-    cutoff_min = cutoff_day * 390
     print("Only including days after", time_list_days[cutoff_day])
 
-    n_total = 1978
+    n_total = len(time_list_days)
     n_0 = n_days # Mon-Friday
 
     # Bistamp only, cutoff day # <-- Bitstamp
-    prices_minutes = prices_minutes[exhange, cutoff_min:n_mins]
-    volumes_minutes = volumes_minutes[exhange, cutoff_min:n_mins]
+    prices_minutes = prices_minutes[exchange, cutoff_min:n_mins]
+    volumes_minutes = volumes_minutes[exchange, cutoff_min:n_mins]
     time_list_minutes = time_list_minutes[cutoff_min:n_mins]
-    prices_hours = prices_hours[exhange, cutoff_hour:n_hours]
-    volumes_hours = volumes_hours[exhange, cutoff_hour:n_hours]
-    prices_days = prices_days[exhange, cutoff_day:n_days]
-    volumes_days = volumes_days[exhange, cutoff_day:n_days]
+    prices_hours = prices_hours[exchange, cutoff_hour:n_hours]
+    volumes_hours = volumes_hours[exchange, cutoff_hour:n_hours]
+    prices_days = prices_days[exchange, cutoff_day:n_days]
+    volumes_days = volumes_days[exchange, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
     n_1 = len(time_list_days) # After removing 2013
@@ -751,10 +757,14 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
                                                                               calc_basis=1, kill_output=1)
+
     # Realized volatility
     volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)
     # Annualize the volatility
-    volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    if full_week == 0:
+        volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    else:
+        volatility_days = np.multiply(volatility_days, 365 ** 0.5)
     # Returns
     returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
@@ -762,21 +772,37 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
     illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes) # Already clean
 
     # --------------------------------------------
-
-    remove_crazy_week = 1  # Removes the week starting at 08.04.2013
-    if remove_crazy_week == 1:
-        time_list_removed = time_list_days[69:74]
-        time_list_days = np.delete(time_list_days, range(69, 74))
-        returns_days = np.delete(returns_days, range(69, 74))
-        volumes_days = np.delete(volumes_days, range(69, 74))
-        spread_days = np.delete(spread_days, range(69, 74))
-        volatility_days = np.delete(volatility_days, range(69, 74))
-        illiq_days_clean = np.delete(illiq_days_clean, range(69, 74))
-        illiq_time = np.delete(illiq_time, range(69, 74))
+    if full_week == 0:
+        cray_s = 69
+        cray_e = 74
     else:
-        time_list_removed = []
+        cray_s= 97
+        cray_e= 103
 
-    n_2 = len(time_list_days) # After removing the crazy week
+    cray_day = 1269
+    remove_crazy = 1
+    remove_crazy_week = 1  # Removes the week starting at 08.04.2013
+
+    if remove_crazy == 1:
+        time_list_removed = time_list_days[cray_day]
+        time_list_days = np.delete(time_list_days, cray_day)
+        returns_days = np.delete(returns_days, cray_day)
+        volumes_days = np.delete(volumes_days, cray_day)
+        spread_days = np.delete(spread_days, cray_day)
+        volatility_days = np.delete(volatility_days, cray_day)
+        illiq_days_clean = np.delete(illiq_days_clean, cray_day)
+        illiq_time = np.delete(illiq_time, cray_day)
+
+        time_list_removed = np.append(time_list_removed, time_list_days[cray_s:cray_e])
+        time_list_days = np.delete(time_list_days, range(cray_s, cray_e))
+        returns_days = np.delete(returns_days, range(cray_s, cray_e))
+        volumes_days = np.delete(volumes_days, range(cray_s, cray_e))
+        spread_days = np.delete(spread_days, range(cray_s, cray_e))
+        volatility_days = np.delete(volatility_days, range(cray_s, cray_e))
+        illiq_days_clean = np.delete(illiq_days_clean, range(cray_s, cray_e))
+        illiq_time = np.delete(illiq_time, range(cray_s, cray_e))
+
+    n_2 = len(time_list_days) # After removing the crazy
 
     # Removing all days where Volume is zero
     time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, volatility_days_clean \
@@ -793,7 +819,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes):
                                                                                      volumes_days_clean,
                                                                                      returns_days_clean,
                                                                                      volatility_days_clean,
-                                                                                    illiq_days_clean)
+                                                                                     illiq_days_clean)
 
     n_4 = len(time_list_days_clean) # After removing the zero-roll
 

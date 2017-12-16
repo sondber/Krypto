@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import math
+from datetime import date
 
 
 def read_single_exc_csvs(file_name, time_list, price, volume):
@@ -354,7 +355,8 @@ def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, lis
             if t_list5:
                 out_list5.append(list5[i])
         else:
-            time_list_removed.append(time_list[i])
+            1
+            #time_list_removed.append(time_list[i])
     if t_list5:
         return time_list_out, time_list_removed, out_list1, out_list2, out_list3, out_list4, out_list5
     elif t_list4:
@@ -393,3 +395,41 @@ def standardize(in_list):
     out_list = np.divide(out_list, std)
 
     return out_list
+
+
+def week_vars(time_list):
+    year, month, day, hour, minute = fix_time_list(time_list)
+    n_entries = len(time_list)
+
+    mon= np.zeros(n_entries)
+    tue= np.zeros(n_entries)
+    wed= np.zeros(n_entries)
+    thu= np.zeros(n_entries)
+    fri= np.zeros(n_entries)
+    sat= np.zeros(n_entries)
+    sun= np.zeros(n_entries)
+    day_string = []
+    for i in range(0, n_entries):
+        daynum = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+        if daynum == 0:
+            mon[i] = 1
+            day_string.append("A")
+        elif daynum ==1:
+            tue[i] = 1
+            day_string.append("B")
+        elif daynum == 2:
+            wed[i] = 1
+            day_string.append("C")
+        elif daynum == 3:
+            thu[i] = 1
+            day_string.append("D")
+        elif daynum == 4:
+            fri[i] = 1
+            day_string.append("E")
+        elif daynum == 5:
+            sat[i] = 1
+            day_string.append("F")
+        elif daynum == 6:
+            sun[i] = 1
+            day_string.append("G")
+    return mon, tue, wed, thu, fri, sat, sun, day_string

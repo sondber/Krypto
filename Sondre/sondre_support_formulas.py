@@ -197,6 +197,8 @@ def write_to_raw_file(volumes, prices, time_list, exchanges, filename):
 
 def fetch_aggregate_csv(file_name, n_exc):
     n_rows = count_rows(file_name)
+    print("Number of rows", n_rows)
+    print("nexc", n_exc)
     n_exc = int(n_exc)
     print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
     with open(file_name, newline='') as csvfile:

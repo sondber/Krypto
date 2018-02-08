@@ -17,8 +17,8 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 dayofweek = 0
-multivariate_regs = 0
-autoreg = 1
+multivariate_regs = 1
+autoreg = 0
 har = 0
 
 
@@ -150,7 +150,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X_benchmark)
 
         print("Spread - Return")
-        print("x_5 = " + "Return")
+        print("x_11 = " + "Return")
         x = returns_days_clean[start_index : end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -158,7 +158,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Spread - Return with 1 lag")
-        print("x_5 = " + "Return with 1 lag ")
+        print("x_11 = " + "Return with 1 lag ")
         x = returns_days_clean[start_index - 1 : end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -166,7 +166,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Spread - Volume")
-        print("x_5 = " + "log-Volume")
+        print("x_11 = " + "log-Volume")
         x = log_volumes_days_clean[start_index : end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -174,7 +174,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Spread - Volume with lag")
-        print("x_5 = " + "volume with lag")
+        print("x_11= " + "volume with lag")
         x = log_volumes_days_clean[start_index - 1 : end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -182,7 +182,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Spread - Volatility")
-        print("x_5 = " + "Log-RVol")
+        print("x_11 = " + "Log-RVol")
         x = log_volatility_days_clean[start_index : end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -190,7 +190,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Spread - Volatility with lag")
-        print("x_5 = " + "Log_RVol with lag")
+        print("x_11 = " + "Log_RVol with lag")
         x = log_volatility_days_clean[start_index - 1 : end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -199,18 +199,18 @@ if multivariate_regs == 1:
 
         print("Contemporaneous")
         print("x_1-x_3 = " + "lagged Rolls")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Return")
-        print("x_6 = " + "Volume")
-        print("x_7 = " + "Volatility")
+        print("x_4-10 = " + "Weekday")
+        print("x_11 = " + "Return")
+        print("x_12 = " + "Volume")
+        print("x_13 = " + "Volatility")
         linreg.reg_multiple(Y, X_contemporary)
 
         print("Lagged")
         print("x_1-x_3 = " + "lagged Rolls")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Return with 1 lag")
-        print("x_6 = " + "Volume with 1 lag")
-        print("x_7 = " + "Volatility with 1 lag")
+        print("x_4-10 = " + "Weekend")
+        print("x_11 = " + "Return with 1 lag")
+        print("x_12 = " + "Volume with 1 lag")
+        print("x_13 = " + "Volatility with 1 lag")
         linreg.reg_multiple(Y, X_lagged)
 
     if illiq_multi == 1:
@@ -250,7 +250,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X_benchmark)
 
         print("ILLIQ - Return")
-        print("x_5 = " + "Return")
+        print("x_11 = " + "Return")
         x = returns_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -258,7 +258,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Return with 1 lag")
-        print("x_5 = " + "Return with 1 lag ")
+        print("x_11 = " + "Return with 1 lag ")
         x = returns_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -266,7 +266,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Volume")
-        print("x_5 = " + "log-Volume")
+        print("x_11 = " + "log-Volume")
         x = log_volumes_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -275,7 +275,7 @@ if multivariate_regs == 1:
 
 
         print("ILLIQ - Volume with lag")
-        print("x_5 = " + "volume with lag")
+        print("x_11 = " + "volume with lag")
         x = log_volumes_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -283,7 +283,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Volatility")
-        print("x_5 = " + "Log-RVol")
+        print("x_11 = " + "Log-RVol")
         x = log_volatility_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -291,7 +291,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("ILLIQ - Volatility with lag")
-        print("x_5 = " + "Log_RVol with lag")
+        print("x_11 = " + "Log_RVol with lag")
         x = log_volatility_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -300,18 +300,18 @@ if multivariate_regs == 1:
 
         print("Contemporaneous")
         print("x_1-x_3 = " + "lagged ILLIQ")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Return")
-        print("x_6 = " + "Volume")
-        print("x_7 = " + "Volatility")
+        print("x_4-10 = " + "Weekend")
+        print("x_11 = " + "Return")
+        print("x_12 = " + "Volume")
+        print("x_13 = " + "Volatility")
         linreg.reg_multiple(Y, X_contemporary)
 
         print("Lagged")
         print("x_1-x_3 = " + "lagged ILLIQ")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Return with 1 lag")
-        print("x_6 = " + "Volume with 1 lag")
-        print("x_7 = " + "Volatility with 1 lag")
+        print("x_4-10 = " + "Weekend")
+        print("x_11 = " + "Return with 1 lag")
+        print("x_12 = " + "Volume with 1 lag")
+        print("x_13 = " + "Volatility with 1 lag")
         linreg.reg_multiple(Y, X_lagged)
 
     if return_multi == 1:
@@ -351,7 +351,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X_benchmark)
 
         print("Return - Volume")
-        print("x_5 = " + "log-Volume")
+        print("x_11 = " + "log-Volume")
         x = log_volumes_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -359,7 +359,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - Volume with lag")
-        print("x_5 = " + "volume with lag")
+        print("x_11 = " + "volume with lag")
         x = log_volumes_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -367,7 +367,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - Volatility")
-        print("x_5 = " + "Log-RVol")
+        print("x_11 = " + "Log-RVol")
         x = log_volatility_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -375,7 +375,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - Volatility with lag")
-        print("x_5 = " + "Log_RVol with lag")
+        print("x_11 = " + "Log_RVol with lag")
         x = log_volatility_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -383,7 +383,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - Spread")
-        print("x_5 = " + "Spread")
+        print("x_11 = " + "Spread")
         x = spread_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -391,7 +391,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - Spread with lag")
-        print("x_5 = " + "Spread with lag")
+        print("x_11 = " + "Spread with lag")
         x = spread_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -399,7 +399,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - ILLIQ")
-        print("x_5 = " + "ILLIQ")
+        print("x_11 = " + "ILLIQ")
         x = log_illiq_days_clean[start_index: end_index]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -407,7 +407,7 @@ if multivariate_regs == 1:
         linreg.reg_multiple(Y, X)
 
         print("Return - ILLIQ with lag")
-        print("x_5 = " + "ILLIQ with lag")
+        print("x_11 = " + "ILLIQ with lag")
         x = log_illiq_days_clean[start_index - 1: end_index - 1]
         x = np.transpose(np.matrix(x))
         X = np.append(X_benchmark, x, axis=1)
@@ -417,20 +417,20 @@ if multivariate_regs == 1:
 
         print("Contemporaneous")
         print("x_1-x_3 = " + "lagged returns")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Volume")
-        print("x_6 = " + "Volatility")
-        print("x_7 = " + "Spread")
-        print("x_8 = " + "ILLIQ")
+        print("x_4-10 = " + "Weekend")
+        print("x_11 = " + "Volume")
+        print("x_12 = " + "Volatility")
+        print("x_13 = " + "Spread")
+        print("x_14 = " + "ILLIQ")
         linreg.reg_multiple(Y, X_contemporary)
 
         print("Lagged")
         print("x_1-x_3 = " + "lagged returns")
-        print("x_4 = " + "Weekend")
-        print("x_5 = " + "Volume with 1 lag")
-        print("x_6 = " + "Volatility with 1 lag")
-        print("x_7 = " + "Spread with 1 lag")
-        print("x_8 = " + "ILLIQ with 1 lag")
+        print("x_4-10 = " + "Weekend")
+        print("x_11 = " + "Volume with 1 lag")
+        print("x_12 = " + "Volatility with 1 lag")
+        print("x_13 = " + "Spread with 1 lag")
+        print("x_14 = " + "ILLIQ with 1 lag")
         linreg.reg_multiple(Y, X_lagged)
 
 if autoreg == 1:

@@ -13,7 +13,7 @@ import realized_volatility
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exc=1  # Bitstamp
+exc=0  # Bitstamp
 
 #RAW
 raw = 1
@@ -41,15 +41,6 @@ time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean,
 illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
     time_list_minutes, prices_minutes,
     volumes_minutes, full_week=1)
-
-plt.plot(volumes_days_clean)
-plt.figure()
-plt.plot(returns_days_clean)
-plt.figure()
-plt.plot(spread_days_clean)
-plt.figure()
-plt.plot(illiq_days_clean)
-plt.show()
 
 print()
 #RAW

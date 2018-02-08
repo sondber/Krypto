@@ -244,7 +244,7 @@ def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0, ndigits
             index = i * (len_x / (n_labels - 1))
         index = int(index)
         labels.append(time_list[index][0:11])
-    plt.figure(figsize=(8, 2), dpi=1000)
+    plt.figure(figsize=(8, 2), dpi=300)
     plt.xticks(np.arange(0, len(time_list) + 1, len(time_list) / (n_labels - 1)), labels)
     plt.plot(data, linewidth=0.5, color="black")
     if ylims:
@@ -323,7 +323,7 @@ def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=
     #average = utc_nyc(average)
     #low = utc_nyc(low)
     #high = utc_nyc(high)
-    plt.figure(figsize=[8, 2], dpi=750)
+    plt.figure(figsize=[8, 2], dpi=300)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
@@ -348,7 +348,7 @@ def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=
 
 
 def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1, ndigits=2):
-    plt.figure(figsize=[8, 2], dpi=1000)
+    plt.figure(figsize=[8, 2], dpi=300)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)

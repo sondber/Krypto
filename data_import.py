@@ -5,7 +5,7 @@ import currency_converter as curr
 
 
 def get_lists(data="all", opening_hours="y", make_totals="y"):
-    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    exchanges = ["bitstampusd"]
     n_exc = len(exchanges)
     print("Fetching minute data..." )
 
@@ -31,7 +31,7 @@ def get_lists(data="all", opening_hours="y", make_totals="y"):
 
 
 def get_hilo(opening_hours="y"):
-    exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
+    exchanges = ["bitstampusd"]
     n_exc = len(exchanges)
     print("Fetching minute data...")
 
@@ -46,7 +46,7 @@ def get_hilo(opening_hours="y"):
     return exchanges, time_list, high, low
 
 
-def fetch_long_and_write(exchanges, opening_hours_only="y"):
+def fetch_long_and_write(exchanges, opening_hours_only="n"):
     n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = dis.get_price_volume_from_fulls(exchanges)
 

@@ -12,6 +12,78 @@ import ILLIQ
 from Jacob import jacob_support as jake_supp
 
 
+def fuse_files():
+    time_new = []
+    price_new = []
+    volume_new = []
+
+    location = "data/bitcoincharts/"
+    exchange = "bitstampusd"
+    exchanges = [exchange]
+    year = "2017"
+    for month in ["06", "07", "08", "09", "10", "11", "12"]: # iterate through the new files
+        filename_new = location + exchange + "/" + year + month + ".csv"
+        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1, unix=0)
+
+    price_new = remove_nan(price_new)
+    price_new = supp.fill_blanks(price_new)
+    volume_new = remove_nan(volume_new)
+
+    for i in range(0, len(price_new), 1440):
+        print(time_new[i], price_new[i])
+
+    time_old = []
+    price_old = []
+    volume_old = []
+
+    filename_old = "data/export_csv/minute_data_full_day.csv"
+    with open(filename_old, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % filename_old)
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            time_old.append(str(row[0]))
+            price_old.append(float(row[1]))
+            volume_old.append(float(row[2]))
+
+    time_list = time_old
+    price = price_old
+    volume = volume_old
+
+    for i in range(0, len(time_new)):
+        time_list.append(time_new[i])
+        price.append(price_new[i])
+        volume.append(volume_new[i])
+
+    with open(filename_old, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % filename_old)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        for exc in exchanges:
+            currency = exc[len(exc) - 3: len(exc)]
+            header1.append(exc)
+            header1.append("")
+            header2.append("Closing price")
+            header2.append("Volume")
+            header3.append(currency.upper())
+            header3.append("BTC")
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+
+        for i in range(0, len(time_list)):
+            rowdata = [time_list[i]]
+            rowdata.append(price[i])
+            rowdata.append(volume[i])
+            writ.writerow(rowdata)
+
+
 def make_time_stamps():
     print("Generating time stamps...")
     short = 0  # <-------------- For å teste modell bare
@@ -81,19 +153,26 @@ def make_time_stamps():
     return unix_stamps, excel_stamps
 
 
-def price_volume_from_raw(file_name, time_list, price, volume):
+def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1):
     with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        if semi == 0:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        else:
+            reader = csv.reader(csvfile, delimiter=';', quotechar='|')
         print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
         i = 0
         next(reader)
         for row in reader:
             try:
-                time_list.append(int(row[0]))
+                if unix == 1:
+                    time_list.append(int(row[0]))
+                else:
+                    time_list.append(str(row[0]))
                 price.append(float(row[4]))
                 volume.append(float(row[5]))
             except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+                1
+                #print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
         return time_list, price, volume
 
@@ -152,7 +231,7 @@ def get_price_volume_from_fulls(exchanges):
         single_volume = []
         time_list = []
         file_name = raw_folder + exchanges[i] + ".csv"
-        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price, single_volume)
+        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price, single_volume, semi=0)
 
         # Gjør om nan til 0 og så fyller inn tomme priser
         single_price = remove_nan(single_price)

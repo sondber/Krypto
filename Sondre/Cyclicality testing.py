@@ -13,7 +13,7 @@ import realized_volatility
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 hours = 1
-days = 0
+days = 1
 # daily
 full_week = 1
 weekdays = 1

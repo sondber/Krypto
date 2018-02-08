@@ -13,13 +13,22 @@ import rolls
 import ILLIQ
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+
+exchanges = ["bitstampusd"]
+
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 #time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-#time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+
+plt.plot(prices_minutes[0,:])
+plt.show()
 
 
-price_volume=0
 
+
+
+
+price_volume = 0
 if price_volume == 1:
     n_labels = 5
     labels = []
@@ -107,12 +116,7 @@ plt.show()
 """
 
 
-
-
-
-
-
-compex = 1
+compex = 0
 if compex == 1:
     time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
     # lower frequency:

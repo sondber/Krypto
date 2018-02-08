@@ -12,7 +12,7 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-unedited = 1
+unedited = 0
 transformed = 1
 
 # Transformation

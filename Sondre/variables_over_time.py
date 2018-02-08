@@ -40,8 +40,11 @@ if unedited == 1:
     plot.time_series_single(time_list_days, volumes_days[0, :], "Volume")
     plot.time_series_single(time_list_days, returns_days, "Return", perc=1, ndigits=0)
     plot.time_series_single(time_list_days, volatility_days, "Realized_Volatility", perc=1, ndigits=0)
+    plot.time_series_single(time_list_days, volatility_days, "Realized_Volatility_cut", perc=1, ndigits=0, ylims=[0,5])
     plot.time_series_single(time_list_days, spread_days, "Spread", perc=1, ndigits=1)
+    plot.time_series_single(time_list_days, spread_days, "Spread_cut", perc=1, ndigits=1, ylims=[0,0.015])
     plot.time_series_single(time_list_days, illiq_days, "ILLIQ", perc=1, ndigits=1)
+    plot.time_series_single(time_list_days, illiq_days, "ILLIQ_cut", perc=1, ndigits=1, ylims=[0, 0.002])
 
 if transformed == 1:
     plot.time_series_single(time_list_days_clean, illiq_days_clean, "Log_ILLIQ", logy=1, perc=1, ndigits=3)

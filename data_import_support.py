@@ -714,15 +714,13 @@ def volume_transformation(volume, initial_mean_volume):
     return out_volume
 
 
-def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_week=1):
+def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=0, days_excluded=0):
 
     # Opening hours only
     print("Transforming data series...")
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
                                                                    volumes_minutes)
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-
-    exchange = 0  # Bitstamp!
 
     if full_week == 0:
         cutoff_day = 261
@@ -772,14 +770,19 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
     illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes) # Already clean
 
     # --------------------------------------------
-    if full_week == 0:
-        cray_s = 69
-        cray_e = 74
-    else:
-        cray_s= 97
-        cray_e= 103
 
-    cray_day = 1269
+    if exchange == 0:
+        if full_week == 0:
+            cray_s = 69
+            cray_e = 74
+        else:
+            cray_s= 97
+            cray_e= 103
+        cray_day = 1269
+    elif exchange == 1:
+        cray_day = 405
+        cray_s = 927
+        cray_e = 928
     remove_crazy = 1
     remove_crazy_week = 1  # Removes the week starting at 08.04.2013
 
@@ -792,7 +795,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
         volatility_days = np.delete(volatility_days, cray_day)
         illiq_days_clean = np.delete(illiq_days_clean, cray_day)
         illiq_time = np.delete(illiq_time, cray_day)
-
+    if remove_crazy_week == 1:
         time_list_removed = np.append(time_list_removed, time_list_days[cray_s:cray_e])
         time_list_days = np.delete(time_list_days, range(cray_s, cray_e))
         returns_days = np.delete(returns_days, range(cray_s, cray_e))
@@ -835,7 +838,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
 
     n_5 = len(time_list_days_clean) # After removing the zero-volatility
 
-    show_days_table = 0
+    show_days_table = days_excluded
     if show_days_table == 1:
         print()
         print()

@@ -13,26 +13,26 @@ import realized_volatility
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
+exc=1  # Bitstamp
 
 #RAW
 raw = 1
 combined = 1
 
-combined = 0
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
 time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
+returns_minutes = jake_supp.logreturn(prices_minutes[exc, :])
 
-returns_days = jake_supp.logreturn(prices_days[0, :])
+returns_days = jake_supp.logreturn(prices_days[exc, :])
 
-spread_days = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]
+spread_days = rolls.rolls(prices_minutes[exc, :], time_list_minutes, calc_basis=1, kill_output=1)[1]
 
-illiq_days_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[0, :], day_or_hour=1)
+illiq_days_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[exc, :], day_or_hour=1)
 
 # Realized volatility
-volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[0, :])
+volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[exc, :])
 # Annualize the volatility
 volatility_days = np.multiply(volatility_days, 365 ** 0.5)
 
@@ -42,12 +42,20 @@ illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_da
     time_list_minutes, prices_minutes,
     volumes_minutes, full_week=1)
 
+plt.plot(volumes_days_clean)
+plt.figure()
+plt.plot(returns_days_clean)
+plt.figure()
+plt.plot(spread_days_clean)
+plt.figure()
+plt.plot(illiq_days_clean)
+plt.show()
 
 print()
 #RAW
 print("RAW------------------------------------------")
 print("Number of entries in RAW:", len(returns_days))
-desc.stats_for_single_list(volumes_days[0, :], "Volumes RAW")
+desc.stats_for_single_list(volumes_days[exc, :], "Volumes RAW")
 desc.stats_for_single_list(returns_days, "Returns RAW")
 desc.stats_for_single_list(volatility_days, "RVol, annualized RAW")
 desc.stats_for_single_list(spread_days, "Roll's RAW")

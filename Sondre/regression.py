@@ -17,16 +17,19 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 dayofweek = 0
-multivariate_regs = 1
-autoreg = 0
+multivariate_regs = 0
+autoreg = 1
 har = 0
 
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+
+print("Number of minutes: ", len(time_list_minutes))
+
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
 illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
     time_list_minutes, prices_minutes,
-    volumes_minutes, full_week=1)
+    volumes_minutes, full_week=1, exchange=0, days_excluded=1)
 
 if dayofweek == 0:
     # standardize all variables
@@ -35,6 +38,18 @@ if dayofweek == 0:
     log_illiq_days_clean =  supp.standardize(log_illiq_days_clean)
     returns_days_clean = supp.standardize(returns_days_clean)
     log_volatility_days_clean = supp.standardize(log_volatility_days_clean)
+else:
+    mean_volume = np.mean(log_volumes_days_clean)
+    mean_spread = np.mean(spread_days_clean)
+    mean_illiq = np.mean(log_illiq_days_clean)
+    mean_return = np.mean(returns_days_clean)
+    mean_volatility = np.mean(log_volatility_days_clean)
+
+    log_volumes_days_clean -= mean_volume
+    spread_days_clean -= mean_spread
+    log_illiq_days_clean -= mean_illiq
+    returns_days_clean -= mean_return
+    log_volatility_days_clean -= mean_volatility
 
 mon, tue, wed, thu, fri, sat, sun, day_string = supp.week_vars(time_list_days_clean)
 weekend = np.zeros(len(mon))
@@ -53,12 +68,16 @@ if dayofweek == 1:
     X = np.transpose(X)
 
     print_n(20)
+    print("Returns")
+    Y = returns_days_clean
+    linreg.reg_multiple(Y, X, intercept=0)
+    linreg.reg_multiple(Y, weekend)
     print("Volumes")
     Y = log_volumes_days_clean
     linreg.reg_multiple(Y, X, intercept=0)
     linreg.reg_multiple(Y, weekend)
-    print("Returns")
-    Y = returns_days_clean
+    print("RVol")
+    Y = log_volatility_days_clean
     linreg.reg_multiple(Y, X, intercept=0)
     linreg.reg_multiple(Y, weekend)
     print("SPREAD")

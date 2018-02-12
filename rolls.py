@@ -1,11 +1,10 @@
 import math
 from Sondre import sondre_support_formulas as supp
-import data_import as di
 import numpy as np
-import matplotlib.pyplot as plt
+import linreg
 
+# SISTE NYE FRA JACOB 16/11
 # The following estimation of Rolls estimator is based on the formula in Haugom, Molnar (2014)
-
 
 def first_price_differences(prices):  # takes list of prices, returns equal length list of first price differences
     returnlist = [float(0)]
@@ -25,7 +24,9 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
     time_list = []
     count_value_error = 0
     count_corr_below = 0
+    alpha_count_below = 0
     corr_threshold = 0.2
+    alpha = 0.05
     if kill_output == 0:
         print("Calculating first price differences ...")
     price_differences = first_price_differences(prices_minute)  # calculates price difference
@@ -33,7 +34,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
         print("Price differences-calculation finished. ")
 
     # determine opening hours yes/no
-    if hour[0] == 13:  # this indicates that opening times are being investigated
+    if hour[0] == 14:  # this indicates that opening times are being investigated
         opening_times = 1
         opening_hours_desc = "opening hours"
     else:
@@ -76,8 +77,12 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 list1 = price_differences[pos:pos + half_hour - 1]
                 list2 = price_differences[pos + 1:pos + half_hour]
                 corr = np.corrcoef(list1, list2)[0, 1]
+                p_val = linreg.linreg_coeffs(list1, list2)[3]
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
+                if p_val > alpha:
+                    alpha_count_below += 1
+
                 for i in range(pos + 1, pos + half_hour):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
@@ -89,7 +94,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 time_list.append(time_list_minute[pos])
                 if prices_minute[pos] == 0:
                     print("Here is a zero!")
-                spread_rel.append(ba_calc / prices_minute[pos])
+                spread_rel.append(ba_calc / prices_minute[pos+half_hour-1])
                 half = 0
                 pos += 30
                 sum_inside = 0
@@ -97,8 +102,11 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 list1 = price_differences[pos:pos + window - 1]
                 list2 = price_differences[pos + 1:pos + window]
                 corr = np.corrcoef(list1, list2)[0, 1]
+                p_val = linreg.linreg_coeffs(list1, list2)[3]
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
+                if p_val > alpha:
+                    alpha_count_below += 1
                 for i in range(pos + 1, pos + window):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
@@ -108,7 +116,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                     ba_calc = 0
                 spread.append(ba_calc)
                 time_list.append(time_list_minute[pos])
-                spread_rel.append(ba_calc / prices_minute[pos])
+                spread_rel.append(ba_calc / prices_minute[pos+window-1])
                 sum_inside = 0
                 if tod == 5:
                     tod = 0
@@ -120,12 +128,16 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
     else:
         sum_inside = 0
         for i in range(0, len(price_differences) - minutes_in_window if calc_basis == 2 else len(price_differences),
-                       minutes_in_window):
+                       minutes_in_window):  # check this loop when weeks are monday-friday - at this point, the loop ends at the next last week
             list1 = price_differences[i:i + minutes_in_window - 1]
             list2 = price_differences[i + 1:i + minutes_in_window]
             corr = np.corrcoef(list1, list2)[0, 1]
+            p_val = linreg.linreg_coeffs(list1, list2)[3]
             if abs(corr) < corr_threshold:
                 count_corr_below += 1
+            if p_val > alpha:
+                alpha_count_below += 1
+
             for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
             try:
@@ -135,7 +147,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 ba_calc = 0
             spread.append(ba_calc)
             time_list.append(time_list_minute[i])
-            spread_rel.append(ba_calc / prices_minute[i])
+            spread_rel.append(ba_calc / prices_minute[i+minutes_in_window-1])
             sum_inside = 0
     if kill_output == 0:
         print("Spreads-calculation is finished")
@@ -145,15 +157,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
               "value errors were counted when calculating Roll-spreads")
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
+        print(alpha_count_below, "correlations were not significant at the", round(100 * alpha, 0), "% level(",
+              round(100 * alpha_count_below / len(spread_rel), 2), "%)")
 
-        return spread, spread_rel, time_list, count_value_error
-
-
-exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(make_totals="y")
-prices = total_price[407550:]
-time_list = time_list[407550:]
-
-spread, spread_rel, time_list, count_value_error = rolls(prices, time_list, calc_basis=0,
-                                                                           kill_output=0)
-plt.plot(spread_rel)
-plt.show()
+    return spread, spread_rel, time_list, count_value_error

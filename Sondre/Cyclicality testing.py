@@ -6,211 +6,123 @@ from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 import os
 import rolls
-from matplotlib import pyplot as plt
 import scipy.stats as st
-
+import ILLIQ
+import realized_volatility
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
-
-# Importing data for all minutes of the day
-exchanges, time_list_min, prices_min, volumes_min = di.get_lists(opening_hours="n", make_totals="n")
-
-spread_hour = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=0, kill_output=1)[1]  # Rolls
-spread_day = rolls.rolls(prices_min[0, :], time_list_min, calc_basis=1, kill_output=1)[1]  # Rolls
-
-
-time_min = time_list_min
-
-minutes = 1
 hours = 1
 days = 1
-figcount = 1  # Making sure all graphs are in unique figures
-if minutes == 1:
-    min_of_day, avg_volumes_minute, low_volumes_minute, upper_volumes_minute = dis.average_over_day(time_list_min, volumes_min[0, :], frequency="m")
-    plt.figure(figcount)
-    # MINUTES ----------------------------------------------------------------------------------------------------
-    returns_min = jake_supp.logreturn(prices_min[0, :])
-    min_of_day, avg_returns_minute, low_returns_minute, upper_returns_minute = dis.average_over_day(time_list_min, returns_min, frequency="m")
+# daily
+full_week = 1
+weekdays = 1
 
-    avg_returns_minute = avg_returns_minute * 100  # Converting to percentage
-    plt.plot(avg_returns_minute, label="Logreturns - Minute", linewidth=0.5)
+if full_week== 1 or hours==1:
+    exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-    stdev = np.std(returns_min) * 100  # Converting to percentage
-    plt.ylim([-stdev, stdev])
+    returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
+    # Converting to hourly data
+    time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+    time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    # Generating x-ticks
-    labels = ["00:00\n20:00\n09:00", "06:00\n02:00\n15:00", "12:00\n08:00\n21:00", "18:00\n14:00\n03:00",
-              "23:59\n19:59\n08:59"]
-    plt.xticks(np.arange(0, 1441, 6 * 60), labels)
-    plt.title("Average return per minute over the course of a day")
-    plt.ylabel("Minute logreturn (%)")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
 
-    plt.legend()
-
-    figcount += 1
-    plt.figure(figcount)
-
-    # Volume
-    plt.plot(avg_volumes_minute, label="Volume per minute")
-    plt.xticks(np.arange(0, 1441, 6 * 60), labels)
-    plt.title("Average volume per minute over the course of a day")
-    plt.ylabel("Minute volume [BTC]")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
-
-    stdev = np.std(volumes_min[0, :])
-    mean = np.mean(volumes_min[0, :])
-    mean_test = np.mean(avg_volumes_minute)
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
-
-    figcount += 1
-    plt.figure(figcount)
 
 if hours == 1:
     # HOURS ----------------------------------------------------------------------------------------------------
-    # Converting to hourly data
-    time_list_hour, prices_hour, volumes_hour = dis.convert_to_hour(time_list_min, prices_min, volumes_min)
-    returns_hour = jake_supp.logreturn(prices_hour[0, :])
+    returns_hours = jake_supp.logreturn(prices_hours[0, :])
+    spread_hours = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
+    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[0, :], day_or_hour=0)
+
+    cutoff_hour_2012 = 8784
+    total_hours = len(time_list_hours)-1
+    time_list_hours = time_list_hours[cutoff_hour_2012:total_hours]
+    returns_hours = returns_hours[cutoff_hour_2012:total_hours]
+    spread_hours = spread_hours[cutoff_hour_2012:total_hours]
+    illiq_hours = illiq_hours[cutoff_hour_2012:total_hours]
+    illiq_hours_time = illiq_hours_time[cutoff_hour_2012:total_hours]
+
+    hours_to_remove = [2393, 2410, 17228, 26712, 30468, 33819]
+    time_list_hours = np.delete(time_list_hours, hours_to_remove)
+    returns_hours = np.delete(returns_hours, hours_to_remove)
+    spread_hours = np.delete(spread_hours, hours_to_remove)
+    illiq_hours = np.delete(illiq_hours, hours_to_remove)
+    illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
 
     # Finding average for every hour of the day
-    hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.average_over_day(time_list_hour, returns_hour, frequency="h")
-    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.average_over_day(time_list_hour, volumes_hour[0, :], frequency="h")
-    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.average_over_day(time_list_hour, spread_hour, frequency="h")
+    hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours, returns_hours, frequency="h")
+    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, volumes_hours[0, :],frequency="h")
+    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours, spread_hours, frequency="h")
+    hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(illiq_hours_time, illiq_hours, frequency="h")
 
-    avg_returns_hour = avg_returns_hour * 100  # Converting to percentage
-    low_returns_hour = low_returns_hour * 100  # Converting to percentage
-    upper_returns_hour = upper_returns_hour * 100  # Converting to percentage
-
-    avg_spread_hour = avg_spread_hour * 100  # Converting to percentage
-    low_spread_hour = low_spread_hour * 100  # Converting to percentage
-    upper_spread_hour = upper_spread_hour * 100  # Converting to percentage
-
-    stdev = np.std(returns_hour) * 100  # Converting to percentage
-    plt.ylim([-stdev, stdev])
-    plt.plot(avg_returns_hour, label="Logreturns -  Hour")
-    plt.plot(low_returns_hour, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_returns_hour, color="blue", linestyle='--', linewidth=0.5)
-
-    labels = ["00:00\n20:00\n09:00", "06:00\n02:00\n15:00", "12:00\n08:00\n21:00", "18:00\n14:00\n03:00",
-              "23:59\n19:59\n08:59"]
-    plt.xticks(np.arange(0, 25, 6), labels)
-    plt.title("Average return per hour over the course of a day")
-    plt.ylabel("Hourly logreturn (%)")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
-    plt.legend()
-
-    figcount += 1
-    plt.figure(figcount)
-
-    # Volumes
-    plt.plot(avg_volumes_hour, label="Volume")
-    plt.plot(low_volumes_hour, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_volumes_hour, color="blue", linestyle='--', linewidth=0.5)
-    plt.xticks(np.arange(0, 25, 6), labels)
-    plt.title("Average volume per hour over the course of a day")
-    plt.ylabel("Hourly volume [BTC]")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
-    stdev = np.std(volumes_hour[0, :])
-    mean = np.mean(volumes_hour[0, :])
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
-
-    figcount += 1
-    plt.figure(figcount)
-
-
-    # Rolls
-    plt.plot(avg_spread_hour, label="Bid/ask (relative)")
-    plt.plot(low_spread_hour, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_spread_hour, color="blue", linestyle='--', linewidth=0.5)
-
-    plt.title("Roll's estimator for bid/ask spread (relative) - Hourly")
-    plt.ylabel("Bid/ask spread (%)")
-    plt.xticks(np.arange(0, 25, 6), labels)
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
-    stdev = np.std(spread_hour) * 100  # Converting to percentage
-    mean = np.mean(spread_hour) * 100  # Converting to percentage
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
-
-    figcount += 1
-    plt.figure(figcount)
+    plot.plot_for_day(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return", perc=1, ndigits=2, yzero=1)
+    plot.plot_for_day(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Volume", perc=0)
+    plot.plot_for_day(avg_spread_hour, low_spread_hour, upper_spread_hour, title="Spread", perc=1)
+    plot.plot_for_day(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="ILLIQ", perc=1, ndigits=3)
 
 if days == 1:
     # DAYS ----------------------------------------------------------------------------------------------------
     # Converting to daily data
+    time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+    illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
+        time_list_minutes, prices_minutes,
+        volumes_minutes, full_week=1)
 
-    time_list_day, prices_day, volumes_day = dis.convert_to_day(time_min, prices_min, volumes_min)
-    returns_day = jake_supp.logreturn(prices_day[0, :])
-
-    # Finding average for every day of the week
-    day_of_week, avg_returns_day, low_returns_day, upper_returns_day = dis.average_over_day(time_list_day, returns_day, frequency="d")
-    day_of_week, avg_volumes_day, low_volumes_day, upper_volumes_day = dis.average_over_day(time_list_day, volumes_day[0, :], frequency="d")
-    day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.average_over_day(time_list_day, spread_day, frequency="d")
-
-    avg_returns_day = avg_returns_day * 100  # Converting to percentage
-    low_returns_day = low_returns_day * 100  # Converting to percentage
-    upper_returns_day = upper_returns_day * 100  # Converting to percentage
-
-    avg_spread_day = avg_spread_day * 100  # Converting to percentage
-    low_spread_day = low_spread_day * 100  # Converting to percentage
-    upper_spread_day = upper_spread_day * 100  # Converting to percentage
-
-    plt.plot(avg_returns_day, label="Logreturns - Day")
-    plt.plot(low_returns_day, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_returns_day, color="blue", linestyle='--', linewidth=0.5)
-
-    stdev = np.std(returns_day) * 100  # Converting to percentage
-    plt.ylim([-stdev, stdev])
-
-    labels = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
-    plt.xticks(np.arange(0, 7, 1), labels)
-    plt.title("Average return per day over the course of a week")
-    plt.ylabel("Daily logreturn (%)")
-    plt.legend()
-
-    # Volume
-    figcount += 1
-    plt.figure(figcount)
-    plt.xticks(np.arange(0, 7, 1), labels)
-    plt.ylabel("Daily volume [BTC]")
-    plt.plot(avg_volumes_day, label="Volumes")
-    plt.plot(low_volumes_day, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_volumes_day, color="blue", linestyle='--', linewidth=0.5)
-
-    plt.title("Average volume per day over the course of a week")
-    stdev = np.std(volumes_day[0, :])
-    mean = np.mean(volumes_day[0, :])
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
-    figcount += 1
+    spread_days_raw = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)[1]  # Rolls
+    returns_days_raw = jake_supp.logreturn(prices_days[0, :])
+    illiq_days_time, illiq_days_raw = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[0, :], day_or_hour=1)
 
 
-    # Rolls
-    plt.figure(figcount)
-    plt.xticks(np.arange(0, 7, 1), labels)
-    plt.title("Roll's estimator for bid/ask spread (relative) - Daily")
-    plt.ylabel("Bid/ask spread (%)")
-    plt.plot(avg_spread_day, label="Bid/ask (relative)")
-    plt.plot(low_spread_day, label="95% confidence interval", color="blue", linestyle='--', linewidth=0.5)
-    plt.plot(upper_spread_day, color="blue", linestyle='--', linewidth=0.5)
-    stdev = np.std(spread_day) * 100  # Converting to percentage
-    mean = np.mean(spread_day) * 100  # Converting to percentage
-    plt.ylim([mean-stdev, mean+stdev])
-    plt.legend()
+    # Finding average for raw variables
+    day_of_week, avg_returns_day_raw, low_returns_day_raw, upper_returns_day_raw = dis.cyclical_average(time_list_days, returns_days_raw, frequency="d")
+    day_of_week, avg_volumes_day_raw, low_volumes_day_raw, upper_volumes_day_raw = dis.cyclical_average(time_list_days, volumes_days[0,:], frequency="d")
+    day_of_week, avg_spread_day_raw, low_spread_day_raw, upper_spread_day_raw = dis.cyclical_average(time_list_days, spread_days_raw, frequency="d")
+    day_of_week, avg_illiq_day_raw, low_illiq_day_raw, upper_illiq_day_raw = dis.cyclical_average(illiq_days_time, illiq_days_raw,frequency="d")
+
+    plot.plot_for_week(avg_returns_day_raw, low_returns_day_raw, upper_returns_day_raw, title="Return_raw", perc=1, ndigits=1)
+
+    plot.plot_for_week(avg_volumes_day_raw, low_volumes_day_raw, upper_volumes_day_raw, title="Volume_raw", perc=0)
+
+    plot.plot_for_week(avg_spread_day_raw, low_spread_day_raw, upper_spread_day_raw, title="Spread_raw", perc=1)
+    plot.plot_for_week(avg_illiq_day_raw, low_illiq_day_raw, upper_illiq_day_raw, title="ILLIQ_raw", perc=1, ndigits=3)
 
 
-plt.show()
+    # Finding average for clean variables
+    day_of_week, avg_returns_day, low_returns_day, upper_returns_day = dis.cyclical_average(time_list_days_clean,
+                                                                                            returns_days_clean,
+                                                                                            frequency="d")
+    day_of_week, avg_volumes_day, low_volumes_day, upper_volumes_day = dis.cyclical_average(time_list_days_clean,
+                                                                                            volumes_days_clean,
+                                                                                            frequency="d")
+    day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_list_days_clean, spread_days_clean,
+                                                                                         frequency="d")
+    day_of_week, avg_illiq_day, low_illiq_day, upper_illiq_day = dis.cyclical_average(time_list_days_clean, illiq_days_clean,
+                                                                                      frequency="d")
+    day_of_week, avg_volatility_day, low_volatility_day, upper_volatility_day = dis.cyclical_average(time_list_days_clean, volatility_days_clean,
+                                                                                         frequency="d")
+
+
+    plot.plot_for_week(avg_returns_day, low_returns_day, upper_returns_day, title="Return_clean", perc=1, ndigits=1)
+    plot.plot_for_week(avg_volumes_day, low_volumes_day, upper_volumes_day, title="Volume_clean", perc=0)
+    plot.plot_for_week(avg_spread_day, low_spread_day, upper_spread_day, title="Spread_clean", perc=1)
+    plot.plot_for_week(avg_volatility_day, low_volatility_day, upper_volatility_day, title="Volatility_clean", perc=1, ndigits=0, logy=0)
+    plot.plot_for_week(avg_illiq_day, low_illiq_day, upper_illiq_day, title="ILLIQ_clean", perc=1, ndigits=3, logy=0)
+
+    #Finding average for transformed
+    day_of_week, avg_log_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(
+        time_list_days_clean, log_volumes_days_clean, frequency="d")
+    day_of_week, avg_volatility_day_clean, low_volatility_day_clean, upper_volatility_day_clean = dis.cyclical_average(
+        time_list_days_clean, volatility_days_clean, frequency="d")
+    day_of_week, avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average(
+        time_list_days_clean, illiq_days_clean, frequency="d")
+    day_of_week, avg_spread_day_clean, low_spread_day_clean, upper_spread_day_clean = dis.cyclical_average(
+        time_list_days_clean, spread_days_clean, frequency="d")
+
+    plot.plot_for_week(avg_volatility_day_clean, low_volatility_day_clean, upper_volatility_day_clean,
+                       title="Log_Volatility", perc=1, weekends=1, logy=1, ndigits=0)
+    plot.plot_for_week(avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean, title="Log_ILLIQ", perc=1,
+                       weekends=1, logy=1, ndigits=3)
+    plot.plot_for_week(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume", perc=0,
+                       weekends=1)  # Hva faen gjør vi med y-aksen på denne?
+    plot.plot_for_week(avg_spread_day_clean, low_spread_day_clean, upper_spread_day_clean, title="Spread_clean",
+                       perc=1, weekends=1)

@@ -21,5 +21,12 @@ def first_price_differences(price): # takes list of prices, returns equal length
             print("Something wrong happened when calculating price difference")
     return returnlist
 
-
+def percentage_return(price): # takes list of prices, returns equal length list of returns per tick
+    returnlist = [0.00]*len(price)
+    for i in range(0, len(price)-1): #The last entry will always be zero
+        try:
+            returnlist[i] = (price[i+1]-price[i])/price[i]
+        except ValueError:
+            returnlist[i] = 0
+    return returnlist
 

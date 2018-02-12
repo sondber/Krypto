@@ -14,3 +14,19 @@ data_import_support.py
 data/long_raw_data/bitstampusd.csv
 data/export_csv/minute_data_full_day.csv
 Jacob/__pycache__/jacob_csv_handling.cpython-36.pyc
+data/export_csv/minute_data.csv
+*.png
+<<<<<<< HEAD
+data/long_raw_data/btceusd.csv
+data/long_raw_data/coinbaseusd.csv
+data/long_raw_data/krakenusd.csv
+data/export_csv/hilo_minute_data_full_day.csv
+=======
+data/export_csv/hilo_minute_data_full_day.csv
+data/long_raw_data/btceusd.csv
+data/long_raw_data/coinbaseusd.csv
+data/long_raw_data/krakenusd.csv
+>>>>>>> Sondre
+*.pyc
+*.pyc
+*.pyc

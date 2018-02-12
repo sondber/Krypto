@@ -1,204 +1,185 @@
 import numpy as np
 import data_import as di
 import plot
-import rolls
-from Jacob import jacob_support as jake_supp
-from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 from matplotlib import pyplot as plt
+import linreg
 
+# Opening hours only
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
+# Removes all days with no volume, volatility or spread
+time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
+    time_list_minutes, prices_minutes,
+    volumes_minutes)
 
 
-daily_scatters = 0
-if daily_scatters == 1:
-    spread_abs_day, spread_daily, time_list_rolls_day, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=1, kill_output=1)
-    time_list_daily, prices_daily, volumes_daily = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-    returns_daily = jake_supp.logreturn(prices_daily[0, :])
-    volumes_daily = volumes_daily[0, :] # Kun bitstamp
+# Getting stds and means for parameters:
+spread_std_day = np.std(spread_days_clean)
+spread_mean_day = np.mean(spread_days_clean)
+log_volume_std_day = np.std(log_volumes_days_clean)
+log_volume_mean_day = np.mean(log_volumes_days_clean)
+returns_std_day = np.std(returns_days_clean)
+returns_mean_day = np.mean(returns_days_clean)
+log_illiq_std_day = np.std(illiq_days_clean)
+log_illiq_mean_day = np.mean(illiq_days_clean)
+log_volatility_std = np.std(log_volatility_days_clean)
+log_volatility_mean = np.mean(log_volatility_days_clean)
 
-    y_mean = np.mean(spread_daily)
-    y_std = np.std(spread_daily)
-    y_lims = [0, y_mean + y_std]
+# Whether to run plots
+roll_v_return = 0
+roll_v_volumes = 0
+roll_v_volatility = 0
+return_v_volumes = 0
+illiq_v_volume = 0
+illiq_v_return = 0
+roll_v_illiq = 0
+illiq_v_volatility = 0
 
-    fig_count = 1
+print()
 
-    # Rolls v Returns
-    plt.figure(fig_count)
+y_data = spread_days_clean
+y_lims = [min(y_data), max(y_data)]
 
-    x_mean = np.mean(returns_daily)
-    x_std = np.std(returns_daily)
+x_data = volatility_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_vol")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Annualized Volatility")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = returns_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_returns")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Returns")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = log_volumes_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=0, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_volume")
+plot.plt.ylabel("Spread")
+plot.plt.xlabel("Normalized Volumes")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+
+y_data = illiq_days_clean
+y_lims = [min(y_data), max(y_data)]
+
+x_data = volatility_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_vol")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Annualized Volatility")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = returns_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_log=1,  y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_returns")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Returns")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+x_data = log_volumes_days_clean
+x_lims = [min(x_data), max(x_data)]
+plot.scatters(x_data, y_data, x_log=0, x_perc=0,  y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_volumes")
+plot.plt.ylabel("ILLIQ")
+plot.plt.xlabel("Normalized Volumes")
+linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+
+if roll_v_return == 1:
+    x_mean = returns_mean_day
+    x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
-    plt.title("Bid/ask spread vs. Daily returns")
-    plot.scatters(returns_daily, spread_daily, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims)
-    fig_count += 1
+    plot.scatters(returns_days_clean, spread_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Spread daily",
+                  ylims=y_lims, xlims=x_lims, x_perc=1, y_perc=1)
 
-    # Rolls v Volumes
-    plt.figure(fig_count)
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, spread_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    reg_text = "R^2: " + str(r_value ** 2) + "  P-value: " + str(p_value)
+    print("Roll - Return:")
+    linreg.stats(slope, intercept, r_value, p_value)
 
-    x_mean = np.mean(volumes_daily)
-    x_std = np.std(volumes_daily)
-    x_lims = [0, x_mean + x_std]
-    plt.title("Bid/ask spread vs. daily traded volumes")
-    plot.scatters(volumes_daily, spread_daily, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims)
-    fig_count += 1
+    plot.plot_x_zero(x_lims)
 
-    # Returns v Volumes
-    plt.figure(fig_count)
 
-    y_mean = np.mean(returns_daily)
-    y_std = np.std(returns_daily)
-    y_lims = [y_mean - y_std, y_mean + y_std]
-    x_mean = np.mean(volumes_daily)
-    x_std = np.std(volumes_daily)
-    x_lims = [0, x_mean + x_std]
-    plt.title("Daily returns vs. Daily traded volumes")
-    plot.scatters(volumes_daily, returns_daily, show_plot=0, xtitle="Volumes daily [BTC]", ytitle="Returns daily",
-                  ylims=y_lims, xlims=x_lims)
+if roll_v_volumes == 1:
+    x_lims = [min(log_volumes_days_clean), max(log_volumes_days_clean)]
+    plot.scatters(log_volumes_days_clean, spread_days_clean, show_plot=0, xtitle="Volumes daily (transformed)",
+                  ytitle="Spread daily",
+                  ylims=y_lims, xlims=x_lims, x_log=0, y_perc=1)
 
-    fig_count += 1
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, spread_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    print("Roll - Volume (transformed):")
+    linreg.stats(slope, intercept, r_value, p_value)
 
-    # Rolls v Returns w/ volume as size
-    plt.figure(fig_count)
+if roll_v_volatility == 1:
+    x_lims = [min(volatility_days_clean), max(volatility_days_clean)]
+    plot.scatters(volatility_days_clean, spread_days_clean, show_plot=0, xtitle="Log volatility, annualized",
+                  ytitle="Spread daily",
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
-    x_mean = np.mean(returns_daily)
-    x_std = np.std(returns_daily)
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, spread_days_clean)
+    #plot.regression_line(intercept, slope, xlims=x_lims)
+    print("Roll - Log volatility:")
+    linreg.stats(slope, intercept, r_value, p_value)
+
+
+if roll_v_illiq == 1:
+
+    x_lims = [min(illiq_days_clean), max(illiq_days_clean)]
+    y_mean = spread_mean_day
+    y_std = spread_std_day
+    y_lims = [0, y_mean + y_std]
+    plot.scatters(illiq_days_clean, spread_days_clean, show_plot=0, xtitle="Log ILLIQ", ytitle="Spread daily",
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
+
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_illiq_days_clean, spread_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    print("Spread - log ILLIQ:")
+    linreg.stats(slope, intercept, r_value, p_value)
+
+if illiq_v_return == 1:
+    y_lims = [min(illiq_days_clean), max(illiq_days_clean)]
+    x_mean = returns_mean_day
+    x_std = returns_std_day
     x_lims = [x_mean - x_std, x_mean + x_std]
+    plot.scatters(returns_days_clean, illiq_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
+                  ylims=y_lims, xlims=x_lims, x_perc=1, y_log=1, y_perc=1)
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, log_illiq_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    print("log ILLIQ - Return:")
+    linreg.stats(slope, intercept, r_value, p_value)
 
-    y_mean = np.mean(spread_daily)
-    y_std = np.std(spread_daily)
-    y_lims = [0, y_mean + y_std]
+    plot.plot_x_zero(x_lims)
 
-    plt.title("Bid/ask spread vs. Daily returns")
-    plot.scatters(returns_daily, spread_daily, show_plot=1, xtitle="Returns daily", ytitle="Spread daily",
-                  ylims=y_lims, xlims=x_lims, areas=volumes_daily, label="Bubble size = traded volume")
-    fig_count += 1
+if illiq_v_volume == 1:
 
-hourly_scatters = 0
-if hourly_scatters == 1:
-    spread_abs_hour, spread_hourly, time_list_rolls_hourly, count_value_error = rolls.rolls(prices_minutes[0, :], time_list_minutes, calc_basis=0, kill_output=1)
-    time_list_hours, prices_hourly, volumes_hourly = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-    returns_hourly = jake_supp.logreturn(prices_hourly[0, :])
-    volumes_hourly = volumes_hourly[0, :] # Kun bitstamp
+    x_lims = [min(log_volumes_days_clean), max(log_volumes_days_clean)]
+    plot.scatters(log_volumes_days_clean, illiq_days_clean, show_plot=0, xtitle="Log volumes", ytitle="Log ILLIQ",
+                  ylims=y_lims, xlims=x_lims, x_log=0, y_log=1, y_perc=1)
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, log_illiq_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    print("Log ILLIQ - Log Volume:")
+    linreg.stats(slope, intercept, r_value, p_value)
 
-    y_mean = np.mean(spread_hourly)
-    y_std = np.std(spread_hourly)
-    y_lims = [0, y_mean + y_std]
+if illiq_v_volatility == 1:
 
-    fig_count = 1
+    x_lims = [min(volatility_days_clean), max(volatility_days_clean)]
+    plot.scatters(volatility_days_clean, illiq_days_clean, show_plot=0, xtitle="Log volatility annualized",
+                  ytitle="Log ILLIQ",
+                  ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_log=1, y_perc=1)
+    # Regression lines
+    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, log_illiq_days_clean)
+    plot.regression_line(intercept, slope, xlims=x_lims)
+    print("Log ILLIQ - Log volatility:")
+    linreg.stats(slope, intercept, r_value, p_value)
 
-    # Rolls v Returns
-    plt.figure(fig_count)
-
-    x_mean = np.mean(returns_hourly)
-    x_std = np.std(returns_hourly)
-    x_lims = [x_mean-x_std, x_mean + x_std]
-    plt.title("Bid/ask spread vs. Hourly returns")
-    plot.scatters(returns_hourly, spread_hourly, show_plot=0, xtitle="Returns hourly", ytitle="Spread hourly", ylims=y_lims, xlims=x_lims)
-
-    fig_count += 1
-    # Rolls v Volumes
-    plt.figure(fig_count)
-
-    x_mean = np.mean(volumes_hourly)
-    x_std = np.std(volumes_hourly)
-    x_lims = [0, x_mean + x_std]
-    plt.title("Bid/ask spread vs. Hourly traded volumes")
-    plot.scatters(volumes_hourly, spread_hourly, show_plot=0, xtitle="Volumes hourly [BTC]", ytitle="Spread hourly", ylims=y_lims, xlims=x_lims)
-
-    fig_count += 1
-    # Returns v Volumes
-    plt.figure(fig_count)
-
-    y_mean = np.mean(returns_hourly)
-    y_std = np.std(returns_hourly)
-    y_lims = [y_mean - y_std, y_mean + y_std]
-    x_mean = np.mean(volumes_hourly)
-    x_std = np.std(volumes_hourly)
-    x_lims = [0, x_mean + x_std]
-    plt.title("Hourly returns vs. Hourly traded volumes")
-    plot.scatters(volumes_hourly, returns_hourly, show_plot=0, xtitle="Volumes hourly [BTC]",
-                  ytitle="Returns hourly", ylims=y_lims, xlims=x_lims)
-
-    fig_count += 1
-
-    # Rolls v Returns w/ volume as size
-    plt.figure(fig_count)
-
-    x_mean = np.mean(returns_hourly)
-    x_std = np.std(returns_hourly)
-    x_lims = [x_mean - x_std, x_mean + x_std]
-
-    y_mean = np.mean(spread_hourly)
-    y_std = np.std(spread_hourly)
-    y_lims = [0, y_mean + y_std]
-
-    plt.title("Bid/ask spread vs. Daily returns")
-    plot.scatters(returns_hourly, spread_hourly, show_plot=1, xtitle="Returns hourly", ytitle="Spread hourly",
-                  label="Bubble size = traded volume", ylims=y_lims, xlims=x_lims, areas=volumes_hourly)
-
-
-# Gammelt
-"""
-plot.plt.figure(1)
-axes = plot.plt.gca()
-axes.set_xlim([0, 1000])
-axes.set_ylim([-0.05, 0.05])
-plot.scatters(total_volume, returns)
-plot.plt.title("Returns vs. volume")
-ccf = np.corrcoef(total_volume, returns)[0,1]
-print("Correlation coefficient = %0.2f" % ccf)
-
-
-plot.plt.figure(2)
-axes = plot.plt.gca()
-axes.set_xlim([0, 1000])
-axes.set_ylim([0, 0.002])
-plot.scatters(total_volume, rolls)
-plot.plt.title("Liquidity vs. volume")
-ccf = np.corrcoef(total_volume, rolls)[0,1]
-print("Correlation coefficient = %0.2f" % ccf)
-
-# Skal være en kode som itererer gjennom årene og lager scatters på liquidity
-plot.plt.figure(4)
-axes = plot.plt.gca()
-axes.set_xlim([0, 1000])
-axes.set_ylim([0, 0.002])
-i = 0
-for yr in range(2013, 2018):
-    temp_y = []
-    temp_x = []
-    yearcheck = 1
-    while yearcheck:
-        try:
-            temp_y.append(rolls[i])
-            temp_x.append(total_volume[i])
-        except IndexError:
-            print("error")
-        i = i + 1
-        try:
-            if year[i] == yr:
-                yearcheck = 1
-            else:
-                yearcheck = 0
-        except IndexError:
-            yearcheck = 0
-    print("\nYear : %i" % yr)
-    ccf = np.corrcoef(temp_x, temp_y)[0,1]
-    print("Correlation coefficient = %0.2f" % ccf)
-    if yr == 2013:
-        clr = "black"
-    elif yr == 2014:
-        clr = "blue"
-    elif yr == 2015:
-        clr = "red"
-    elif yr == 2016:
-        clr = "green"
-    elif yr == 2017:
-        clr = "purple"
-    plot.scatters(temp_x, temp_y, color=clr, label=str(yr))
-
-plot.plt.show()
-"""
+plt.show()

@@ -20,9 +20,9 @@ bitstamp_price_open = np.transpose(prices_open[0, :])
 open_returns = jake_supp.logreturn(bitstamp_price_open)
 
 # Finding average for entire day
-full_day_time, full_day_avg_returns = dis.average_over_day(time_list, full_returns)
+full_day_time, full_day_avg_returns = dis.cyclical_average(time_list, full_returns)
 # Finding average for opening hours
-open_time, open_avg_returns = dis.average_over_day(time_list_open, open_returns)
+open_time, open_avg_returns = dis.cyclical_average(time_list_open, open_returns)
 
 # Want to compare the two in a single graph
 x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]

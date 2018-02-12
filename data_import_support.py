@@ -1,10 +1,87 @@
 import csv
+
+import realized_volatility
 from Sondre import sondre_support_formulas as supp
 import numpy as np
 from datetime import date
 import math
 from matplotlib import pyplot as plt
 import scipy.stats as st
+import rolls
+import ILLIQ
+from Jacob import jacob_support as jake_supp
+
+
+def fuse_files():
+    time_new = []
+    price_new = []
+    volume_new = []
+
+    location = "data/bitcoincharts/"
+    exchange = "bitstampusd"
+    exchanges = [exchange]
+    year = "2017"
+    for month in ["06", "07", "08", "09", "10", "11", "12"]: # iterate through the new files
+        filename_new = location + exchange + "/" + year + month + ".csv"
+        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1, unix=0)
+
+    price_new = remove_nan(price_new)
+    price_new = supp.fill_blanks(price_new)
+    volume_new = remove_nan(volume_new)
+
+    for i in range(0, len(price_new), 1440):
+        print(time_new[i], price_new[i])
+
+    time_old = []
+    price_old = []
+    volume_old = []
+
+    filename_old = "data/export_csv/minute_data_full_day.csv"
+    with open(filename_old, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % filename_old)
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            time_old.append(str(row[0]))
+            price_old.append(float(row[1]))
+            volume_old.append(float(row[2]))
+
+    time_list = time_old
+    price = price_old
+    volume = volume_old
+
+    for i in range(0, len(time_new)):
+        time_list.append(time_new[i])
+        price.append(price_new[i])
+        volume.append(volume_new[i])
+
+    with open(filename_old, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % filename_old)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        for exc in exchanges:
+            currency = exc[len(exc) - 3: len(exc)]
+            header1.append(exc)
+            header1.append("")
+            header2.append("Closing price")
+            header2.append("Volume")
+            header3.append(currency.upper())
+            header3.append("BTC")
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+
+        for i in range(0, len(time_list)):
+            rowdata = [time_list[i]]
+            rowdata.append(price[i])
+            rowdata.append(volume[i])
+            writ.writerow(rowdata)
 
 
 def make_time_stamps():
@@ -76,7 +153,31 @@ def make_time_stamps():
     return unix_stamps, excel_stamps
 
 
-def read_long_csvs(file_name, time_list, price, volume):
+def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1):
+    with open(file_name, newline='') as csvfile:
+        if semi == 0:
+            reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        else:
+            reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            try:
+                if unix == 1:
+                    time_list.append(int(row[0]))
+                else:
+                    time_list.append(str(row[0]))
+                price.append(float(row[4]))
+                volume.append(float(row[5]))
+            except ValueError:
+                1
+                #print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+        return time_list, price, volume
+
+
+def hilo_from_raw(file_name, time_list, high, low):
     with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='|')
         print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
@@ -85,12 +186,13 @@ def read_long_csvs(file_name, time_list, price, volume):
         for row in reader:
             try:
                 time_list.append(int(row[0]))
-                price.append(float(row[4]))
-                volume.append(float(row[5]))
+                high.append(float(row[2]))
+                low.append(float(row[3]))
             except ValueError:
                 print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
-        return time_list, price, volume
+        return time_list, high, low
+
 
 
 def make_excel_stamp(y, mo, d, h, mi):
@@ -115,14 +217,13 @@ def make_excel_stamp(y, mo, d, h, mi):
     return stamp
 
 
-def get_lists_from_fulls(exchanges):
+def get_price_volume_from_fulls(exchanges):
     n_exc = len(exchanges)
     print("Number of exchanges: ", n_exc)
     raw_folder = "data/long_raw_data/"
     unix_stamps, excel_stamps = make_time_stamps()
     n_cols = len(excel_stamps)
     prices = np.zeros([n_exc, n_cols])
-    prices_usd = np.zeros([n_exc, n_cols])
     volumes = np.zeros([n_exc, n_cols])
     for i in range(0, n_exc):
         print("Working on exchange %i/%i" % ((i + 1), n_exc))
@@ -130,13 +231,12 @@ def get_lists_from_fulls(exchanges):
         single_volume = []
         time_list = []
         file_name = raw_folder + exchanges[i] + ".csv"
-        time_list, single_price, single_volume = read_long_csvs(file_name, time_list, single_price, single_volume)
+        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price, single_volume, semi=0)
 
         # Gjør om nan til 0 og så fyller inn tomme priser
         single_price = remove_nan(single_price)
         single_price = supp.fill_blanks(single_price)
         single_volume = remove_nan(single_volume)
-
 
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_price)
@@ -159,6 +259,48 @@ def get_lists_from_fulls(exchanges):
             prices[i, j] = single[j]
 
     return excel_stamps, unix_stamps, prices, volumes
+
+
+def get_hilo_from_fulls(exchanges):
+    n_exc = len(exchanges)
+    print("Number of exchanges: ", n_exc)
+    raw_folder = "data/long_raw_data/"
+    unix_stamps, excel_stamps = make_time_stamps()
+    n_cols = len(excel_stamps)
+    high = np.zeros([n_exc, n_cols])
+    low = np.zeros([n_exc, n_cols])
+    for i in range(0, n_exc):
+        print("Working on exchange %i/%i" % ((i + 1), n_exc))
+        single_high = []
+        single_low = []
+        time_list = []
+        file_name = raw_folder + exchanges[i] + ".csv"
+        time_list, single_high, single_low = hilo_from_raw(file_name, time_list, single_high, single_low)
+
+
+        # Gjør om nan til 0 og så fyller inn tomme priser
+        single_high = remove_nan(single_high)
+        single_low = remove_nan(single_low)
+        single_high = supp.fill_blanks(single_high)
+        single_low = supp.fill_blanks(single_low)
+
+
+        # Må nå finne hvilken rad vi skal lime inn på
+        n = len(single_high)
+        r = 0
+
+        # Check whether the first entry in time_list is before the start of the unix_stamps
+        start_j = 0
+        while time_list[start_j] < unix_stamps[0]:
+            start_j += 1
+
+        for j in range(start_j, n):
+            while unix_stamps[r] != time_list[j]:
+                r = r + 1
+            high[i, r] = single_high[j]
+            low[i, r] = single_low[j]
+
+    return excel_stamps, unix_stamps, high, low
 
 
 def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
@@ -190,6 +332,38 @@ def write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename):
             for j in range(0, n_exc):
                 rowdata.append(prices[j, i])
                 rowdata.append(volumes[j, i])
+            writ.writerow(rowdata)
+    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
+
+
+def write_hilo_to_csv(high, low, excel_stamps, exchanges, filename):
+    time_list = excel_stamps  # <-- Kun for å kunne bruke gammel syntax
+    n_exc = len(exchanges)
+    print("Exporting data to csv-files...")
+    with open(filename, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        n_rows = np.size(high, 1)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        for exc in exchanges:
+            currency = exc[len(exc) - 3: len(exc)]
+            header1.append(exc)
+            header1.append("")
+            header2.append("High")
+            header2.append("Low")
+            header3.append(currency.lower())
+            header3.append(currency.lower())
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+        for i in range(0, n_rows):
+            rowdata = [time_list[i]]
+            for j in range(0, n_exc):
+                rowdata.append(high[j, i])
+                rowdata.append(low[j, i])
             writ.writerow(rowdata)
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
@@ -249,25 +423,25 @@ def write_to_gold_csvs(excel_stamps, volume, price, bid, ask, filename):
     print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
 
 
-def opening_hours(in_excel_stamps, in_prices, in_volumes):
+def opening_hours(in_excel_stamps, in_matrix1, in_matrix2):
     year, month, day, hour, minute = supp.fix_time_list(in_excel_stamps)
     n_mins = len(in_excel_stamps)
     out_excel_stamps = []
-    out_prices = []
-    out_volumes = []
+    out_matrix1 = []
+    out_matrix2 = []
 
     # Kan sette inn en funksjon som sjekker om det er helligdag
 
     for i in range(n_mins):
         w_day = int(date(year[i], month[i], day[i]).isoweekday())
         if w_day != 6 and w_day != 7:
-            if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+            if 15 <= hour[i] <= 20 or (hour[i] == 14 and minute[i] >= 30):
                 out_excel_stamps.append(in_excel_stamps[i])
-                out_prices.append(in_prices[:, i])
-                out_volumes.append(in_volumes[:, i])
-    out_prices = np.transpose(np.matrix(out_prices))
-    out_volumes = np.transpose(np.matrix(out_volumes))
-    return out_excel_stamps, out_prices, out_volumes
+                out_matrix1.append(in_matrix1[:, i])
+                out_matrix2.append(in_matrix2[:, i])
+    out_matrix1 = np.transpose(np.matrix(out_matrix1))
+    out_matrix2 = np.transpose(np.matrix(out_matrix2))
+    return out_excel_stamps, out_matrix1, out_matrix2
 
 
 # Denne er kun et eksperiment
@@ -282,7 +456,7 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
 
     for i in range(n_mins):
         w_day = int(date(year[i], month[i], day[i]).isoweekday())
-        if 14 <= hour[i] <= 19 or (hour[i] == 13 and minute[i] >= 30):
+        if 15 <= hour[i] <= 20 or (hour[i] == 14 and minute[i] >= 30):
             out_excel_stamps.append(in_excel_stamps[i])
             out_prices.append(in_prices[:, i])
             out_volumes.append(in_volumes[:, i])
@@ -290,30 +464,16 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     out_volumes = np.transpose(np.matrix(out_volumes))
     return out_excel_stamps, out_prices, out_volumes
 
-"""
-def convert_to_lower_freq(time_stamps, prices, volumes, conversion_rate=60):
-    n_cols_high = len(time_stamps)
-    n_exc = np.size(volumes, 0)
-    n_cols_low = int(n_cols_high / conversion_rate)
-    time_stamps_low = []
-    prices_low = np.zeros([n_exc, n_cols_low])
-    volumes_low = np.zeros([n_exc, n_cols_low])
-    for i in range(0, n_cols_low):
-        time_stamps_low.append(time_stamps[i * conversion_rate])
-        for j in range(0, n_exc):
-            prices_low[j, i] = prices[j, i * conversion_rate]
-            volumes_low[j, i] = np.sum(volumes[j, i * conversion_rate: (i + 1) * conversion_rate])
-    return time_stamps_low, prices_low, volumes_low
-"""
 
-
-def convert_to_hour(time_stamps, prices, volumes):
+def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
+    # basis=0 --> start/end     basis=1 --> sum
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
     time_stamps_out = []
     k = 0
-    n_exc = np.size(prices, 0)
+
+    n_exc = np.size(list1, 0)
 
     if hour[0] == 0:
         opening_hours_only = 0
@@ -323,33 +483,51 @@ def convert_to_hour(time_stamps, prices, volumes):
 
     if opening_hours_only == 1:
         n_hours = int(math.ceil(n_mins * (7 / 390)))
-        prices_out = np.zeros([n_exc, n_hours])
-        volumes_out = np.zeros([n_exc, n_hours])
+        matrix1_out = np.zeros([n_exc, n_hours])
+        matrix2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
-            if hour[i] == 13 and minute[i] == 30:
+            if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 29]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 30)]) * 2  # To make up for missing half hour
+                    if list1_basis == 0:
+                        matrix1_out[j, k] = list1[j, i + 29]  # The price at the last minute of the hour
+                    else:
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 30)]) * 2  # The price at the last minute of the hour
+                    if list2_basis == 0:
+                        matrix2_out[j, k] = list2[j, i + 29]    # To make up for missing half hour
+                    else:
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 30)]) * 2  # To make up for missing half hour
                 k += 1
             elif minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                    if list1_basis == 0:
+                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                    if list2_basis == 0:
+                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
     else:
         n_hours = int(n_mins / 60)
-        prices_out = np.zeros([n_exc, n_hours])
-        volumes_out = np.zeros([n_exc, n_hours])
+        matrix1_out = np.zeros([n_exc, n_hours])
+        matrix2_out = np.zeros([n_exc, n_hours])
         for i in range(n_mins - 59):
             if minute[i] == 0:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 59]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 60)])
+                    if list1_basis == 0:
+                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
+                    if list2_basis == 0:
+                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
+                    else:
+                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
                 k += 1
-    return time_stamps_out, prices_out, volumes_out
+    return time_stamps_out, matrix1_out, matrix2_out
 
 
 def convert_to_day(time_stamps, prices, volumes):
@@ -370,7 +548,7 @@ def convert_to_day(time_stamps, prices, volumes):
         prices_out = np.zeros([n_exc, n_days])
         volumes_out = np.zeros([n_exc, n_days])
         for i in range(n_mins - 59):
-            if hour[i] == 13 and minute[i] == 30:
+            if hour[i] == 14 and minute[i] == 30:
                 time_stamps_out.append(time_stamps[i])
                 for j in range(n_exc):
                     prices_out[j, k] = prices[j, i + 389]  # The price at the last minute of the hour
@@ -475,7 +653,7 @@ def get_month(month_string):
     return month_num
 
 
-def average_over_day(time_list, data, frequency="h"):
+def cyclical_average(time_list, data, frequency="h"):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -484,16 +662,8 @@ def average_over_day(time_list, data, frequency="h"):
 
     # Generating day_time ---------------
     if frequency == "h":
-        if hour[0] == 13:
-            for h in range(13, 20):
-                if h < 10:
-                    hs = "0" + str(h)
-                else:
-                    hs = str(h)
-                day_time.append(hs + ":" + "00")
-                h_list.append(h)
-        elif hour[0] == 0:
-            for h in range(0, 24):
+        if hour[0] == 14:
+            for h in range(14, 21):
                 if h < 10:
                     hs = "0" + str(h)
                 else:
@@ -501,16 +671,21 @@ def average_over_day(time_list, data, frequency="h"):
                 day_time.append(hs + ":" + "00")
                 h_list.append(h)
         else:
-            print("di.average_over_day: Something was wrong with the time_list....")
-            return None
-    elif frequency == "m":
-        if hour[0] == 13:
-            for h in range(13, 20):
+            for h in range(0, 24):
                 if h < 10:
                     hs = "0" + str(h)
                 else:
                     hs = str(h)
-                if h == 13:
+                day_time.append(hs + ":" + "00")
+                h_list.append(h)
+    elif frequency == "m":
+        if hour[0] == 14:
+            for h in range(14, 21):
+                if h < 10:
+                    hs = "0" + str(h)
+                else:
+                    hs = str(h)
+                if h == 14:
                     mins_in_hour = 30
                 else:
                     mins_in_hour = 60
@@ -522,7 +697,7 @@ def average_over_day(time_list, data, frequency="h"):
                     day_time.append(hs + ":" + ms)
                     h_list.append(h)
                     m_list.append(m)
-        elif hour[0] == 0:
+        else:
             for h in range(0, 24):
                 if h < 10:
                     hs = "0" + str(h)
@@ -556,7 +731,7 @@ def average_over_day(time_list, data, frequency="h"):
     k = -1
     if frequency == "h":
         for i in range(n_entries):
-            index = hour[i] - hour[0]  # Hvis dagen starter på 13:30 vil vi også at indexen skal starte der
+            index = hour[i] - hour[0]  # Hvis dagen starter på 14:30 vil vi også at indexen skal starte der
             if index == 0:
                 temp_list[index] = data[i]
                 temp_matrix.append(temp_list)
@@ -566,7 +741,7 @@ def average_over_day(time_list, data, frequency="h"):
                 temp_list[index] = data[i]
     elif frequency == "m":
         for i in range(n_entries):
-            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 13:30 vil vi også...
+            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 14:30 vil vi også...
             if index == 0:
                 try:
                     temp_list[index] = data[i]
@@ -596,6 +771,190 @@ def average_over_day(time_list, data, frequency="h"):
     percentile = 0.95
     for i in range(n_out):
         out_data[i] = np.mean(temp_matrix[:, i])
-        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i])-1, loc=np.mean(temp_matrix[:, i]), scale=st.sem(temp_matrix[:, i]))
+        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=np.mean(temp_matrix[:, i]),
+                                           scale=st.sem(temp_matrix[:, i]))
 
     return day_time, out_data, lower, upper
+
+
+def volume_transformation(volume, initial_mean_volume):
+    n_entries = len(volume)
+    n_days_in_window = 365
+    out_volume = np.zeros(n_entries)
+    for i in range(0, n_days_in_window):
+        floating_mean = (initial_mean_volume * (n_days_in_window - i) + i * np.mean(volume[0: i])) / n_days_in_window
+        out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
+    for i in range(n_days_in_window, n_entries):
+        if volume[i] == 0 or np.mean(volume[i - n_days_in_window:i]) == 0:
+            out_volume[i] = 0
+        else:
+            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_days_in_window:i - 1]))
+    out_volume[0] = np.log(volume[0]) - np.log(initial_mean_volume)
+    return out_volume
+
+
+def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=0, days_excluded=0):
+
+    # Opening hours only
+    print("Transforming data series...")
+    time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
+                                                                   volumes_minutes)
+    time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+
+    if full_week == 0:
+        cutoff_day = 261
+        cutoff_hour = cutoff_day * 7
+        cutoff_min = cutoff_day * 390
+    else:
+        cutoff_day = 366
+        cutoff_hour = cutoff_day * 24
+        cutoff_min = cutoff_day * 1440
+
+    mean_volume_2012 = np.mean(volumes_days[exchange, 0:cutoff_day])  # <-- Bitstamp
+    n_days = len(time_list_days)
+    n_hours = len(time_list_hours)
+    n_mins = len(time_list_minutes)
+    print("Only including days after", time_list_days[cutoff_day])
+
+    n_total = len(time_list_days)
+    n_0 = n_days # Mon-Friday
+
+    # Bistamp only, cutoff day # <-- Bitstamp
+    prices_minutes = prices_minutes[exchange, cutoff_min:n_mins]
+    volumes_minutes = volumes_minutes[exchange, cutoff_min:n_mins]
+    time_list_minutes = time_list_minutes[cutoff_min:n_mins]
+    prices_hours = prices_hours[exchange, cutoff_hour:n_hours]
+    volumes_hours = volumes_hours[exchange, cutoff_hour:n_hours]
+    prices_days = prices_days[exchange, cutoff_day:n_days]
+    volumes_days = volumes_days[exchange, cutoff_day:n_days]
+    time_list_days = time_list_days[cutoff_day:n_days]
+
+    n_1 = len(time_list_days) # After removing 2013
+
+    # Rolls
+    spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
+                                                                              calc_basis=1, kill_output=1)
+
+    # Realized volatility
+    volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)
+    # Annualize the volatility
+    if full_week == 0:
+        volatility_days = np.multiply(volatility_days, 252 ** 0.5)
+    else:
+        volatility_days = np.multiply(volatility_days, 365 ** 0.5)
+    # Returns
+    returns_minutes = jake_supp.logreturn(prices_minutes)
+    returns_days = jake_supp.logreturn(prices_days)
+    # Amihud's ILLIQ
+    illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes) # Already clean
+
+    # --------------------------------------------
+
+    if exchange == 0:
+        if full_week == 0:
+            cray_s = 69
+            cray_e = 74
+        else:
+            cray_s= 97
+            cray_e= 103
+        cray_day = 1269
+    elif exchange == 1:
+        cray_day = 405
+        cray_s = 927
+        cray_e = 928
+    remove_crazy = 1
+    remove_crazy_week = 1  # Removes the week starting at 08.04.2013
+
+    if remove_crazy == 1:
+        time_list_removed = time_list_days[cray_day]
+        time_list_days = np.delete(time_list_days, cray_day)
+        returns_days = np.delete(returns_days, cray_day)
+        volumes_days = np.delete(volumes_days, cray_day)
+        spread_days = np.delete(spread_days, cray_day)
+        volatility_days = np.delete(volatility_days, cray_day)
+        illiq_days_clean = np.delete(illiq_days_clean, cray_day)
+        illiq_time = np.delete(illiq_time, cray_day)
+    if remove_crazy_week == 1:
+        time_list_removed = np.append(time_list_removed, time_list_days[cray_s:cray_e])
+        time_list_days = np.delete(time_list_days, range(cray_s, cray_e))
+        returns_days = np.delete(returns_days, range(cray_s, cray_e))
+        volumes_days = np.delete(volumes_days, range(cray_s, cray_e))
+        spread_days = np.delete(spread_days, range(cray_s, cray_e))
+        volatility_days = np.delete(volatility_days, range(cray_s, cray_e))
+        illiq_days_clean = np.delete(illiq_days_clean, range(cray_s, cray_e))
+        illiq_time = np.delete(illiq_time, range(cray_s, cray_e))
+
+    n_2 = len(time_list_days) # After removing the crazy
+
+    # Removing all days where Volume is zero
+    time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, volatility_days_clean \
+        = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
+                                                 returns_days, volatility_days)
+
+    n_3 = len(time_list_days_clean) # After removing the zero-volume
+
+    # Removing all days where Roll is zero
+    time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
+    volatility_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+                                                                                     time_list_removed,
+                                                                                     spread_days_clean,
+                                                                                     volumes_days_clean,
+                                                                                     returns_days_clean,
+                                                                                     volatility_days_clean,
+                                                                                     illiq_days_clean)
+
+    n_4 = len(time_list_days_clean) # After removing the zero-roll
+
+
+    # Removing all days where Volatility is zero
+    time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
+    spread_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+                                                                                 time_list_removed,
+                                                                                 volatility_days_clean,
+                                                                                 volumes_days_clean,
+                                                                                 returns_days_clean,
+                                                                                 spread_days_clean, illiq_days_clean)
+
+    n_5 = len(time_list_days_clean) # After removing the zero-volatility
+
+    show_days_table = days_excluded
+    if show_days_table == 1:
+        print()
+        print()
+        print("Total days:", n_total)
+        print("Week only:", n_0)
+        print("Removing 2012:", n_1)
+        print("Removing extreme week:", n_2)
+        print("Removing zero-volume:", n_3)
+        print("Removing zero-roll:", n_4)
+        print("Removing zero-volatility:", n_5)
+
+    # Turning ILLIQ, Volume and RVol into log
+    log_illiq_days_clean = np.log(illiq_days_clean)
+    log_volatility_days_clean = np.log(volatility_days_clean)
+    log_volumes_days_clean = volume_transformation(volumes_days_clean, mean_volume_2012)
+
+    return time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+           illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
+
+
+def fetch_aggregate_csv_hilo(file_name, n_exc):
+    n_rows = supp.count_rows(file_name)
+    n_exc = int(n_exc)
+    print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        i = 0
+        time_list = []
+        high = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        low = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            time_list.append(row[0])
+            for j in range(0, n_exc):
+                high[j, i] = row[1 + 2 * j]
+                low[j, i] = row[2 + 2 * j]
+            i = i + 1
+    return time_list, high, low

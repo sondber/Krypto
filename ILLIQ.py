@@ -1,127 +1,115 @@
-import pip
-def install(package):
-    pip.main(['install', package])
-import numpy as np
-import math
-import matplotlib.pyplot as pltt
 from Sondre import sondre_support_formulas as supp
-import scipy
-from scipy.optimize import curve_fit
-import data_import as di
-import data_import_support as dis
-import os
-import datetime as dt
-import matplotlib.pyplot as plt
+
+# Illiq as described in Amihud.
+# Cuts any volumes less than "volume_limit". If all minutes in a window is zero, the window is omitted, resulting in a time-gap in the return-vector.
 
 
-def daily_Rv(time_series, prices_list):
-    year, month, day, hour, minute = supp.fix_time_list(time_series)
-    if hour[0]==0:
-        mins = int(1440)
+def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
+              kill_output=1):  # day=1 indicates daily measure, day_or_hour=0 indicates hourly measure
+    year, month, day, hour, minute = supp.fix_time_list(timestamps)
+    illiq = []
+    time_list = []
+    value_errors = 0
+    zero_count_window = 0
+    volume_limit = 1
+
+    # determine trading day yes/no
+    if hour[0] == 0:  # this indicates that full day is being investigated
+        hours_in_day = 24
+        day_desc = "full day"
     else:
-        mins=int(6.5*60)
+        hours_in_day = 6.5
+        day_desc = "trading day"
 
-    days = math.floor(len(prices_list) / (mins))
-    #time_list_dates=[]
-    window=15
-    rvol = np.zeros(days)
-    for i in range(1, days):
-        #time_list_dates.append(time_series[mins*i]) #for å få ut en datoliste: time_series[0]+the number of days later?
-        for j in range(0, mins-window):
-            if (j % window== 0):
-                rvol[i] = rvol[i] + ((prices_list[i * mins + j+window] - prices_list[i * mins + j]) / prices_list[
-                    i * mins + j+window]) ** 2
-    return rvol
+    if day_or_hour == 1:
+        window = int(hours_in_day * 60)
+        freq_desc = "daily"
+    else:
+        window = int(60)
+        freq_desc = "hourly"
 
+    if kill_output == 0:
+        print("Calculating ILLIQ on a/an", freq_desc, "basis using", day_desc, "data")
 
-def abs_returns(prices):
-    ret=np.zeros(len(prices))
-    for i in range(len(prices)-1):
-        ret[i]=(prices[i+1]-prices[i])/(prices[i+1])
-        if (ret[i]<0):
-            ret[i]=ret[i]*(-1)
-    return ret
+    partsum = 0
 
+    if day_or_hour == 0 and hours_in_day == 6.5:  # seperate loop to take care of half hours
+        pos = 0  # position in price diff vector
+        half = 1  # indicates that one half hour must be accounted for
+        tod = 0  # tod to keep track of when to reset half
+        half_hour = 30
+        while pos < len(minute_returns):  # looping through hours of day using the pos-var
+            half_hour_adjusted = half_hour
+            window_adjusted = window
+            if half == 1:
+                for i in range(pos, pos + half_hour):
+                    # print("We are in the IF %d pos and %d i", pos, i)
+                    if minute_volumes[i] < volume_limit:
+                        value_errors += 1
+                        partsum += 0
+                        window_adjusted -= 1
+                    else:
+                        partsum += abs(minute_returns[i]) / minute_volumes[i]
+                if half_hour_adjusted != 0:
+                    window_illiq = partsum / window_adjusted
+                    illiq.append(window_illiq)
+                    time_list.append(timestamps[pos])
+                else:
+                    zero_count_window += 1
 
+                half = 0
+                pos += 30
+                partsum = 0
+            else:
+                for i in range(pos, pos + window):
+                    # print("We are in the ELSE  %d pos and %d i", pos, i)
+                    if minute_volumes[i] < volume_limit:
+                        value_errors += 1
+                        partsum += 0
+                        window_adjusted -= 1
+                    else:
+                        partsum += abs(minute_returns[i]) / minute_volumes[i]
+                if window_adjusted != 0:
+                    window_illiq = partsum/window_adjusted
+                    illiq.append(window_illiq)
+                    time_list.append(timestamps[pos])
+                else:
+                    zero_count_window += 1
 
-def ILLIQ(prices_hour, volume_hour):
-    returns = abs_returns(prices_hour)
-    illiq=np.zeros(math.floor(len(returns)/24))
-    for i in range(len(illiq)):
-        illiq_hour=0
-        for j in range(24):
-            if (volume_hour[24*i+j]!=0):
-                illiq_hour=illiq_hour+returns[24*i+j]/volume_hour[24*i+j]
-        illiq[i]=illiq_hour/24
-    print("Returning daily ILLIQ ")
-    return illiq
+                partsum = 0
 
+                if tod == 5:
+                    tod = 0
+                    half = 1
+                    pos += 60
+                else:
+                    tod += 1
+                    pos += 60
+    else:
+        for i in range(0, len(minute_returns), window):  # looping through windows
+            window_adjusted = window
+            for j in range(i, i + window):  # looping through minutes in window
+                # print("We are in the %d i and %d j",i,j)
+                if minute_volumes[j] < volume_limit:
+                    value_errors += 1
+                    partsum += 0
+                    window_adjusted -= 1
+                else:
+                    partsum += abs(minute_returns[j]) / minute_volumes[j]
+            if window_adjusted != 0:
+                window_illiq = partsum / window_adjusted
+                illiq.append(window_illiq)
+                time_list.append(timestamps[i])
+            else:
+                zero_count_window += 1
 
-def ILLIQ_nyse_day(prices_hour, volume_hour):
-    returns=abs_returns(prices_hour)
-    illiq=np.zeros(math.floor(len(returns)/(7)))
-    for i in range(len(illiq)):
-        illiq_hour=0
-        for j in range(7):
-            if (volume_hour[7*i+j]!=0):
-                illiq_hour=illiq_hour+returns[7*i+j]/volume_hour[7*i+j]
-        illiq[i]=illiq_hour/7
-    print("Returning daily ILLIQ ")
-    return illiq
+            partsum = 0
 
-def ILLIQ_nyse_year(prices_day,volume_day):
-    returns=abs_returns(prices_day)
-    days = 261
+    if kill_output == 0:
+        print("ILLIQ-calculation is finished")
+        print("The length of the ILLIQ-vector is", len(illiq))
+        print("The length of the time-vector is", len(time_list))
+        print("Number of value errors:", value_errors)
+        print("Number of zero-count windows", zero_count_window)
 
-    illiq=np.zeros(math.floor((len(returns))/(days))+1)
-    for i in range(len(illiq)-1):
-        illiq_day=0
-        count = 0
-        for j in range(days):
-            if (volume_day[days*i+j]!=0):
-                count=count+1
-                illiq_day=illiq_day+returns[days*i+j]/volume_day[days*i+j]
-        illiq[i]=illiq_day/count
-    illiq_day=0
-    count=0
-    for k in range(108):
-        if volume_day[261*5+k]!=0:
-            count=count+1
-            illiq_day=illiq_day+returns[261*5+k]/volume_day[261*5+k]
-    illiq[len(illiq)-1]=(illiq_day/count)
-    print("Returning yearly ILLIQ ")
-    return illiq
-
-
-
-def p_v(prices,volumes,window):
-    p_v = np.zeros(len(prices))
-    for i in range(window,len(prices)):
-        if sum(volumes[(i-window):i])==0:
-            p_v[i]=0
-        else:
-            p_v[i]=np.average(prices[(i-window):i])/np.average(volumes[(i-window):i])
-    plt.plot(p_v)
-    plt.ylabel("monthly average rolling price/volume")
-    plt.xlabel("time (2012-2017)")
-    plt.show()
-    return p_v
-
-
-def ILLIQ_nyse_window(prices_day,volume_day,window_days,remove_outliers="No"):
-    returns=abs_returns(prices_day)
-    days = window_days
-    illiq=np.zeros(math.floor((len(returns))/(days)))
-    for i in range(len(illiq)):
-        illiq_day=np.zeros(window_days)
-        for j in range(window_days):
-            if (volume_day[days*i+j]!=0):
-                illiq_day[j]=returns[days*i+j]/volume_day[days*i+j]
-                if remove_outliers != "No" and j>0:
-                    if illiq_day[j] < illiq_day[j - 1] * 0.5 or illiq_day[j] > illiq_day[j - 1] * 2:
-                        illiq_day[j] = illiq_day[j-1]
-        illiq[i]=np.median(illiq_day)
-
-
-    print("Returning yearly ILLIQ ")
-    return illiq
+    return time_list, illiq

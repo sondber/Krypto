@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import math
+from datetime import date
 
 
 def read_single_exc_csvs(file_name, time_list, price, volume):
@@ -196,6 +197,8 @@ def write_to_raw_file(volumes, prices, time_list, exchanges, filename):
 
 def fetch_aggregate_csv(file_name, n_exc):
     n_rows = count_rows(file_name)
+    print("Number of rows", n_rows)
+    print("nexc", n_exc)
     n_exc = int(n_exc)
     print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
     with open(file_name, newline='') as csvfile:
@@ -259,3 +262,176 @@ def get_rolls():
                 rolls.append(0)
             i = i + 1
         return time_list, rolls
+
+
+def remove_list1_outliers_from_all_lists(list1, list2=[], list3=[], list4=[], threshold=2):
+    # threshold is in number of standard deviations
+    # only chekcs for positive deviations
+    t_list2 = False
+    t_list3 = False
+    t_list4 = False
+    if len(list2) > 1:
+        t_list2 = True
+    if len(list3) > 1:
+        t_list3 = True
+    if len(list4) > 1:
+        t_list4 = True
+
+    n_in = len(list1)
+    std = np.std(list1)
+    mean = np.mean(list1)
+    list1_min = mean - threshold * std
+    list1_max = mean + threshold * std
+    out_list1 = []
+    if t_list2:
+        out_list2 = []
+    if t_list3:
+        out_list3 = []
+    if t_list4:
+        out_list4 = []
+    for i in range(0, n_in):
+        if list1[i] < list1_max:
+            out_list1.append(list1[i])
+            if t_list2:
+                out_list2.append(list2[i])
+            if t_list3:
+                out_list3.append(list3[i])
+            if t_list4:
+                out_list4.append(list4[i])
+    if t_list4:
+        return out_list1, out_list2, out_list3, out_list4
+    elif t_list3:
+        return out_list1, out_list2, out_list3
+    elif t_list2:
+        return out_list1, out_list2
+    else:
+        return out_list1
+
+
+def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, list1, list2=[], list3=[], list4=[], list5=[]):
+    # threshold is in number of standard deviations
+    # only chekcs for positive deviations
+    t_list2 = False
+    t_list3 = False
+    t_list4 = False
+    t_list5 = False
+    if len(list2) > 1:
+        t_list2 = True
+    if len(list3) > 1:
+        t_list3 = True
+    if len(list4) > 1:
+        t_list4 = True
+    if len(list5) > 1:
+        t_list5 = True
+
+    time_list_removed = time_list_removed_previous # from previous
+    time_list_out = []
+    n_in = len(list1)
+    out_list1= []
+    if t_list2:
+        out_list2 = []
+        if len(list2) != n_in:
+            print("Wrong length of list2!", len(list2))
+    if t_list3:
+        out_list3 = []
+        if len(list2) != n_in:
+            print("Wrong length of list3!", len(list3))
+    if t_list4:
+        out_list4 = []
+        if len(list2) != n_in:
+            print("Wrong length of list4!", len(list4))
+    if t_list5:
+        out_list5 = []
+        if len(list2) != n_in:
+            print("Wrong length of list5!", len(list5))
+    for i in range(0, n_in):
+        if list1[i] != 0:
+            time_list_out.append(time_list[i])
+            out_list1.append(list1[i])
+            if t_list2:
+                out_list2.append(list2[i])
+            if t_list3:
+                out_list3.append(list3[i])
+            if t_list4:
+                out_list4.append(list4[i])
+            if t_list5:
+                out_list5.append(list5[i])
+        else:
+            1
+            #time_list_removed.append(time_list[i])
+    if t_list5:
+        return time_list_out, time_list_removed, out_list1, out_list2, out_list3, out_list4, out_list5
+    elif t_list4:
+        return time_list_out, time_list_removed, out_list1, out_list2, out_list3, out_list4
+    elif t_list3:
+        return time_list_out, time_list_removed, out_list1, out_list2, out_list3
+    elif t_list2:
+        return time_list_out, time_list_removed, out_list1, out_list2
+    else:
+        return time_list_out, time_list_removed, out_list1
+
+
+def autocorr(in_list, lag):
+    n = len(in_list)
+    list1 = in_list[0 : n - lag]
+    list2 = in_list[lag : n]
+    corr = np.corrcoef(list1, list2)[0, 1]
+    return corr
+
+def mean_for_n_entries(in_list, n_lag):
+    n_in = len(in_list)
+    out_list = np.zeros(n_in - n_lag)
+    initial_mean = np.mean(in_list[0:n_lag])
+    out_list[0] = initial_mean
+    for i in range(1, n_lag):
+        out_list[i] = (initial_mean * (n_lag - i) + i * np.mean(in_list[n_lag - 1:n_lag - 1 + i]))/(n_lag-1)
+    for i in range(n_lag, n_in - n_lag):
+        out_list[i] =  np.mean(in_list[i: i + n_lag])
+    return out_list
+
+
+def standardize(in_list):
+    mean = np.mean(in_list)
+    out_list = in_list - mean
+    std = np.std(in_list)
+    out_list = np.divide(out_list, std)
+
+    return out_list
+
+
+def week_vars(time_list):
+    year, month, day, hour, minute = fix_time_list(time_list)
+    n_entries = len(time_list)
+
+    mon= np.zeros(n_entries)
+    tue= np.zeros(n_entries)
+    wed= np.zeros(n_entries)
+    thu= np.zeros(n_entries)
+    fri= np.zeros(n_entries)
+    sat= np.zeros(n_entries)
+    sun= np.zeros(n_entries)
+    day_string = []
+    for i in range(0, n_entries):
+        daynum = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+        if daynum == 0:
+            mon[i] = 1
+            day_string.append("A")
+        elif daynum ==1:
+            tue[i] = 1
+            day_string.append("B")
+        elif daynum == 2:
+            wed[i] = 1
+            day_string.append("C")
+        elif daynum == 3:
+            thu[i] = 1
+            day_string.append("D")
+        elif daynum == 4:
+            fri[i] = 1
+            day_string.append("E")
+        elif daynum == 5:
+            sat[i] = 1
+            day_string.append("F")
+        elif daynum == 6:
+            sun[i] = 1
+            day_string.append("G")
+    return mon, tue, wed, thu, fri, sat, sun, day_string

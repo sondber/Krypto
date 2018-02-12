@@ -1,63 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Sondre import sondre_support_formulas as supp, user_interface as ui
-
-
-def user_plots(exchanges, time_list, prices, volumes, total_prices, total_volume):
-    number_of_ticks = 5
-    n_exc = len(exchanges)
-    fig_count = 1  # Ensures that each graph has its own unique figure
-    x, myticks = supp.get_ticks(time_list, number_of_ticks)
-    volumeplots, priceplots, varplots, dataplots = ui.plots()
-
-    number_of_ticks = 5
-    x, myticks = supp.get_ticks(time_list, number_of_ticks)
-
-    if volumeplots or priceplots or varplots or dataplots:
-        print("\nPLOTS")
-        print("---------------------------------------------------------------------------------\n")
-
-    if volumeplots:
-        print("Drawing volume plots...")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        volume_plots(total_volume, volumes, exchanges)
-
-    if priceplots:
-        print("Drawing price plots...")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        plt.xticks(x, myticks)
-        price_plots(total_prices, prices, exchanges)
-
-    if varplots:
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        plt.xticks(x, myticks)
-        var_plots(prices, exchanges, "Minute-to-minute variance of prices")
-
-    if dataplots:
-        print("Drawing histograms... \n")
-        plt.figure(fig_count)
-        fig_count = fig_count + 1
-        hist_plot(total_volume, "Total volume distribution")
-
-        if n_exc > 1:
-            inp = input("\033[33;0;0mWould you like distribution plots for each individual exchange?\
-    [1=Yes, 0=No]: \033[0;0;0m\n")
-            if inp == 1 or inp == 'y' or inp == 'yes':
-                individual_plots = True
-            else:
-                individual_plots = False
-            if individual_plots is True:
-                for i in range(0, n_exc):
-                    plt.figure(fig_count)
-                    fig_count = fig_count + 1
-                    description = "Distribution of volume for " + exchanges[i]
-                    hist_plot(volumes[i, :], description)
-                    avg_min = supp.average_at_time_of_day(volumes[i, :])
-
-    plt.show()  # Denne må stå etter alle plots for at de skal vises sammen
+import pandas
+from matplotlib.ticker import FormatStrFormatter
 
 
 def hist_plot(in_list, description):
@@ -117,85 +62,53 @@ def plot_for_exchanges(matrix, exchanges):
     plt.legend()
 
 
-def volume_plots(total_volume, volumes, exchanges):
-    total_day = supp.average_at_time_of_day(total_volume)
-    plt.plot(total_day, label='Total volume')
-    plot_for_exchanges(volumes, exchanges)
-
-
-def price_plots(total_prices, prices, exchanges):
-    n_exc = len(exchanges)
-    if n_exc > 1:
-        for i in range(0, n_exc):
-            plt.plot(prices[i, :], label=exchanges[i])
-    else:
-        plt.plot(prices, label=exchanges[0])
-    plt.title("Price chart")
-    plt.ylabel("USD/BTC")
-    if n_exc > 1:
-        plt.plot(total_prices, label="Volume weighted average price, USD/BTC", linewidth=0.5, color="black")
-    plt.legend()
-
-
-def var_plots(prices, exchanges,
-              title):  # Denne må skrives om så den tar inn en liste med varianse og plotter det i stedet
-    n_exc = len(exchanges)
-    mins = [1]
-    mins[0] = int(input("How many mintues rolling average would you like? "))
-    print("Working on variance plots, this may take some time...")
-    for m in mins:
-        for i in range(0, n_exc):
-            if n_exc > 1:
-                mov_var = supp.moving_variance(prices[i, :], m)
-            else:
-                mov_var = supp.moving_variance(prices, m)
-            exc = exchanges[i]
-            if m > 60:
-                interval = " " + str(m / 60) + " hours"
-            else:
-                interval = " " + str(m) + " minutes"
-            plot_label = exc + interval + " moving average " + title
-            plt.plot(mov_var, label=plot_label)
-
-    plt.legend()
-    plt.title(title)
-
-
-def easy_plot(y, label="My plot", show_plot=1):
-    label = str(label)
-    plt.plot(y, label=label)
-    plt.legend()
-    if show_plot == 1:
-        plt.show()
-
-
-def scatters(x, y, color="blue", areas=[], label="", show_plot=1, xlims=[], ylims=[], xtitle="", ytitle=""):
+def scatters(x, y, color="black", areas=[], title="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
+    plt.figure()
     if not xlims:
         xlims = [min(x), max(x)]
     if not ylims:
         ylims = [min(y), max(y)]
     n = len(x)
     if len(areas) == 0:
-        areas = np.ones(n)
+        areas_scaled = np.ones(n)
     else:
         scaling_factor = 50
         max_area = max(areas)
         for i in range(len(areas)):
             if areas[i] == 0:
                 areas[i] += 1
+        areas_scaled = np.zeros(len(areas))
         for i in range(len(areas)):
-            areas[i] = scaling_factor * areas[i]/ max_area
-    plt.scatter(x, y, s=areas, c=color, alpha=0.5, label=label)
+            areas_scaled[i] = scaling_factor * areas[i]/ max_area
+    plt.scatter(x, y, s=areas_scaled, c=color, alpha=0.5)
     plt.xlim(xlims)
     plt.ylim(ylims)
+
+    if x_log == 1:
+        plt.xscale("log", basex=np.exp(1))
+
+    if y_log == 1:
+        plt.yscale("log", basey=np.exp(1))
+
+    if x_perc == 1:
+        ax = plt.gca()
+        vals = ax.get_xticks()
+        ax.set_xticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
+    if y_perc == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        ax.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+
     if xtitle:
         plt.xlabel(xtitle)
     if ytitle:
         plt.ylabel(ytitle)
-    if label:
-        plt.legend()
+    location = "figures/scatters/" + title + ".png"
+    plt.savefig(location)
     if show_plot == 1:
         plt.show()
+
 
 def two_scales(ax1, time_list, data1, data2, title1, title2, title_x, color1, color2, type1, type2, scale1, scale2):
     # brukes til å sette de to aksene riktig skalert
@@ -256,25 +169,211 @@ def two_axis(data1, data2, title1="data1", title2="data2", title_x='time (hours)
     return None
 
 
-def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title=""):
+def sondre_two_axes(y1, y2, x=[], show_plot=1, y1_label="y1", y2_label="y2", x_label="x", title="", y1lims=[], y2lims=[], perc1=0, perc2=0, log1=0, log2=0):
     fig, ax1 = plt.subplots()
 
     n_entries = len(y1)
 
     t = np.arange(0, n_entries, 1)
 
-    ax1.plot(t, y1, 'b-')
-    ax1.set_ylabel(y1_label, color='b')
-    ax1.tick_params('y', colors='b')
+    ax1.plot(t, y1, linewidth=0.5, linestyle="-", color="black", label=y1_label)
+    ax1.set_ylabel(y1_label)
+    ax1.tick_params('y')
     ax1.set_xlabel(x_label)
+    ax1.legend(bbox_to_anchor=(1, 0.93))
 
     ax2 = ax1.twinx()
-    ax2.plot(t, y2, 'r-')
-    ax2.set_ylabel(y2_label, color='r')
-    ax2.tick_params('y', colors='r')
+    ax2.plot(t, y2, linewidth=0.5, linestyle="-", color="blue", label=y2_label)
+    ax2.set_ylabel(y2_label)
+    ax2.tick_params('y')
+
+    ax2.legend(bbox_to_anchor=(1, 1))
+    plt.legend()
+
+    if not y1lims:
+        y1lims =[min(y1), max(y1)]
+    if not y2lims:
+        y2lims = [min(y2), max(y2)]
+    ax1.set_ylim(y1lims)
+    ax2.set_ylim(y2lims)
+
+    if x:
+        n_labels = 5
+        labels = []
+        len_x = len(x)
+        for i in range(0, n_labels):
+            if i == n_labels - 1:
+                index = len_x - 1
+            else:
+                index = i * (len_x / (n_labels + 1))
+            index = int(index)
+            labels.append(x[index][0:11])
+        plt.xticks(np.arange(0, len(x) + 1, len(x)/(n_labels-1)), labels)
+
+    if perc1 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    if perc2 == 1:
+        vals = ax2.get_yticks()
+        ax2.set_yticklabels(['{:3.2f}%'.format(x * 100) for x in vals])
+    if log1 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(10 ** x) for x in vals])
+    if log2 == 1:
+        vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:3.2f}%'.format(10 ** x) for x in vals])
+
+
+    plt.xlim([0, len(y1)])
 
     if title:
         plt.title(title)
     fig.tight_layout()
     if show_plot == 1:
         plt.show()
+
+
+def time_series_single(time_list, data, title, ylims=[], perc=0, logy=0, ndigits=2, ylab=""):
+    n_labels = 5
+    labels = []
+    len_x = len(time_list)
+    for i in range(0, n_labels):
+        if i == n_labels - 1:
+            index = len_x - 1
+        else:
+            index = i * (len_x / (n_labels - 1))
+        index = int(index)
+        labels.append(time_list[index][0:11])
+    plt.figure(figsize=(8, 2), dpi=300)
+    plt.xticks(np.arange(0, len(time_list) + 1, len(time_list) / (n_labels - 1)), labels)
+    plt.plot(data, linewidth=0.5, color="black")
+    if ylims:
+        ymin = ylims[0]
+        ymax = ylims[1]
+    else:
+        ymin = min(data)
+        ymax = max(data) * 1.01
+    plt.ylim([ymin, ymax])
+    plt.xlim([0, len(time_list)])
+
+    if logy == 1:
+        ax = plt.gca()
+        plt.yscale("log", basey=np.exp(1))
+        plt.ylim([0, ymax])
+        if perc == 0:
+            vals = ax.get_yticks()
+            frmt = '{:3.'+str(ndigits)+'f}'
+            ax.set_yticklabels([frmt.format(x) for x in vals])
+    if perc == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        frmt = '{:3.'+str(ndigits)+'f}%'
+        ax.set_yticklabels([frmt.format(x * 100) for x in vals])
+
+    if len(ylab)>0:
+        plt.ylabel(ylab)
+    title = title.lower()
+    location = "figures/variables_over_time/" + title + ".png"
+    plt.savefig(location)
+
+
+def regression_line(alpha, beta, xlims=[], color="black"):
+    if xlims:
+        x_min = xlims[0]
+        x_max = xlims[1]
+    else:
+        print("No xlims")
+        return
+    y_vals = [alpha + beta*(x_min) , alpha + beta*(x_max)]
+    plt.plot(xlims, y_vals, linestyle="--", color=color)
+
+
+def plot_y_zero(y_lims):
+    x_min = y_lims[0]
+    x_max = y_lims[1]
+    plt.plot([x_min, x_max], [0, 0], linewidth=0.2, color="black")
+
+
+def plot_x_zero(y_lims):
+    y_min = y_lims[0]
+    y_max = y_lims[1]
+    plt.plot([0, 10**(-10)], [y_min, y_max], linewidth=0.2, color="black")
+
+
+def hour_of_day_ticks():
+    labels = [ "04:00", "08:00", "12:00", "16:00", "20:00"]
+    plt.xticks([3.5, 7.5, 11.5, 15.5, 19.5], labels)
+    plt.figtext(0.10, 0.010, "Time", fontsize=10)
+    plt.xlim([0, 23])
+
+
+def utc_nyc(in_list):
+    outlist = np.zeros(24)
+    for london in range(5, 24):
+        nyc = london - 5
+        outlist[nyc] = in_list[london]
+    for london in range(0, 5):
+        nyc = london + 19
+        outlist[nyc] = in_list[london]
+    return outlist
+
+
+def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0):
+    # converting to NYC time (UTC-5)
+    #average = utc_nyc(average)
+    #low = utc_nyc(low)
+    #high = utc_nyc(high)
+    plt.figure(figsize=[8, 2], dpi=300)
+    plt.plot(average, color="black")
+    plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
+    plt.plot(high, color="black", linestyle='--', linewidth=0.5)
+    plt.ylim([min(low)*0.99, max(high)*1.01])
+    if perc == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        frmt = '{:3.' + str(ndigits) + 'f}%'
+        ax.set_yticklabels([frmt.format(x*100) for x in vals])
+
+    hour_of_day_ticks()
+    title=title.lower()
+
+    # Plotting NYSE opening hours
+    #plt.plot([9, 9.0001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
+    #plt.plot([15.5, 15.5001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
+
+    if yzero==1:
+        plot_y_zero([0, 24])
+    location = "figures/seasonality/day/" + title + ".png"
+    plt.savefig(location)
+
+
+def plot_for_week(average, low, high, title="no_title", perc=0, logy=0, weekends=1, ndigits=2):
+    plt.figure(figsize=[8, 2], dpi=300)
+    plt.plot(average, color="black")
+    plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
+    plt.plot(high, color="black", linestyle='--', linewidth=0.5)
+
+    if weekends == 1:
+        labels = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
+        plt.xticks(np.arange(0, 7, 1), labels)
+        plt.xlim([0, 6])
+    else:
+        labels = ["Mon", "Tue", "Wed", "Thur", "Fri"]
+        plt.xticks(np.arange(0, 5, 1), labels)
+        plt.xlim([0, 4])
+    if logy == 1:
+        y_min = max(0.00001, min(low))
+        y_max = max(high)
+        ylims = [y_min * 0.99, y_max * 1.01]
+        plt.yscale("log", basey=np.exp(1))
+        labels = [ylims[0], y_min + 0.25 * (y_max - y_min), y_min + 0.67 * (y_max - y_min), ylims[1]]
+        plt.yticks(labels, labels)
+    if perc == 1:
+        ax = plt.gca()
+        vals = ax.get_yticks()
+        frmt = '{:3.' + str(ndigits) + 'f}%'
+        ax.set_yticklabels([frmt.format(100*x) for x in vals])
+    title = title.lower()
+    #plt.legend()
+    location = "figures/seasonality/week/" + title + ".png"
+    plt.savefig(location)

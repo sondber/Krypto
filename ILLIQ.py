@@ -11,7 +11,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
     time_list = []
     value_errors = 0
     zero_count_window = 0
-    volume_limit = 1
+    volume_limit = 0.05
 
     # determine trading day yes/no
     if hour[0] == 0:  # this indicates that full day is being investigated

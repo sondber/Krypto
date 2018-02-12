@@ -12,29 +12,13 @@ import ILLIQ
 from Jacob import jacob_support as jake_supp
 
 
-def fuse_files():
-    time_new = []
-    price_new = []
-    volume_new = []
-
-    location = "data/bitcoincharts/"
-    exchange = "bitstampusd"
-    exchanges = [exchange]
-    year = "2017"
-    for month in ["06", "07", "08", "09", "10", "11", "12"]: # iterate through the new files
-        filename_new = location + exchange + "/" + year + month + ".csv"
-        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1, unix=0)
-
-    price_new = remove_nan(price_new)
-    price_new = supp.fill_blanks(price_new)
-    volume_new = remove_nan(volume_new)
-
-    for i in range(0, len(price_new), 1440):
-        print(time_new[i], price_new[i])
-
+def fuse_files(exchanges):
+    n_exc = len(exchanges)
     time_old = []
-    price_old = []
-    volume_old = []
+    price_old1 = []
+    volume_old1= []
+    price_old2 = []
+    volume_old2 = []
 
     filename_old = "data/export_csv/minute_data_full_day.csv"
     with open(filename_old, newline='') as csvfile:
@@ -45,17 +29,82 @@ def fuse_files():
         next(reader)
         for row in reader:
             time_old.append(str(row[0]))
-            price_old.append(float(row[1]))
-            volume_old.append(float(row[2]))
+            price_old1.append(float(row[1]))
+            volume_old1.append(float(row[2]))
+            price_old2.append(float(row[3]))
+            volume_old2.append(float(row[4]))
+
+    print("Her 1")
+    print("Time old",len(time_old))
+    print("Price old1",len(price_old1))
+
+    location = "data/bitcoincharts/"
+    year = "2017"
+    time_new = []
+    price_new = []
+    volume_new = []
+
+    exc = "bitstampusd"
+    for month in ["06", "07", "08", "09", "10", "11", "12"]:  # iterate through the new files
+        filename_new = location + exc + "/" + year + month + ".csv"
+        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1,
+                                                                unix=0)
+    price_new1 = remove_nan(price_new)
+    price_new1 = supp.fill_blanks(price_new1)
+    volume_new1 = remove_nan(volume_new)
+
+    time_new = []
+    price_new = []
+    volume_new = []
+
+    exc = "coincheckjpy"
+    for month in ["06", "07", "08", "09", "10", "11", "12"]:  # iterate through the new files
+        filename_new = location + exc + "/" + year + month + ".csv"
+        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1,
+                                                                unix=0)
+
+    price_new2 = remove_nan(price_new)
+    price_new2 = supp.fill_blanks(price_new2)
+    volume_new2 = remove_nan(volume_new)
+
+    print("Her 2")
+    print("time old:",len(time_old))
+    print("price old1:",len(price_old1))
+    print("price old2:",len(price_old2))
+    print("time new2: ",len(time_new))
+    print("price new1:",len(price_new1))
+    print("price new2:",len(price_new2))
 
     time_list = time_old
-    price = price_old
-    volume = volume_old
-
     for i in range(0, len(time_new)):
         time_list.append(time_new[i])
-        price.append(price_new[i])
-        volume.append(volume_new[i])
+
+    print("Her 3")
+    print("Time list:", len(time_list))
+
+    prices = np.zeros([2, len(time_list)])
+    volumes = np.zeros([2, len(time_list)])
+
+    for i in range(0, len(price_old1)):
+        prices[0, i] = price_old1[i]
+        volumes[0, i] = volume_old1[i]
+        prices[1, i] = price_old2[i]
+        volumes[1, i] = volume_old2[i]
+
+    k = 0 # Counts the entries in the new lists
+    for i in range(len(price_old1), len(time_list)):
+        try:
+            prices[0, i] = price_new1[k]
+        except IndexError:
+            print("Error when i =",i," k =",k)
+            try:
+                print(price_new1[k])
+            except IndexError:
+                print("Price new!!!")
+        volumes[0, i] = volume_new1[k]
+        prices[1, i] = price_new2[k]
+        volumes[1, i] = volume_new2[k]
+        k += 1
 
     with open(filename_old, 'w', newline='') as csvfile:
         writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -79,8 +128,9 @@ def fuse_files():
 
         for i in range(0, len(time_list)):
             rowdata = [time_list[i]]
-            rowdata.append(price[i])
-            rowdata.append(volume[i])
+            for j in range(0, n_exc):
+                rowdata.append(prices[j, i])
+                rowdata.append(volumes[j, i])
             writ.writerow(rowdata)
 
 
@@ -171,8 +221,7 @@ def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1):
                 price.append(float(row[4]))
                 volume.append(float(row[5]))
             except ValueError:
-                1
-                #print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
         return time_list, price, volume
 
@@ -793,7 +842,7 @@ def volume_transformation(volume, initial_mean_volume):
     return out_volume
 
 
-def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=0, days_excluded=0):
+def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=0, days_excluded=0):
 
     # Opening hours only
     print("Transforming data series...")
@@ -801,25 +850,31 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
                                                                    volumes_minutes)
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
+
     if full_week == 0:
-        cutoff_day = 261
+        if exchange == 0:
+            cutoff_day = 261
+        else:
+            cutoff_day = 0  # Don't know which day to put here
         cutoff_hour = cutoff_day * 7
         cutoff_min = cutoff_day * 390
     else:
-        cutoff_day = 366
+        if exchange == 0:
+            cutoff_day = 366
+        else:
+            cutoff_day = 366+365+365 # Years 2013 and 2014 removed
         cutoff_hour = cutoff_day * 24
         cutoff_min = cutoff_day * 1440
 
-    mean_volume_2012 = np.mean(volumes_days[exchange, 0:cutoff_day])  # <-- Bitstamp
+    mean_volume_prev_year = np.mean(volumes_days[exchange, 0:cutoff_day])
     n_days = len(time_list_days)
     n_hours = len(time_list_hours)
     n_mins = len(time_list_minutes)
     print("Only including days after", time_list_days[cutoff_day])
 
     n_total = len(time_list_days)
-    n_0 = n_days # Mon-Friday
+    n_0 = n_days
 
-    # Bistamp only, cutoff day # <-- Bitstamp
     prices_minutes = prices_minutes[exchange, cutoff_min:n_mins]
     volumes_minutes = volumes_minutes[exchange, cutoff_min:n_mins]
     time_list_minutes = time_list_minutes[cutoff_min:n_mins]
@@ -829,7 +884,7 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
     volumes_days = volumes_days[exchange, cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
-    n_1 = len(time_list_days) # After removing 2013
+    n_1 = len(time_list_days) # After removing 2012
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
@@ -851,38 +906,31 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
     # --------------------------------------------
 
     if exchange == 0:
-        if full_week == 0:
+        if full_week == 0:  # Denne må fikses!
             cray_s = 69
             cray_e = 74
         else:
-            cray_s= 97
-            cray_e= 103
-        cray_day = 1269
-    elif exchange == 1:
-        cray_day = 405
-        cray_s = 927
-        cray_e = 928
-    remove_crazy = 1
-    remove_crazy_week = 1  # Removes the week starting at 08.04.2013
+            cray_days = [97, 98, 99, 100, 101, 102, 735, 736, 737, 1269]
+            illiq_adjust = [97, 98, 99, 100, 101, 102, 1266]
+    else:
+        if full_week == 0:  # Denne må fikses!
+            cray_s = 69
+            cray_e = 74
+        else:
+            cray_days = [12, 13, 22, 62, 106, 307, 307, 308, 309, 378, 537, 735, 736, 986, 987, 988, 1046, 1063, 1070, 1071]
+            illiq_adjust = cray_days
 
-    if remove_crazy == 1:
-        time_list_removed = time_list_days[cray_day]
-        time_list_days = np.delete(time_list_days, cray_day)
-        returns_days = np.delete(returns_days, cray_day)
-        volumes_days = np.delete(volumes_days, cray_day)
-        spread_days = np.delete(spread_days, cray_day)
-        volatility_days = np.delete(volatility_days, cray_day)
-        illiq_days_clean = np.delete(illiq_days_clean, cray_day)
-        illiq_time = np.delete(illiq_time, cray_day)
-    if remove_crazy_week == 1:
-        time_list_removed = np.append(time_list_removed, time_list_days[cray_s:cray_e])
-        time_list_days = np.delete(time_list_days, range(cray_s, cray_e))
-        returns_days = np.delete(returns_days, range(cray_s, cray_e))
-        volumes_days = np.delete(volumes_days, range(cray_s, cray_e))
-        spread_days = np.delete(spread_days, range(cray_s, cray_e))
-        volatility_days = np.delete(volatility_days, range(cray_s, cray_e))
-        illiq_days_clean = np.delete(illiq_days_clean, range(cray_s, cray_e))
-        illiq_time = np.delete(illiq_time, range(cray_s, cray_e))
+    time_list_removed = []
+    for d in cray_days:
+        time_list_removed = np.append(time_list_removed, time_list_days[d])
+    time_list_days = np.delete(time_list_days, cray_days)
+    returns_days = np.delete(returns_days, cray_days)
+    volumes_days = np.delete(volumes_days, cray_days)
+    spread_days = np.delete(spread_days, cray_days)
+    volatility_days = np.delete(volatility_days, cray_days)
+    illiq_days_clean = np.delete(illiq_days_clean, illiq_adjust)
+    illiq_time = np.delete(illiq_time, illiq_adjust)
+
 
     n_2 = len(time_list_days) # After removing the crazy
 
@@ -932,10 +980,48 @@ def clean_trans_2013(time_list_minutes, prices_minutes, volumes_minutes, full_we
     # Turning ILLIQ, Volume and RVol into log
     log_illiq_days_clean = np.log(illiq_days_clean)
     log_volatility_days_clean = np.log(volatility_days_clean)
-    log_volumes_days_clean = volume_transformation(volumes_days_clean, mean_volume_2012)
+    log_volumes_days_clean = volume_transformation(volumes_days_clean, mean_volume_prev_year)
 
     return time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
            illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
+
+
+def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hours, illiq_hours, illiq_hours_time, exc=0):
+    if exc == 0:
+        cutoff_hour = 8784  # 2012
+        illiq_cutoff = cutoff_hour
+    elif exc == 1:
+        cutoff_hour = 26304 # 2012-2015
+        illiq_cutoff = 539
+    else:
+        print("Choose an exchange!")
+
+    volume_year_basis = np.average(volumes_hours[cutoff_hour-8784:cutoff_hour])
+
+    total_hours = len(time_list_hours)-1
+    time_list_hours = time_list_hours[cutoff_hour:total_hours]
+    returns_hours = returns_hours[cutoff_hour:total_hours]
+    volumes_hours = volumes_hours[cutoff_hour:total_hours]
+    spread_hours = spread_hours[cutoff_hour:total_hours]
+    illiq_hours = illiq_hours[illiq_cutoff:len(illiq_hours)-1]
+    illiq_hours_time = illiq_hours_time[illiq_cutoff:len(illiq_hours)-1]
+
+    if exc == 0:
+        hours_to_remove = [2393, 2410, 17228, 26712, 30468, 33819]
+    else:
+        hours_to_remove = [318, 1503, 1504, 7389, 12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
+
+    time_list_hours = np.delete(time_list_hours, hours_to_remove)
+    returns_hours = np.delete(returns_hours, hours_to_remove)
+    volumes_hours = np.delete(volumes_hours, hours_to_remove)
+    spread_hours = np.delete(spread_hours, hours_to_remove)
+    illiq_hours = np.delete(illiq_hours, hours_to_remove)
+    illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
+
+    spread_hours_clean = spread_hours
+    returns_hours_clean = returns_hours
+
+    return returns_hours_clean, spread_hours_clean
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

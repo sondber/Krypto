@@ -30,3 +30,4 @@ data/long_raw_data/krakenusd.csv
 *.pyc
 *.pyc
 *.pyc
+data/long_raw_data/coincheckjpy.csv

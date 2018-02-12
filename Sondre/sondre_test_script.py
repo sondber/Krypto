@@ -6,6 +6,7 @@ from Sondre import sondre_support_formulas as supp
 import descriptive_stats as desc
 import data_import_support as dis
 import os
+import high_low_spread as hilo
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import realized_volatility
@@ -14,20 +15,25 @@ import ILLIQ
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
-exchanges = ["bitstampusd"]
+exchanges = ["bitstampusd", "coincheckjpy"]
+
+#di.fetch_long_and_write(exchanges)
+#dis.fuse_files(exchanges)
+
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 #time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-
-plt.plot(prices_minutes[0,:])
-plt.show()
+#time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
 
+time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
+illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_days(
+    time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=1, days_excluded=1)
 
 
 
 
+"""
 price_volume = 0
 if price_volume == 1:
     n_labels = 5
@@ -77,7 +83,7 @@ if price_volume == 1:
     location = "figures/variables_over_time/" + title + ".png"
     plt.savefig(location)
 
-
+"""
 
 """
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \

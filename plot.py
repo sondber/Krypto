@@ -37,31 +37,6 @@ def time_of_day(in_list):
     plt.legend()
 
 
-def plot_for_exchanges(matrix, exchanges):
-    try:  # Skal bare sjekke om dette er bitstamp eller om det er for alle exchangene
-        n_cols = np.size(matrix, 1)
-    except IndexError:
-        n_cols = 1
-
-    if n_cols > 1:
-        for i in range(0, np.size(matrix, 0)):
-            per_day = supp.average_at_time_of_day(matrix[i, :])
-            plt.plot(per_day, label=exchanges[i])
-    else:
-        per_day = supp.average_at_time_of_day(matrix)
-        plt.plot(per_day, label=exchanges[0])
-
-    labels = ["00:00\n20:00\n09:00", "06:00\n02:00\n15:00", "12:00\n08:00\n21:00", "18:00\n14:00\n03:00",
-              "23:59\n19:59\n08:59"]
-    plt.xticks(np.arange(0, 1441, 6 * 60), labels)
-    plt.title("Average volume over the course of a day")
-    plt.ylabel("Number of bitcoins traded per minute")
-    plt.figtext(0.01, 0.068, "London")
-    plt.figtext(0.01, 0.036, "New York")
-    plt.figtext(0.01, 0.005, "Tokyo")
-    plt.legend()
-
-
 def scatters(x, y, color="black", areas=[], title="", show_plot=0, xlims=[], ylims=[], xtitle="", ytitle="", x_perc=0, y_perc=0, x_log=0, y_log=0):
     plt.figure()
     if not xlims:

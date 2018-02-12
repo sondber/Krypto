@@ -5,7 +5,7 @@ import currency_converter as curr
 
 
 def get_lists(data="all", opening_hours="y", make_totals="y"):
-    exchanges = ["bitstampusd"]
+    exchanges = ["bitstampusd", "coincheckjpy"]
     n_exc = len(exchanges)
     print("Fetching minute data..." )
 
@@ -30,7 +30,7 @@ def get_lists(data="all", opening_hours="y", make_totals="y"):
         return exchanges, time_list, prices, volumes
 
 
-def get_hilo(opening_hours="y"):
+def get_hilo(opening_hours="n"):
     exchanges = ["bitstampusd"]
     n_exc = len(exchanges)
     print("Fetching minute data...")

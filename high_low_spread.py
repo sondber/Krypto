@@ -30,7 +30,14 @@ def gamma_calc(high_two, low_two):  # to implement: check for 0s
 def beta_calc(two_highs, two_lows):  # two lists of two prices each
     total = 0
     for i in range(2):
-        total = total + gamma_calc(two_highs[i], two_lows[i])
+        try:
+            total = total + gamma_calc(two_highs[i], two_lows[i])
+        except IndexError:
+            print("total:", total)
+            print("highs:", two_highs)
+            print("lows:", two_lows)
+            print("i:", i)
+
     return total  # should this be divided by two? I dont think so
 
 
@@ -52,7 +59,6 @@ def hi_lo_spread(timestamps, highs, lows,
     freq_desc = "daily"
 
     n = len(highs)  # number of minutes in dataset
-
     # determine trading day yes/no
     if hour[0] == 0:  # this indicates that full day is being investigated
         hours_in_day = 24
@@ -70,8 +76,8 @@ def hi_lo_spread(timestamps, highs, lows,
         partsum = 0  # for averaging
         averager_adjusted = window - 1
         for j in range(i, i + window - 1):  # iterates through minutes in day
-            two_highs = highs[i:i + 1]
-            two_lows = lows[i:i + 1]
+            two_highs = highs[i:i + 2]  # endret denne fra 1 til 2 (09.02.18)
+            two_lows = lows[i:i + 2]  # endret denne fra 1 til 2 (09.02.18)
             high_two = determine_hilo(two_highs, two_lows)[0]
             low_two = determine_hilo(two_highs, two_lows)[1]
             gamma = gamma_calc(high_two, low_two)
@@ -95,7 +101,7 @@ def hi_lo_spread(timestamps, highs, lows,
 
     if kill_output == 0:
         print("Hi/Low spread-calculation is finished")
-        print("The length of the spread-vector is", len(spread))
+        print("The length of the spread-vector is", len(spreads))
         print("The length of the time-vector is", len(time_list))
         print("Number of value errors:", value_errors)
         print("Number of days set to zero due to lack of data:", na_spread)

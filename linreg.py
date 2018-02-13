@@ -14,6 +14,12 @@ def reg_multiple(Y, X, intercept=1):
         X = sm.add_constant(X)
     reg_model = sm.OLS(Y, X).fit(cov_type="HC0")
     print(reg_model.summary())
+    print(reg_model.params)
+    print(reg_model.tvalues)
+    print(reg_model.rsquared_adj)
+    print(reg_model.aic)
+    print(reg_model.pvalues)
+    print(reg_model.bse)
     print_n(13)
 
 

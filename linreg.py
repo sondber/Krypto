@@ -18,8 +18,8 @@ def reg_multiple(Y, X, intercept=1):
     print(reg_model.tvalues)
     print(reg_model.rsquared_adj)
     print(reg_model.aic)
-    print(reg_model.pvalues)
-    print(reg_model.bse)
+    print(reg_model.pvalues) 
+    print(reg_model.bse) #standard errors of the parameter estimates
     print_n(13)
 
 

@@ -5,13 +5,12 @@ from Sondre import sondre_support_formulas as supp
 
 
 def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
-              kill_output=1):  # day=1 indicates daily measure, day_or_hour=0 indicates hourly measure
+              kill_output=1, threshold=0.05):  # day=1 indicates daily measure, day_or_hour=0 indicates hourly measure
     year, month, day, hour, minute = supp.fix_time_list(timestamps)
     illiq = []
     time_list = []
     value_errors = 0
     zero_count_window = 0
-    volume_limit = 0.05
 
     # determine trading day yes/no
     if hour[0] == 0:  # this indicates that full day is being investigated
@@ -44,7 +43,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             if half == 1:
                 for i in range(pos, pos + half_hour):
                     # print("We are in the IF %d pos and %d i", pos, i)
-                    if minute_volumes[i] < volume_limit:
+                    if minute_volumes[i] <= threshold:
                         value_errors += 1
                         partsum += 0
                         window_adjusted -= 1
@@ -63,7 +62,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             else:
                 for i in range(pos, pos + window):
                     # print("We are in the ELSE  %d pos and %d i", pos, i)
-                    if minute_volumes[i] < volume_limit:
+                    if minute_volumes[i] < threshold:
                         value_errors += 1
                         partsum += 0
                         window_adjusted -= 1
@@ -90,7 +89,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             window_adjusted = window
             for j in range(i, i + window):  # looping through minutes in window
                 # print("We are in the %d i and %d j",i,j)
-                if minute_volumes[j] < volume_limit:
+                if minute_volumes[j] < threshold:
                     value_errors += 1
                     partsum += 0
                     window_adjusted -= 1

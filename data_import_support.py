@@ -826,18 +826,22 @@ def cyclical_average(time_list, data, frequency="h"):
     return day_time, out_data, lower, upper
 
 
-def volume_transformation(volume, initial_mean_volume):
+def volume_transformation(volume, initial_mean_volume, daily=1):
     n_entries = len(volume)
-    n_days_in_window = 365
+
+    if daily == 1:
+        n_entries_in_window = 365
+    else:
+        n_entries_in_window = 365 * 24
     out_volume = np.zeros(n_entries)
-    for i in range(0, n_days_in_window):
-        floating_mean = (initial_mean_volume * (n_days_in_window - i) + i * np.mean(volume[0: i])) / n_days_in_window
+    for i in range(0, n_entries_in_window):
+        floating_mean = (initial_mean_volume * (n_entries_in_window - i) + i * np.mean(volume[0: i])) / n_entries_in_window
         out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
-    for i in range(n_days_in_window, n_entries):
-        if volume[i] == 0 or np.mean(volume[i - n_days_in_window:i]) == 0:
+    for i in range(n_entries_in_window, n_entries):
+        if volume[i] == 0 or np.mean(volume[i - n_entries_in_window:i]) == 0:
             out_volume[i] = 0
         else:
-            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_days_in_window:i - 1]))
+            out_volume[i] = np.log(volume[i]) - np.log(np.mean(volume[i - n_entries_in_window:i - 1]))
     out_volume[0] = np.log(volume[0]) - np.log(initial_mean_volume)
     return out_volume
 
@@ -849,7 +853,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
                                                                    volumes_minutes)
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-
 
     if full_week == 0:
         if exchange == 0:
@@ -901,7 +904,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
     returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes) # Already clean
+    illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)  # Already clean
 
     # --------------------------------------------
 
@@ -910,17 +913,18 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
             cray_s = 69
             cray_e = 74
         else:
-            cray_days = [97, 98, 99, 100, 101, 102, 735, 736, 737, 1269]
-            illiq_adjust = [97, 98, 99, 100, 101, 102, 1266]
+            cray_days =    [97, 98, 99, 100, 101, 102, 105, 106, 123, 124, 171, 351, 420, 735, 736, 737, 743, 1037, 1269]
+            illiq_adjust = [97, 98, 99, 100, 101, 102, 105, 106, 123, 124, 171, 351, 420, 740, 1034, 1266]
     else:
         if full_week == 0:  # Denne må fikses!
             cray_s = 69
             cray_e = 74
         else:
-            cray_days = [12, 13, 22, 62, 106, 307, 307, 308, 309, 378, 537, 735, 736, 986, 987, 988, 1046, 1063, 1070, 1071]
+            cray_days = [12, 13, 14, 22, 60, 62, 106, 307, 307, 308, 309, 310, 378, 528, 537, 734, 735, 736, 737, 741, 742, 875, 876, 877, 986, 987, 988, 1046, 1063, 1070, 1071, 1072, 1086]
             illiq_adjust = cray_days
 
     time_list_removed = []
+
     for d in cray_days:
         time_list_removed = np.append(time_list_removed, time_list_days[d])
     time_list_days = np.delete(time_list_days, cray_days)
@@ -930,6 +934,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
     volatility_days = np.delete(volatility_days, cray_days)
     illiq_days_clean = np.delete(illiq_days_clean, illiq_adjust)
     illiq_time = np.delete(illiq_time, illiq_adjust)
+
 
 
     n_2 = len(time_list_days) # After removing the crazy
@@ -952,7 +957,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
                                                                                      illiq_days_clean)
 
     n_4 = len(time_list_days_clean) # After removing the zero-roll
-
 
     # Removing all days where Volatility is zero
     time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
@@ -977,6 +981,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
         print("Removing zero-roll:", n_4)
         print("Removing zero-volatility:", n_5)
 
+
     # Turning ILLIQ, Volume and RVol into log
     log_illiq_days_clean = np.log(illiq_days_clean)
     log_volatility_days_clean = np.log(volatility_days_clean)
@@ -987,16 +992,19 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
 
 
 def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hours, illiq_hours, illiq_hours_time, exc=0):
+
+    n_0= len(time_list_hours)
     if exc == 0:
         cutoff_hour = 8784  # 2012
         illiq_cutoff = cutoff_hour
-    elif exc == 1:
-        cutoff_hour = 26304 # 2012-2015
-        illiq_cutoff = 539
+    elif exc == 1:  # For Coincheck we want to remove 2012. 2013 and 2014
+        cutoff_hour = 26304 # 2012-2014
+        illiq_cutoff = cutoff_hour
     else:
         print("Choose an exchange!")
 
-    volume_year_basis = np.average(volumes_hours[cutoff_hour-8784:cutoff_hour])
+
+    mean_volume_prev_year = np.average(volumes_hours[cutoff_hour-8784:cutoff_hour])
 
     total_hours = len(time_list_hours)-1
     time_list_hours = time_list_hours[cutoff_hour:total_hours]
@@ -1006,8 +1014,10 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
     illiq_hours = illiq_hours[illiq_cutoff:len(illiq_hours)-1]
     illiq_hours_time = illiq_hours_time[illiq_cutoff:len(illiq_hours)-1]
 
+
+    n_1 = len(time_list_hours)
     if exc == 0:
-        hours_to_remove = [2393, 2410, 17228, 26712, 30468, 33819]
+        hours_to_remove = [2393, 2410, 2945, 2963, 3116, 3471, 4021, 4108,  5844, 7337, 7390, 7889, 17228, 26712, 30468, 33819]
     else:
         hours_to_remove = [318, 1503, 1504, 7389, 12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
 
@@ -1018,10 +1028,73 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
 
-    spread_hours_clean = spread_hours
-    returns_hours_clean = returns_hours
+    print("Here1:")
+    print("time:", len(time_list_hours))
+    print("returns:", len(returns_hours))
+    print("illiq:", len(illiq_hours))
 
-    return returns_hours_clean, spread_hours_clean
+
+    print()
+    n_2 = len(time_list_hours)
+
+
+    time_list_removed = []
+    # Removing all hours where Volume is zero
+    time_list_hours_clean, time_list_removed, volumes_hours_clean, spread_hours_clean, returns_hours_clean, illiq_hours_clean\
+        = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
+                                                 returns_hours, illiq_hours)
+
+    print("Here2:")
+    print("time:", len(time_list_hours_clean))
+    print("returns:", len(returns_hours_clean))
+    print("illiq:", len(illiq_hours_clean))
+
+    n_3 = len(time_list_hours_clean) # After removing the zero-volume
+
+    # Removing all days where Roll is zero
+    time_list_hours_clean, time_list_removed, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
+    illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
+                                                                                     time_list_removed,
+                                                                                     spread_hours_clean,
+                                                                                     volumes_hours_clean,
+                                                                                     returns_hours_clean,
+                                                                                     illiq_hours_clean)
+
+    print("Here3:")
+    print("time:", len(time_list_hours_clean))
+    print("returns:", len(returns_hours_clean))
+    print("illiq:", len(illiq_hours_clean))
+
+    n_4 = len(time_list_hours_clean) # After removing the zero-roll
+
+    # Removing all days where ILLIQ is zero (NB! only from ILLIQ)
+    illiq_hours_time = time_list_hours_clean
+
+    illiq_hours_time, time_list_removed, illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
+                                                                                     time_list_removed,
+                                                                                     illiq_hours_clean)
+
+    print("Here4:")
+    print("time:", len(time_list_hours_clean))
+    print("returns:", len(returns_hours_clean))
+    print("illiq:", len(illiq_hours_clean))
+
+
+    show_hours_table = 1
+    if show_hours_table == 1:
+        print()
+        print()
+        print("Total:", n_0)
+        print("Removing beginning:", n_1)
+        print("Removing crazy :", n_2)
+        print("Removing zero-volume:", n_3)
+        print("Removing zero-roll:", n_4)
+
+    # Turning ILLIQ and Volume into log
+    log_illiq_hours_clean = np.log(illiq_hours_clean)
+    log_volumes_hours_clean = volume_transformation(volumes_hours_clean, mean_volume_prev_year)
+
+    return time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

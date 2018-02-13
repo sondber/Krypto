@@ -293,21 +293,26 @@ def utc_nyc(in_list):
     return outlist
 
 
-def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0):
+def plot_for_day(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0, logy=0):
     # converting to NYC time (UTC-5)
-    #average = utc_nyc(average)
-    #low = utc_nyc(low)
-    #high = utc_nyc(high)
     plt.figure(figsize=[8, 2], dpi=300)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)
     plt.ylim([min(low)*0.99, max(high)*1.01])
+
+    if logy == 1:
+        y_min = max(0.00001, min(low))
+        y_max = max(high)
+        ylims = [y_min * 0.99, y_max * 1.01]
+        plt.yscale("log", basey=np.exp(1))
+        labels = [ylims[0], y_min + 0.25 * (y_max - y_min), y_min + 0.67 * (y_max - y_min), ylims[1]]
+        plt.yticks(labels, labels)
     if perc == 1:
         ax = plt.gca()
         vals = ax.get_yticks()
         frmt = '{:3.' + str(ndigits) + 'f}%'
-        ax.set_yticklabels([frmt.format(x*100) for x in vals])
+        ax.set_yticklabels([frmt.format(100*x) for x in vals])
 
     hour_of_day_ticks()
     title=title.lower()

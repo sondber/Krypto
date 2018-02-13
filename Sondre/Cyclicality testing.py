@@ -18,11 +18,14 @@ days = 1
 full_week = 1
 weekdays = 1
 
-exc = 0  #  0=bitstamp, 1=coincheck
+exc = 1  # 0=bitstamp, 1=coincheck
 
 if full_week== 1 or hours==1:
     exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
     exc_name = "_" + exchanges[exc]
+    print()
+    print("SEASONALITY TESTING FOR", exchanges[exc].upper())
+    print()
 
     returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
     # Converting to hourly data
@@ -33,49 +36,23 @@ if full_week== 1 or hours==1:
 if hours == 1:
     # HOURS ----------------------------------------------------------------------------------------------------
     returns_hours = jake_supp.logreturn(prices_hours[exc, :])
-    spread_hours = rolls.rolls(prices_minutes[exc, :], time_list_minutes, calc_basis=0, kill_output=0)[1]  # Rolls
-    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[exc, :], day_or_hour=0)
+    spread_hours = rolls.rolls(prices_minutes[exc, :], time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
+    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[exc, :], day_or_hour=0, threshold=0)
 
-    if exc == 0:
-        cutoff_hour = 8784  # 2012
-        illiq_cutoff = cutoff_hour
-    elif exc == 1:
-        cutoff_hour = 26304 # 2012-2015
-        illiq_cutoff = 539
-    else:
-        print("Choose an exchange!")
-
-    total_hours = len(time_list_hours)-1
-    time_list_hours = time_list_hours[cutoff_hour:total_hours]
-    returns_hours = returns_hours[cutoff_hour:total_hours]
-    volumes_hours = volumes_hours[cutoff_hour:total_hours]
-    spread_hours = spread_hours[cutoff_hour:total_hours]
-    illiq_hours = illiq_hours[illiq_cutoff:len(illiq_hours)-1]
-    illiq_hours_time = illiq_hours_time[illiq_cutoff:len(illiq_hours)-1]
-
-    if exc == 0:
-        hours_to_remove = [2393, 2410, 17228, 26712, 30468, 33819]
-    else:
-        hours_to_remove = [318, 1503, 1504, 7389, 12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
-
-    time_list_hours = np.delete(time_list_hours, hours_to_remove)
-    returns_hours = np.delete(returns_hours, hours_to_remove)
-    volumes_hours = np.delete(volumes_hours, hours_to_remove)
-    spread_hours = np.delete(spread_hours, hours_to_remove)
-    illiq_hours = np.delete(illiq_hours, hours_to_remove)
-    illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
-
+    time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean = dis.clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hours, illiq_hours, illiq_hours_time, exc=exc)
 
     # Finding average for every hour of the day
-    hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours, returns_hours, frequency="h")
-    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, volumes_hours,frequency="h")
-    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours, spread_hours, frequency="h")
-    hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(illiq_hours_time, illiq_hours, frequency="h")
+    hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours_clean, returns_hours_clean, frequency="h")
+    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours_clean, log_volumes_hours_clean,frequency="h")
+    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours_clean, spread_hours_clean, frequency="h")
+    hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(illiq_hours_time, log_illiq_hours_clean, frequency="h")
+
+
 
     plot.plot_for_day(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return"+exc_name, perc=1, ndigits=2, yzero=1)
-    plot.plot_for_day(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Volume"+exc_name, perc=0)
+    plot.plot_for_day(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Log_Volume"+exc_name, perc=0)
     plot.plot_for_day(avg_spread_hour, low_spread_hour, upper_spread_hour, title="Spread"+exc_name, perc=1)
-    plot.plot_for_day(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="ILLIQ"+exc_name, perc=1, ndigits=3)
+    plot.plot_for_day(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="Log_ILLIQ"+exc_name, perc=0, ndigits=2)  # Skulle helst brukt vanlig illiq med log-skala i stedet
 
 if days == 1:
     # DAYS ----------------------------------------------------------------------------------------------------

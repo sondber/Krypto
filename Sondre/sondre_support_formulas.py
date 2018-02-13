@@ -343,7 +343,7 @@ def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, lis
         if len(list2) != n_in:
             print("Wrong length of list5!", len(list5))
     for i in range(0, n_in):
-        if list1[i] != 0:
+        if list1[i] > 0 and not math.isinf(list1[i]):
             time_list_out.append(time_list[i])
             out_list1.append(list1[i])
             if t_list2:

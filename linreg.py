@@ -1,26 +1,27 @@
 import scipy.stats as scistat
 import numpy as np
 import statsmodels.api as sm
-import statsmodels.formula.api as smf
-
 
 def print_n(n):
     for i in range(n+1):
         print()
 
 
-def reg_multiple(Y, X, intercept=1):
+def reg_multiple(Y, X, intercept=1, prints=0):
     if intercept ==1:
         X = sm.add_constant(X)
     reg_model = sm.OLS(Y, X).fit(cov_type="HC0")
-    print(reg_model.summary())
-    print(reg_model.params)
-    print(reg_model.tvalues)
-    print(reg_model.rsquared_adj)
-    print(reg_model.aic)
-    print(reg_model.pvalues) 
-    print(reg_model.bse) #standard errors of the parameter estimates
-    print_n(13)
+
+    if prints == 1:
+        print(reg_model.summary())
+    coeffs = reg_model.params
+    tvalues = reg_model.tvalues
+    rsquared=reg_model.rsquared_adj
+    aic=reg_model.aic
+    p_values = reg_model.pvalues
+    std_errs = reg_model.bse
+    n_obs = reg_model.nobs
+    return coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs
 
 
 

@@ -129,8 +129,8 @@ if dayofweek == 1:  # Er ikke oppdatert med ny output!
 
 
 if multivariate_regs == 1:
-    rolls_multi = 1
-    illiq_multi = 1
+    rolls_multi = 0
+    illiq_multi = 0
     return_multi = 1
 
     lags = [1, 7, 60]
@@ -294,7 +294,7 @@ if multivariate_regs == 1:
         # Headers
 
         headers = []
-        headers.append('                             ')
+        headers.append('                         ')
         for i in range(1, n_cols + 1):
             headers.append(' &     (' + str(i) + ')  ')
         headers.append("\\\\")
@@ -306,22 +306,19 @@ if multivariate_regs == 1:
         j = 0
         for i in range(0, len(first_col_entries)):
             first_col.append(first_col_entries[i])
-            for k in range(len(first_col_entries[i]), 11):  # Tallet her skal være lengden på den lengste entrien
+            for k in range(len(first_col_entries[i]), 18):  # Tallet her skal være lengden på den lengste entrien
                 first_col[j] += ' '  # Passer på at alle blir like lange
             j += 1
             if i < 10:
-                first_col.append('           ')  # De første 10 radene skal ha mellomrom mellom seg
+                first_col.append('                  ')  # De første 10 radene skal ha mellomrom mellom seg
                 j += 1
 
         print_rows = []
-        # Fyller starten med tomromm så det blir lettere å sese
+        # Fyller starten med tomromm så det blir lettere å se
         for i in range(0, n_rows):
-            print_rows.append('           ')
-        for r in range(0, n_rows - 3):
-            print_rows[r] += (first_col[r]) + "        &"
-        print_rows[n_rows - 3] += (first_col[n_rows - 3]) + "   &   "
-        print_rows[n_rows - 2] += (first_col[n_rows - 2]) + "        &   "
-        print_rows[n_rows - 1] += (first_col[n_rows - 1]) + "       &   "
+            print_rows.append('        ')
+        for r in range(0, n_rows):
+            print_rows[r] += (first_col[r]) + "&"
 
         # Dette er benchmarken
         i = 0
@@ -353,6 +350,10 @@ if multivariate_regs == 1:
                     print_rows[r] += "           &"
                     print_rows[r + 1] += "           &"
         # Dette fikser de tre nedreste radene
+        print_rows[n_rows - 3] += "   "
+        print_rows[n_rows - 2] += "   "
+        print_rows[n_rows - 1] += "   "
+
         for c in range(0, n_cols):
             print_rows[n_rows - 3] += str(int(n_obs_array[c])) + "    &   "
             print_rows[n_rows - 2] += "{0:.3f}".format(rsquared_array[c]) + "   &   "
@@ -521,7 +522,7 @@ if multivariate_regs == 1:
         # Headers
 
         headers = []
-        headers.append('                             ')
+        headers.append('                         ')
         for i in range(1, n_cols + 1):
             headers.append(' &     ('+str(i)+')  ')
         headers.append("\\\\")
@@ -533,22 +534,19 @@ if multivariate_regs == 1:
         j = 0
         for i in range(0, len(first_col_entries)):
             first_col.append(first_col_entries[i])
-            for k in range (len(first_col_entries[i]), 11):  # Tallet her skal være lengden på den lengste entrien
+            for k in range(len(first_col_entries[i]), 18):  # Tallet her skal være lengden på den lengste entrien
                 first_col[j] += ' '  # Passer på at alle blir like lange
             j += 1
             if i < 10:
-                first_col.append('           ')  # De første 10 radene skal ha mellomrom mellom seg
+                first_col.append('                  ')  # De første 10 radene skal ha mellomrom mellom seg
                 j += 1
 
         print_rows = []
-        # Fyller starten med tomromm så det blir lettere å sese
+        # Fyller starten med tomromm så det blir lettere å se
         for i in range(0, n_rows):
-            print_rows.append('           ')
-        for r in range(0, n_rows-3):
-            print_rows[r] += (first_col[r]) + "        &"
-        print_rows[n_rows-3] += (first_col[n_rows-3]) + "   &   "
-        print_rows[n_rows-2] += (first_col[n_rows-2]) + "        &   "
-        print_rows[n_rows-1] += (first_col[n_rows-1]) + "       &   "
+            print_rows.append('        ')
+        for r in range(0, n_rows):
+            print_rows[r] += (first_col[r]) + "&"
 
         # Dette er benchmarken
         i = 0
@@ -578,6 +576,10 @@ if multivariate_regs == 1:
                     print_rows[r] += "           &"
                     print_rows[r + 1] += "           &"
         # Dette fikser de tre nedreste radene
+        print_rows[n_rows - 3] += "   "
+        print_rows[n_rows - 2] += "   "
+        print_rows[n_rows - 1] += "   "
+
         for c in range(0, n_cols):
             print_rows[n_rows-3] += str(int(n_obs_array[c])) + "    &   "
             print_rows[n_rows-2] += "{0:.3f}".format(rsquared_array[c]) + "   &   "
@@ -610,7 +612,7 @@ if multivariate_regs == 1:
         #print("----------------------------------------------------------------------------------------------------------------------------")
 
         for j in range(n_lags):
-            print("x%i: Returns with %i days lag" % (j + 1, lags[j]))
+            #print("x%i: Returns with %i days lag" % (j + 1, lags[j]))
             x = supp.mean_for_n_entries(returns_days_clean, lags[j])
             x = np.matrix(x[len(x) - n_entries: len(x)])
             if j == 0:
@@ -763,9 +765,8 @@ if multivariate_regs == 1:
                                std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
         # Headers
-
         headers = []
-        headers.append('                             ')
+        headers.append('                         ')
         for i in range(1, n_cols + 1):
             headers.append(' &     ('+str(i)+')  ')
         headers.append("\\\\")
@@ -778,23 +779,19 @@ if multivariate_regs == 1:
         j = 0
         for i in range(0, len(first_col_entries)):
             first_col.append(first_col_entries[i])
-            for k in range (len(first_col_entries[i]), 11):  # Tallet her skal være lengden på den lengste entrien
+            for k in range(len(first_col_entries[i]), 18):  # Tallet her skal være lengden på den lengste entrien
                 first_col[j] += ' '  # Passer på at alle blir like lange
             j += 1
             if i < 12:
-                first_col.append('           ')  # De første 12 radene skal ha mellomrom mellom seg
+                first_col.append('                  ')  # De første 10 radene skal ha mellomrom mellom seg
                 j += 1
 
         print_rows = []
-        # Fyller starten med tomromm så det blir lettere å sese
+        # Fyller starten med tomromm så det blir lettere å se
         for i in range(0, n_rows):
-            print_rows.append('           ')
-        for r in range(0, n_rows-3):
-            print_rows[r] += (first_col[r]) + "        &"
-        print_rows[n_rows-3] += (first_col[n_rows-3]) + "   &   "
-        print_rows[n_rows-2] += (first_col[n_rows-2]) + "        &   "
-        print_rows[n_rows-1] += (first_col[n_rows-1]) + "       &   "
-
+            print_rows.append('        ')
+        for r in range(0, n_rows):
+            print_rows[r] += (first_col[r]) + "&"
 
         # Dette er benchmarken
         i = 0
@@ -812,11 +809,11 @@ if multivariate_regs == 1:
                     print_rows[r] = fmt_print(print_rows[r], coeff_matrix[i, c], p_values_matrix[i, c], type="coeff")
                     print_rows[r + 1] = fmt_print(print_rows[r + 1], std_errs_matrix[i, c], type="std_err")
                     i += 1
-                elif c == 7 and (r == 8 or r == 12 or r == 16 or r ==20):
+                elif c == 9 and (r == 8 or r == 12 or r == 16 or r ==20):
                     i_cont = 11 + int((r - 8) / 4)
                     print_rows[r] = fmt_print(print_rows[r], coeff_matrix[i_cont, c], p_values_matrix[i_cont, c], type="coeff")
                     print_rows[r + 1] = fmt_print(print_rows[r + 1], std_errs_matrix[i_cont, c], type="std_err")
-                elif c == 8 and (r == 10 or r == 14 or r == 18 or r == 22):
+                elif c == 10 and (r == 10 or r == 14 or r == 18 or r == 22):
                     i_lag = 11 + int((r - 10) / 4)
                     print_rows[r] = fmt_print(print_rows[r], coeff_matrix[i_lag, c], p_values_matrix[i_lag, c], type="coeff")
                     print_rows[r + 1] = fmt_print(print_rows[r + 1], std_errs_matrix[i_lag, c], type="std_err")
@@ -825,6 +822,10 @@ if multivariate_regs == 1:
                     print_rows[r + 1] += "           &"
 
         # Dette fikser de tre nedreste radene
+        print_rows[n_rows - 3] += "   "
+        print_rows[n_rows - 2] += "   "
+        print_rows[n_rows - 1] += "   "
+
         for c in range(0, n_cols):
             print_rows[n_rows - 3] += str(int(n_obs_array[c])) + "    &   "
             print_rows[n_rows - 2] += "{0:.3f}".format(rsquared_array[c]) + "   &   "

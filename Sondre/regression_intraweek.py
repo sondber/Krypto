@@ -1,61 +1,19 @@
 import os
+
 import numpy as np
+
 import data_import as di
 import data_import_support as dis
 import linreg
 from Sondre import sondre_support_formulas as supp
-from tabulate import tabulate as tbl
-
-
-def print_n(n):
-    for k in range(n+1):
-        print()
-
-
-def import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
-                               std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array):
-    for i in range(0, len(coeffs)):
-        coeff_matrix[i, m_col] = coeffs[i]
-        std_errs_matrix[i, m_col] = std_errs[i]
-        p_values_matrix[i, m_col] = p_values[i]
-    rsquared_array[m_col] = rsquared
-    aic_array[m_col] = aic
-    n_obs_array[m_col] = n_obs
-    return coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array
-
-
-def fmt_print(print_loc, data, p_value=1, type="coeff"):
-
-    if type == "coeff":
-
-        if data >= 0:
-            print_loc += "   "
-        else:
-            print_loc += "$-$"
-
-        print_loc += "{0:.4f}".format(abs(data))
-
-        if p_value <= 0.01:
-            stars = "**"
-        elif p_value <= 0.05:
-            stars = "* "
-        else:
-            stars = "  "
-        print_loc += stars + "&"
-
-    elif type == "std_err":
-        print_loc += "  (" + str("{0:.3f}".format(data)) + ")" + "  &"
-    else:
-        pass
-
-    return print_loc
-
+from Sondre.sondre_support_formulas import first_col_entries, first_col, j, print_rows, i, import_to_matrices, print_n, \
+    import_regressions, fmt_print
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
-dayofweek = 0
-multivariate_regs = 1
+dayofweek = 1    # Fikset tabell
+multivariate_regs = 0  # Fikset tabell
 autoreg = 0
 har = 0
 exc = 0
@@ -77,6 +35,7 @@ if dayofweek == 0:
     returns_days_clean = supp.standardize(returns_days_clean)
     log_volatility_days_clean = supp.standardize(log_volatility_days_clean)
 else:
+    # Subtract mean to see whether they are stat. sig. different from mean
     mean_volume = np.mean(log_volumes_days_clean)
     mean_spread = np.mean(spread_days_clean)
     mean_illiq = np.mean(log_illiq_days_clean)
@@ -105,32 +64,124 @@ if dayofweek == 1:  # Er ikke oppdatert med ny output!
     X = np.append(X, np.matrix(sun), axis=0)
     X = np.transpose(X)
 
-    print_n(20)
-    print("Returns")
-    Y = returns_days_clean
-    linreg.reg_multiple(Y, X, intercept=0)
-    linreg.reg_multiple(Y, weekend)
-    print("Volumes")
-    Y = log_volumes_days_clean
-    linreg.reg_multiple(Y, X, intercept=0)
-    linreg.reg_multiple(Y, weekend)
-    print("RVol")
-    Y = log_volatility_days_clean
-    linreg.reg_multiple(Y, X, intercept=0)
-    linreg.reg_multiple(Y, weekend)
-    print("SPREAD")
-    Y = spread_days_clean
-    linreg.reg_multiple(Y, X, intercept=0)
-    linreg.reg_multiple(Y, weekend)
-    print("ILLIQ")
-    Y = log_illiq_days_clean
-    linreg.reg_multiple(Y, X, intercept=0)
-    linreg.reg_multiple(Y, weekend)
+    n_rows = 21  # in final table
+    n_cols = 10
+    n_entries = 10  # Må bare være minst like stor som antall forklaringsvariable
+    coeff_matrix = np.zeros([n_entries, n_cols])
+    rsquared_array = np.zeros(n_cols)
+    aic_array = np.zeros(n_cols)
+    n_obs_array = np.zeros(n_cols)
+    p_values_matrix = np.zeros([n_entries, n_cols])
+    std_errs_matrix = np.zeros([n_entries, n_cols])
 
+
+    m_col = 0
+
+    #print("Returns")
+    Y = returns_days_clean
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
+
+    #print("Volumes")
+    Y = log_volumes_days_clean
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=0)
+
+    #print("RVol")
+    Y = log_volatility_days_clean
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
+    #print("SPREAD")
+    Y = spread_days_clean
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
+    #print("ILLIQ")
+    Y = log_illiq_days_clean
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+    m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
+    for i in range(0, len(first_col_entries)):
+        first_col.append(first_col_entries[i])
+        for k in range(len(first_col_entries[i]), 18):  # Tallet her skal være lengden på den lengste entrien
+            first_col[j] += ' '  # Passer på at alle blir like lange
+        j += 1
+        if i < 9:
+            first_col.append('                  ')  # De første 9 radene skal ha mellomrom mellom seg
+            j += 1
+
+    print()
+
+    # Fyller starten med tomromm så det blir lettere å se
+    for i in range(0, n_rows):
+        print_rows.append('        ')
+    for r in range(0, n_rows):
+        print_rows[r] += (first_col[r]) + "&"
+
+    for r in range(0, 14, 2):
+        for c in range(0, n_cols, 2):
+            print_rows[r] = fmt_print(print_rows[r], coeff_matrix[i, c], p_values_matrix[i, c], type="coeff")
+            print_rows[r] += "          & &"
+            print_rows[r + 1] = fmt_print(print_rows[r + 1], std_errs_matrix[i, c], type="std_err")
+            print_rows[r + 1] += "          & &"
+        i += 1
+
+    i = 0
+    for r in [14, 16]:
+        print_rows[r] += "           &"
+        print_rows[r + 1] += "           &"
+
+        for c in range(1, n_cols, 2):
+            print_rows[r] = fmt_print(print_rows[r], coeff_matrix[i, c], p_values_matrix[i, c], type="coeff")
+            print_rows[r + 1] = fmt_print(print_rows[r + 1], std_errs_matrix[i, c], type="std_err")
+            if c < n_cols - 1:
+                print_rows[r] += "&           &"
+                print_rows[r + 1] += "&           &"
+            else:
+                print_rows[r] += "      "
+                print_rows[r + 1] += "       "
+
+        i += 1
+
+
+
+    # Dette fikser de tre nedreste radene
+    print_rows[n_rows - 3] += "   "
+    print_rows[n_rows - 2] += "   "
+    print_rows[n_rows - 1] += "   "
+
+    for c in range(0, n_cols):
+        print_rows[n_rows - 3] += str(int(n_obs_array[c])) + "     & "
+        print_rows[n_rows - 2] += "{0:.3f}".format(max(rsquared_array[c], 0)) + "   & "
+        print_rows[n_rows - 1] += str(int(aic_array[c])) + "   & "
+        if c % 2 == 1:
+            print_rows[n_rows - 3] += "&  "
+            print_rows[n_rows - 2] += "&  "
+            print_rows[n_rows - 1] += "&   "
+        else:
+            print_rows[n_rows - 3] += "  "
+            print_rows[n_rows - 2] += "  "
+            print_rows[n_rows - 1] += "  "
+
+    print()
+    print("     ------------------------------------------------",str(exchanges[exc]),"-----------------------------------------")
+    print()
+    print("     ------------------------------------------------Regression table for Intraweek seasonality-----------------------------------------")
+    print()
+    print()
+    for i in range(0, len(print_rows)):
+        if i < len(print_rows) - 3:
+            print(
+                print_rows[i][0:len(print_rows[i]) - 9] + "\\\\")  # Fjerner det siste &-tegnet og legger til backslash
+        else:
+            print(
+                print_rows[i][0:len(print_rows[i]) - 6] + "\\\\")  # Fjerner det siste &-tegnet og legger til backslash
 
 if multivariate_regs == 1:
-    rolls_multi = 0
-    illiq_multi = 0
+    rolls_multi = 1
+    illiq_multi = 1
     return_multi = 1
 
     lags = [1, 7, 60]
@@ -194,12 +245,13 @@ if multivariate_regs == 1:
         p_values_matrix = np.zeros([n_entries, n_cols])
         std_errs_matrix = np.zeros([n_entries, n_cols])
 
-        coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
 
         m_col = 0
+        coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
         coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
             import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
 
         # Spread - Return
         x = returns_days_clean[start_index : end_index]
@@ -524,10 +576,10 @@ if multivariate_regs == 1:
         headers = []
         headers.append('                         ')
         for i in range(1, n_cols + 1):
-            headers.append(' &     ('+str(i)+')  ')
+            headers.append(' &     (' + str(i) + ')  ')
         headers.append("\\\\")
 
-        first_col_entries = ['Intercept', '$illiq^D$', '$illiq^W$', '$illiq^M$', '$r_t$', '$r_{t-1}$','$v_{t}$',
+        first_col_entries = ['Intercept', '$illiq^D$', '$illiq^W$', '$illiq^M$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
                              '$v_{t-1}$', '$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 
         first_col = []
@@ -581,9 +633,9 @@ if multivariate_regs == 1:
         print_rows[n_rows - 1] += "   "
 
         for c in range(0, n_cols):
-            print_rows[n_rows-3] += str(int(n_obs_array[c])) + "    &   "
-            print_rows[n_rows-2] += "{0:.3f}".format(rsquared_array[c]) + "   &   "
-            print_rows[n_rows-1] += str(int(aic_array[c])) + "    &   "
+            print_rows[n_rows - 3] += str(int(n_obs_array[c])) + "    &   "
+            print_rows[n_rows - 2] += "{0:.3f}".format(rsquared_array[c]) + "   &   "
+            print_rows[n_rows - 1] += str(int(aic_array[c])) + "    &   "
 
         print()
         print()
@@ -768,10 +820,10 @@ if multivariate_regs == 1:
         headers = []
         headers.append('                         ')
         for i in range(1, n_cols + 1):
-            headers.append(' &     ('+str(i)+')  ')
+            headers.append(' &     (' + str(i) + ')  ')
         headers.append("\\\\")
 
-        first_col_entries = ['Intercept', '$r^D$', '$r^W$', '$r^M$', '$v_t$', '$v_{t-1}$','$rv_{t}$',
+        first_col_entries = ['Intercept', '$r^D$', '$r^W$', '$r^M$', '$v_t$', '$v_{t-1}$', '$rv_{t}$',
                              '$rv_{t-1}$', '$bas_{t}$', '$bas_{t-1}$', '$illiq_{t}$', '$illiq_{t-1}$',
                              '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 

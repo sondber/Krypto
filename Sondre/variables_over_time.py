@@ -11,7 +11,7 @@ from Jacob import jacob_support as jake_supp
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-exc = 1  #  0=bitstamp, 1=coincheck
+exc = 0  #  0=bitstamp, 1=coincheck
 exc_name = "_" + exchanges[exc]
 
 unedited = 1

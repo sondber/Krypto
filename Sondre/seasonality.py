@@ -9,37 +9,29 @@ import rolls
 import scipy.stats as st
 import ILLIQ
 import realized_volatility
+import math
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-hours = 1
-days = 1
-# daily
+intraday = 0
+intraweek = 1
 full_week = 1
-weekdays = 1
 
 exc = 1  # 0=bitstamp, 1=coincheck
 
-if full_week== 1 or hours==1:
-    exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-    exc_name = "_" + exchanges[exc]
-    print()
-    print("SEASONALITY TESTING FOR", exchanges[exc].upper())
-    print()
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-    returns_minutes = jake_supp.logreturn(prices_minutes[0, :])
-    # Converting to hourly data
-    time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-    volumes_hours = volumes_hours[exc, :]
-    time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+exc_name = "_" + exchanges[exc]
+print()
+print("SEASONALITY FOR", exchanges[exc].upper())
+print()
 
-if hours == 1:
+if intraday == 1:
     # HOURS ----------------------------------------------------------------------------------------------------
-    returns_hours = jake_supp.logreturn(prices_hours[exc, :])
-    spread_hours = rolls.rolls(prices_minutes[exc, :], time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
-    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes[exc, :], day_or_hour=0, threshold=0)
 
-    time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean = dis.clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hours, illiq_hours, illiq_hours_time, exc=exc)
+    time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
+    illiq_hours_time, log_illiq_hours_clean = \
+        dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
 
     # Finding average for every hour of the day
     hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours_clean, returns_hours_clean, frequency="h")
@@ -47,16 +39,16 @@ if hours == 1:
     hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours_clean, spread_hours_clean, frequency="h")
     hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(illiq_hours_time, log_illiq_hours_clean, frequency="h")
 
-
-
     plot.plot_for_day(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return"+exc_name, perc=1, ndigits=2, yzero=1)
     plot.plot_for_day(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Log_Volume"+exc_name, perc=0)
     plot.plot_for_day(avg_spread_hour, low_spread_hour, upper_spread_hour, title="Spread"+exc_name, perc=1)
-    plot.plot_for_day(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="Log_ILLIQ"+exc_name, perc=0, ndigits=2)  # Skulle helst brukt vanlig illiq med log-skala i stedet
+    plot.plot_for_day(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="Log_ILLIQ"+exc_name, perc=0, ndigits=3, logy=0)  # Skulle helst brukt vanlig illiq med log-skala i stedet
 
-if days == 1:
+if intraweek == 1:
     # DAYS ----------------------------------------------------------------------------------------------------
     # Converting to daily data
+    time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+    returns_minutes = jake_supp.logreturn(prices_minutes[exc, :])
     time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
     illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_days(
         time_list_minutes, prices_minutes,

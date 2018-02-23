@@ -2,7 +2,10 @@ import csv
 import numpy as np
 import math
 from datetime import date
+import os
+import linreg
 
+os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 def read_single_exc_csvs(file_name, time_list, price, volume):
     with open(file_name, newline='') as csvfile:
@@ -433,3 +436,64 @@ def week_vars(time_list):
             sun[i] = 1
             day_string.append("G")
     return mon, tue, wed, thu, fri, sat, sun, day_string
+
+
+first_col_entries = ['\\textit{Mon}', '\\textit{Tue}', '\\textit{Wed}', '\\textit{Thu}', '\\textit{Fri}', '\\textit{Sat}', '\\textit{Sun}',
+                     '\\textit{Weekday}', '\\textit{Weekend}', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
+first_col = []
+j = 0
+print_rows = []
+i = 0
+
+
+def import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
+                               std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array):
+    for j in range(0, len(coeffs)):
+        coeff_matrix[j, m_col] = coeffs[j]
+        std_errs_matrix[j, m_col] = std_errs[j]
+        p_values_matrix[j, m_col] = p_values[j]
+    rsquared_array[m_col] = rsquared
+    aic_array[m_col] = aic
+    n_obs_array[m_col] = n_obs
+    return coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array
+
+
+def print_n(n):
+    for k in range(n+1):
+        print()
+
+
+def import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=0, intercept=1):
+    coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X, intercept=intercept, prints=prints)
+    coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
+        import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
+                           std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+    m_col += 1
+    return m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array
+
+
+def fmt_print(print_loc, data, p_value=1, type="coeff"):
+
+    if type == "coeff":
+
+        if data >= 0:
+            print_loc += "   "
+        else:
+            print_loc += "$-$"
+
+        print_loc += "{0:.4f}".format(abs(data))
+
+        if p_value <= 0.01:
+            stars = "**"
+        elif p_value <= 0.05:
+            stars = "* "
+        else:
+            stars = "  "
+        print_loc += stars + "&"
+
+    elif type == "std_err":
+        print_loc += "  (" + str("{0:.3f}".format(data)) + ")" + "  &"
+    else:
+        pass
+
+    return print_loc

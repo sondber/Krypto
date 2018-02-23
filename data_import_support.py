@@ -991,35 +991,49 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
            illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
 
 
-def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hours, illiq_hours, illiq_hours_time, exc=0):
+def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0):
+
+    time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+    prices_hours = prices_hours[exc, :]
+    prices_minutes = prices_minutes[exc, :]
+    volumes_hours = volumes_hours[exc, :]
+    volumes_minutes = volumes_minutes[exc, :]
+
+    returns_minutes = jake_supp.logreturn(prices_minutes)
+    returns_hours = jake_supp.logreturn(prices_hours)
+
+    spread_hours = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
+    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, day_or_hour=0, threshold=0)
+
 
     n_0= len(time_list_hours)
     if exc == 0:
         cutoff_hour = 8784  # 2012
-        illiq_cutoff = cutoff_hour
-    elif exc == 1:  # For Coincheck we want to remove 2012. 2013 and 2014
-        cutoff_hour = 26304 # 2012-2014
-        illiq_cutoff = cutoff_hour
+    elif exc == 1:  # For Coincheck we want to remove 2012, 2013, 2014 and 2015
+        #cutoff_hour = 35064 # 2012-2015
+        cutoff_hour = 26304 # 2012-2014  # NBNB! HVis du bruker denne må også linje 1041 være aktivert!!!!!
     else:
         print("Choose an exchange!")
-
 
     mean_volume_prev_year = np.average(volumes_hours[cutoff_hour-8784:cutoff_hour])
 
     total_hours = len(time_list_hours)-1
     time_list_hours = time_list_hours[cutoff_hour:total_hours]
     returns_hours = returns_hours[cutoff_hour:total_hours]
+    prices_hours = prices_hours[cutoff_hour:total_hours]
     volumes_hours = volumes_hours[cutoff_hour:total_hours]
     spread_hours = spread_hours[cutoff_hour:total_hours]
-    illiq_hours = illiq_hours[illiq_cutoff:len(illiq_hours)-1]
-    illiq_hours_time = illiq_hours_time[illiq_cutoff:len(illiq_hours)-1]
+    illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours)-1]
+    illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time)-1]
 
 
     n_1 = len(time_list_hours)
     if exc == 0:
-        hours_to_remove = [2393, 2410, 2945, 2963, 3116, 3471, 4021, 4108,  5844, 7337, 7390, 7889, 17228, 26712, 30468, 33819]
+        hours_to_remove = [2393, 2410, 2945, 2963, 3005, 3116, 3471, 4021, 4108,  5844, 6564, 7337, 7390, 7889, 8013, 17228, 26712, 30468, 33819]
     else:
-        hours_to_remove = [318, 1503, 1504, 7389, 12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
+        hours_to_remove = [318, 1503, 1504, 7389, 10336, 11070, 11094,  11188, 11335, 11793,  12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
+        for i in range(len(hours_to_remove)):
+            hours_to_remove[i] += (35064 - 26304) # NBNB! Hvis 2015 er inkludert i datasettet
 
     time_list_hours = np.delete(time_list_hours, hours_to_remove)
     returns_hours = np.delete(returns_hours, hours_to_remove)
@@ -1027,11 +1041,6 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
     spread_hours = np.delete(spread_hours, hours_to_remove)
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
-
-    print("Here1:")
-    print("time:", len(time_list_hours))
-    print("returns:", len(returns_hours))
-    print("illiq:", len(illiq_hours))
 
 
     print()
@@ -1044,10 +1053,7 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
         = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
                                                  returns_hours, illiq_hours)
 
-    print("Here2:")
-    print("time:", len(time_list_hours_clean))
-    print("returns:", len(returns_hours_clean))
-    print("illiq:", len(illiq_hours_clean))
+
 
     n_3 = len(time_list_hours_clean) # After removing the zero-volume
 
@@ -1060,10 +1066,7 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
                                                                                      returns_hours_clean,
                                                                                      illiq_hours_clean)
 
-    print("Here3:")
-    print("time:", len(time_list_hours_clean))
-    print("returns:", len(returns_hours_clean))
-    print("illiq:", len(illiq_hours_clean))
+
 
     n_4 = len(time_list_hours_clean) # After removing the zero-roll
 
@@ -1074,13 +1077,8 @@ def clean_trans_hours(time_list_hours, returns_hours, volumes_hours, spread_hour
                                                                                      time_list_removed,
                                                                                      illiq_hours_clean)
 
-    print("Here4:")
-    print("time:", len(time_list_hours_clean))
-    print("returns:", len(returns_hours_clean))
-    print("illiq:", len(illiq_hours_clean))
 
-
-    show_hours_table = 1
+    show_hours_table = 0
     if show_hours_table == 1:
         print()
         print()

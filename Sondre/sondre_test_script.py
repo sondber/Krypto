@@ -16,26 +16,107 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 exchanges = ["bitstampusd", "coincheckjpy"]
+exc = 1
 
 #di.fetch_long_and_write(exchanges)
 #dis.fuse_files(exchanges)
 
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-#time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+#time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
 
-counter = 0
-good = 0
-for i in range(26304, len(time_list_hours)):
-    if volumes_hours[1, i] == 0:
-        print(i, time_list_hours[i], volumes_hours[1, i])
-        counter += 1
-    else:
-        good += 1
+time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
+illiq_hours_time, log_illiq_hours_clean = \
+    dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
 
+
+
+plt.plot(log_volumes_hours_clean)
+plt.title("volume")
+plt.figure()
+
+plt.plot(spread_hours_clean)
+plt.title("bas")
+plt.figure()
+
+
+plt.plot(returns_hours_clean)
+plt.title("returns")
+plt.figure()
+
+
+plt.plot(illiq_hours_clean)
+plt.title("illiq")
+plt.figure()
+
+years, months, days, hours, minutes = supp.fix_time_list(illiq_hours_time)
+
+counter = np.zeros(24)
+
+for i in range(len(hours)):
+    counter[int(hours[i])] += 1
 print(counter)
-print(100*counter/(counter+good))
+
+day_time, out_data, lower, upper = dis.cyclical_average(illiq_hours_time,illiq_hours_clean)
+
+
+plt.plot(counter)
+plt.figure()
+plt.plot(out_data)
+plt.show()
+
+
+#for i in range(len(illiq_hours_clean)):
+#    print(illiq_hours_time[i], illiq_hours_clean[i])
+
+
+"""
+
+plt.plot(volumes_hours[1,:])
+
+n_mins = len(time_list_minutes)
+n_hours = len(time_list_hours)
+cutoff_hour = 35064
+cutoff_minute = 60 * cutoff_hour
+
+
+prices_hours = prices_hours[exc, cutoff_hour:n_hours-1]
+time_list_hours = time_list_hours[cutoff_hour:n_hours-1]
+volumes_hours = volumes_hours[exc, cutoff_hour:n_hours-1]
+returns_hours= jake_supp.logreturn(prices_hours)
+
+
+prices_minutes = prices_minutes[exc, cutoff_minute:n_mins-1]
+time_list_minutes = time_list_minutes[cutoff_minute:n_mins-1]
+volumes_minutes = volumes_minutes[exc, cutoff_minute:n_mins-1]
+
+print("These should be the same:", len(prices_minutes), len(time_list_minutes), len(volumes_minutes))
+returns_minutes = jake_supp.logreturn(prices_minutes)
+
+plt.figure()
+plt.plot(volumes_hours[0:240])
+plt.figure()
+plt.plot(volumes_minutes[0:(240*60)])
+plt.show()
+"""
+
+#for i in range(0, 360):
+#    print(time_list_minutes[i], " ", str("{0:.2f}".format(volumes_minutes[i])), " ", str("{0:.0f}".format(prices_minutes[i])))
+
+print()
+print()
+#illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, day_or_hour=0,
+#                                            threshold=0, kill_output=0)
+#for i in range(0, 6):
+#    print(time_list_hours[i], " ", str("{0:.2f}".format(volumes_hours[i])), " ", str("{0:.0f}".format(prices_hours[i])), " ", str("{0:.0f}".format(1000*illiq_hours[i])))
+
+
+
+
+
+
+
+
 
 """
 time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \

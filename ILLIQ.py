@@ -4,24 +4,21 @@ from Sondre import sondre_support_formulas as supp
 # Cuts any volumes less than "volume_limit". If all minutes in a window is zero, the window is omitted, resulting in a time-gap in the return-vector.
 
 
-def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
-              kill_output=1):  # day=1 indicates daily measure, day_or_hour=0 indicates hourly measure
+def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily=1,
+          kill_output=1, threshold=0.05):  # 0=hourly, 1=daily
     year, month, day, hour, minute = supp.fix_time_list(timestamps)
     illiq = []
     time_list = []
     value_errors = 0
     zero_count_window = 0
-    volume_limit = 1
 
-    # determine trading day yes/no
-    if hour[0] == 0:  # this indicates that full day is being investigated
-        hours_in_day = 24
-        day_desc = "full day"
-    else:
-        hours_in_day = 6.5
-        day_desc = "trading day"
+    start_hour = hour[0]
+    start_minute = start_hour * 60 + minute[0]
 
-    if day_or_hour == 1:
+    hours_in_day = 24
+    day_desc = "full day"
+
+    if hourly_or_daily == 1:
         window = int(hours_in_day * 60)
         freq_desc = "daily"
     else:
@@ -33,7 +30,8 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
 
     partsum = 0
 
-    if day_or_hour == 0 and hours_in_day == 6.5:  # seperate loop to take care of half hours
+    """
+    if hourly_or_daily == 0 and hours_in_day == 6.5:  # seperate loop to take care of half hours
         pos = 0  # position in price diff vector
         half = 1  # indicates that one half hour must be accounted for
         tod = 0  # tod to keep track of when to reset half
@@ -44,7 +42,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             if half == 1:
                 for i in range(pos, pos + half_hour):
                     # print("We are in the IF %d pos and %d i", pos, i)
-                    if minute_volumes[i] < volume_limit:
+                    if minute_volumes[i] <= threshold:
                         value_errors += 1
                         partsum += 0
                         window_adjusted -= 1
@@ -63,7 +61,7 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             else:
                 for i in range(pos, pos + window):
                     # print("We are in the ELSE  %d pos and %d i", pos, i)
-                    if minute_volumes[i] < volume_limit:
+                    if minute_volumes[i] < threshold:
                         value_errors += 1
                         partsum += 0
                         window_adjusted -= 1
@@ -85,12 +83,13 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
                 else:
                     tod += 1
                     pos += 60
-    else:
-        for i in range(0, len(minute_returns), window):  # looping through windows
-            window_adjusted = window
-            for j in range(i, i + window):  # looping through minutes in window
+    """
+
+    if hourly_or_daily == 1:
+            window_adjusted = window - start_minute
+            for j in range(0, window - start_minute):  # looping through minutes in window
                 # print("We are in the %d i and %d j",i,j)
-                if minute_volumes[j] < volume_limit:
+                if minute_volumes[j] < threshold:
                     value_errors += 1
                     partsum += 0
                     window_adjusted -= 1
@@ -99,11 +98,29 @@ def illiq(timestamps, minute_returns, minute_volumes, day_or_hour=1,
             if window_adjusted != 0:
                 window_illiq = partsum / window_adjusted
                 illiq.append(window_illiq)
-                time_list.append(timestamps[i])
+                time_list.append(timestamps[0])
             else:
                 zero_count_window += 1
-
             partsum = 0
+
+    for i in range(0, len(minute_returns), window):  # looping through windows
+        window_adjusted = window
+        for j in range(i, i + window):  # looping through minutes in window
+            # print("We are in the %d i and %d j",i,j)
+            if minute_volumes[j] < threshold:
+                value_errors += 1
+                partsum += 0
+                window_adjusted -= 1
+            else:
+                partsum += abs(minute_returns[j]) / minute_volumes[j]
+        if window_adjusted != 0:
+            window_illiq = partsum / window_adjusted
+            illiq.append(window_illiq)
+            time_list.append(timestamps[i])
+        else:
+            zero_count_window += 1
+
+        partsum = 0
 
     if kill_output == 0:
         print("ILLIQ-calculation is finished")

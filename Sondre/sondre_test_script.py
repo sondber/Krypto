@@ -6,47 +6,84 @@ from Sondre import sondre_support_formulas as supp
 import descriptive_stats as desc
 import data_import_support as dis
 import os
+import high_low_spread as hilo
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
+import realized_volatility
 import rolls
 import ILLIQ
+
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="y", make_totals="n")
-time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
-illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
-    time_list_minutes, prices_minutes,
-    volumes_minutes)
+exc = 0
 
-time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+#time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
+#    illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
+#    dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=0)
 
 
-check_freq = 0
-if check_freq == 1:  # Verification of frequency consistency
-    exchanges, minute_time, min_prices, min_volumes = di.get_lists(opening_hours="n", make_totals="n")
-    hour_time, hour_prices, hour_volumes = dis.convert_to_hour(minute_time, min_prices, min_volumes)
-    day_time, day_prices, day_volumes = dis.convert_to_day(minute_time, min_prices, min_volumes)
+print(time_list_minutes[0:2880])
 
-    k_time_m, avg_vol_m = dis.cyclical_average(minute_time, min_volumes[0, :], frequency="m")
-    k_time_h, avg_vol_h = dis.cyclical_average(hour_time, hour_volumes[0, :], frequency="h")
-    k_time_d, avg_vol_d = dis.cyclical_average(day_time, day_volumes[0, :], frequency="d")
+for i in range(0, 2880):
+    ask = 0
+    if np.random.uniform(0,1) > 0.5:
+        ask = 1
+    price.append(100 + ask)
 
-    print("Minute: ")
-    print(" ", minute_time[0], minute_time[len(minute_time) - 1])
-    print(" Sum of volumes: ", sum(min_volumes[0, :]))
-    print(" Average volume: ", np.average(min_volumes[0, :]))
-    print(" Alternative average: ", np.average(avg_vol_m))
-    print()
-    print("Hour: ")
-    print(" ", hour_time[0], hour_time[len(hour_time) - 1])
-    print(" Sum of volumes: ", sum(hour_volumes[0, :]))
-    print(" Average volume: ", np.average(hour_volumes[0, :]))
-    print(" Alternative average: ", np.average(avg_vol_h))
-    print()
-    print("Day: ")
-    print(" ", day_time[0], day_time[len(day_time) - 1])
-    print(" Sum of volumes: ", sum(day_volumes[0, :]))
-    print(" Average volume: ", np.average(day_volumes[0, :]))
-    print(" Alternative average: ", np.average(avg_vol_d))
-    print()
+print()
+print(draw)
+test_prices = [99.57688314413653, 99.20659038539112, 100.457004034158, 100.64286833323169, 100.81733623209406,
+          100.7499352208313, 100.87608990478634, 100.315908865317, 100.99366483118992, 99.71946633598326,
+          99.50504810944739, 99.6271177385977, 100.6872821194026, 100.95346717423052, 99.02688841447322,
+          100.20029575130413, 99.57133305521137, 99.12714867790027, 99.09283758724655, 99.40434965309441,
+          100.37918688640224, 99.3146713138428, 99.11995381003176, 100.6487180243608, 99.94318852612062,
+          99.29400676204082, 100.01139260268408, 99.75115499064027, 99.06507889654529, 99.24973180922862,
+          99.09684457811403, 99.07913619673235, 100.4315449840724, 99.67457990858826, 100.70742732548202,
+          100.38130015133821, 100.10159579631504, 99.6713736870137, 100.02603215180005, 100.3622946421771,
+          100.73229205818195, 99.54717051228883, 99.14132895210415, 100.07131877993281, 100.72836499742324,
+          100.34760391925471, 100.60398221103054, 100.81937927240617, 99.29646620364444, 99.24135044922402,
+          100.0844258921368, 99.28559604154607, 100.75332936218882, 99.15939420927722, 100.48984044793907,
+          99.74240567533771, 100.94750075415526, 99.37354835405394, 100.2536205825651, 100.92552411795238,
+          99.28053811379255, 99.21811262372869, 99.76143449745838, 99.07527602519635, 99.26289767580897,
+          99.97111558341585, 99.29442733820036, 99.0510617112783, 99.43633013246239, 100.61639880370959,
+          100.4247165221396, 100.56033257809777, 99.79441142179247, 99.32947126775873, 99.87058325841829,
+          100.89827233537238, 99.25897097049939, 99.65195886908884, 100.96610187831435, 100.00969985332274,
+          99.49974452185126, 99.31070509746023, 99.44509215893366, 99.20260503598666, 99.95943588367494,
+          100.38124665155999, 100.06472111883153, 99.70230278586901, 100.65393693751209, 99.0615548408998,
+          100.69793080801159, 100.54228375077359, 99.62182601915131, 100.73179641654202, 99.17225588443851,
+          100.16865466825358, 99.08274887239155, 99.40421825073079, 99.77568594973074, 99.42714413051716,
+          99.84416720629571, 100.15051364560362, 99.93339842046068, 99.70297623003243, 99.7675883781071,
+          100.74850475213431, 100.12972476872817, 100.97206938965441, 99.74228557284425, 100.50381013323106,
+          100.03195259148997, 99.60750886645654, 99.24137789040198, 99.51076880238386, 100.22974360427177,
+          100.65270217527943, 100.87195781681467, 100.75906252633858, 100.0522443192676, 100.27490923499587]
+
+test_time_list_minutes = ['01.01.2012 00:00', '01.01.2012 00:01', '01.01.2012 00:02', '01.01.2012 00:03', '01.01.2012 00:04',
+                     '01.01.2012 00:05', '01.01.2012 00:06', '01.01.2012 00:07', '01.01.2012 00:08', '01.01.2012 00:09',
+                     '01.01.2012 00:10', '01.01.2012 00:11', '01.01.2012 00:12', '01.01.2012 00:13', '01.01.2012 00:14',
+                     '01.01.2012 00:15', '01.01.2012 00:16', '01.01.2012 00:17', '01.01.2012 00:18', '01.01.2012 00:19',
+                     '01.01.2012 00:20', '01.01.2012 00:21', '01.01.2012 00:22', '01.01.2012 00:23', '01.01.2012 00:24',
+                     '01.01.2012 00:25', '01.01.2012 00:26', '01.01.2012 00:27', '01.01.2012 00:28', '01.01.2012 00:29',
+                     '01.01.2012 00:30', '01.01.2012 00:31', '01.01.2012 00:32', '01.01.2012 00:33', '01.01.2012 00:34',
+                     '01.01.2012 00:35', '01.01.2012 00:36', '01.01.2012 00:37', '01.01.2012 00:38', '01.01.2012 00:39',
+                     '01.01.2012 00:40', '01.01.2012 00:41', '01.01.2012 00:42', '01.01.2012 00:43', '01.01.2012 00:44',
+                     '01.01.2012 00:45', '01.01.2012 00:46', '01.01.2012 00:47', '01.01.2012 00:48', '01.01.2012 00:49',
+                     '01.01.2012 00:50', '01.01.2012 00:51', '01.01.2012 00:52', '01.01.2012 00:53', '01.01.2012 00:54',
+                     '01.01.2012 00:55', '01.01.2012 00:56', '01.01.2012 00:57', '01.01.2012 00:58', '01.01.2012 00:59',
+                     '01.01.2012 01:00', '01.01.2012 01:01', '01.01.2012 01:02', '01.01.2012 01:03', '01.01.2012 01:04',
+                     '01.01.2012 01:05', '01.01.2012 01:06', '01.01.2012 01:07', '01.01.2012 01:08', '01.01.2012 01:09',
+                     '01.01.2012 01:10', '01.01.2012 01:11', '01.01.2012 01:12', '01.01.2012 01:13', '01.01.2012 01:14',
+                     '01.01.2012 01:15', '01.01.2012 01:16', '01.01.2012 01:17', '01.01.2012 01:18', '01.01.2012 01:19',
+                     '01.01.2012 01:20', '01.01.2012 01:21', '01.01.2012 01:22', '01.01.2012 01:23', '01.01.2012 01:24',
+                     '01.01.2012 01:25', '01.01.2012 01:26', '01.01.2012 01:27', '01.01.2012 01:28', '01.01.2012 01:29',
+                     '01.01.2012 01:30', '01.01.2012 01:31', '01.01.2012 01:32', '01.01.2012 01:33', '01.01.2012 01:34',
+                     '01.01.2012 01:35', '01.01.2012 01:36', '01.01.2012 01:37', '01.01.2012 01:38', '01.01.2012 01:39',
+                     '01.01.2012 01:40', '01.01.2012 01:41', '01.01.2012 01:42', '01.01.2012 01:43', '01.01.2012 01:44',
+                     '01.01.2012 01:45', '01.01.2012 01:46', '01.01.2012 01:47', '01.01.2012 01:48', '01.01.2012 01:49',
+                     '01.01.2012 01:50', '01.01.2012 01:51', '01.01.2012 01:52', '01.01.2012 01:53', '01.01.2012 01:54',
+                     '01.01.2012 01:55', '01.01.2012 01:56', '01.01.2012 01:57', '01.01.2012 01:58', '01.01.2012 01:59']
+
+spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes, calc_basis=0)
+
+for i in range(len(spread_rel)):
+    print(time_list[i], "{0:.3f}".format(spread[i]), "{0:.3f}%".format(100*spread_rel[i]))

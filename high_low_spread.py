@@ -47,12 +47,13 @@ def determine_hilo(two_highs, two_lows):
     return high, low
 
 
-def hi_lo_spread(timestamps, highs, lows,
+def hi_lo_spread(timestamps, highs, lows, prices,
                  kill_output=0, hour_yesno=0):  # returns daily spreads, spread is set to zero if lack of data (as with rolls). hour=1 if houry data
     year, month, day, hour, minute = supp.fix_time_list(timestamps)
 
     spreads = []
     time_list = []
+    rel_spreads = []
     value_errors = 0
     na_spread = 0
 
@@ -103,24 +104,28 @@ def hi_lo_spread(timestamps, highs, lows,
                 else:
                     alpha = alpha_calc(beta, gamma)
                     spread = spread_calc(alpha)
+                    if spread < 0:
+                        spread = 0
                     partsum += spread
-
         if averager_adjusted == 0:
             na_spread += 1
             spreads.append(0)
+            rel_spreads.append(0)
             time_list.append(timestamps[i])
         else:
             spread_averaged = partsum / averager_adjusted
             spreads.append(spread_averaged)
+            rel_spreads.append(spread_averaged/prices[i+window-1])
             time_list.append(timestamps[i])
 
     if kill_output == 0:
         print("Hi/Low spread-calculation is finished")
         print("The length of the spread-vector is", len(spreads))
         print("The length of the time-vector is", len(time_list))
+        print("The length of the relative spread-vector is", len(rel_spreads))
         print("Number of value errors:", value_errors)
         print("Number of days set to zero due to lack of data:", na_spread)
 
-    return time_list, spreads
+    return time_list, spreads, rel_spreads
 
 

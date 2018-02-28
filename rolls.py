@@ -80,8 +80,6 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 p_val = linreg.linreg_coeffs(list1, list2)[3]
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
-                if p_val > alpha:
-                    alpha_count_below += 1
 
                 for i in range(pos + 1, pos + half_hour):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
@@ -90,6 +88,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 except ValueError:
                     count_value_error += 1
                     ba_calc = 0
+                    if p_val < alpha:
+                        alpha_count_below += 1
                 spread.append(ba_calc)
                 time_list.append(time_list_minute[pos])
                 if prices_minute[pos] == 0:
@@ -105,8 +105,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 p_val = linreg.linreg_coeffs(list1, list2)[3]
                 if abs(corr) < corr_threshold:
                     count_corr_below += 1
-                if p_val > alpha:
-                    alpha_count_below += 1
+
+
                 for i in range(pos + 1, pos + window):
                     sum_inside = sum_inside + (price_differences[i] * price_differences[i - 1])
                 try:
@@ -114,6 +114,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
                 except ValueError:
                     count_value_error += 1
                     ba_calc = 0
+                    if p_val < alpha:
+                        alpha_count_below += 1
                 spread.append(ba_calc)
                 time_list.append(time_list_minute[pos])
                 spread_rel.append(ba_calc / prices_minute[pos+window-1])
@@ -135,8 +137,6 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
             p_val = linreg.linreg_coeffs(list1, list2)[3]
             if abs(corr) < corr_threshold:
                 count_corr_below += 1
-            if p_val > alpha:
-                alpha_count_below += 1
 
             for y in range(i + 1, i + minutes_in_window):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
@@ -145,6 +145,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
             except ValueError:
                 count_value_error += 1
                 ba_calc = 0
+                if p_val < alpha:
+                    alpha_count_below += 1
             spread.append(ba_calc)
             time_list.append(time_list_minute[i])
             spread_rel.append(ba_calc / prices_minute[i+minutes_in_window-1])
@@ -157,7 +159,7 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
               "value errors were counted when calculating Roll-spreads")
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
-        print(alpha_count_below, "correlations were not significant at the", round(100 * alpha, 0), "% level(",
-              round(100 * alpha_count_below / len(spread_rel), 2), "%)")
+        print(alpha_count_below, "of the  value-error correlations were  significantly different from zero at the", round(100 * alpha, 0), "% level(",
+              round(100 * alpha_count_below / count_value_error, 1), "%)")
 
     return spread, spread_rel, time_list, count_value_error

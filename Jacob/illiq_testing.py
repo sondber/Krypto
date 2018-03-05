@@ -17,7 +17,7 @@ print("length of volume",len(volumes))
 print("length of returns", len(returns))
 
 
-time_illiq, illiq = ilq.illiq(time_list, returns, volumes, day_or_hour=0, kill_output=0)
+time_illiq, illiq = ilq.illiq(time_list, returns, volumes, hourly_or_daily=0, kill_output=0)
 
 plt.plot(illiq)
 plt.show()

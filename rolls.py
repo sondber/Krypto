@@ -19,6 +19,7 @@ def first_price_differences(prices):  # takes list of prices, returns equal leng
 
 def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc_basis 0/1/2 hour/day/week
     year, month, day, hour, minute = supp.fix_time_list(time_list_minute)
+
     spread = []
     spread_rel = []
     time_list = []

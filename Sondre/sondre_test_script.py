@@ -12,297 +12,78 @@ import matplotlib.ticker as mtick
 import realized_volatility
 import rolls
 import ILLIQ
+
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-
-exchanges = ["bitstampusd", "coincheckjpy"]
-exc = 1
-
-#di.fetch_long_and_write(exchanges)
-#dis.fuse_files(exchanges)
-
+exc = 0
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-#time_list_hours, prices_hours, volumes_hours = dis.convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-
-time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
-illiq_hours_time, log_illiq_hours_clean = \
-    dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
+#time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
+#    illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
+#    dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=0)
 
 
+print(time_list_minutes[0:2880])
 
-plt.plot(log_volumes_hours_clean)
-plt.title("volume")
-plt.figure()
-
-plt.plot(spread_hours_clean)
-plt.title("bas")
-plt.figure()
-
-
-plt.plot(returns_hours_clean)
-plt.title("returns")
-plt.figure()
-
-
-plt.plot(illiq_hours_clean)
-plt.title("illiq")
-plt.figure()
-
-years, months, days, hours, minutes = supp.fix_time_list(illiq_hours_time)
-
-counter = np.zeros(24)
-
-for i in range(len(hours)):
-    counter[int(hours[i])] += 1
-print(counter)
-
-day_time, out_data, lower, upper = dis.cyclical_average(illiq_hours_time,illiq_hours_clean)
-
-
-plt.plot(counter)
-plt.figure()
-plt.plot(out_data)
-plt.show()
-
-
-#for i in range(len(illiq_hours_clean)):
-#    print(illiq_hours_time[i], illiq_hours_clean[i])
-
-
-"""
-
-plt.plot(volumes_hours[1,:])
-
-n_mins = len(time_list_minutes)
-n_hours = len(time_list_hours)
-cutoff_hour = 35064
-cutoff_minute = 60 * cutoff_hour
-
-
-prices_hours = prices_hours[exc, cutoff_hour:n_hours-1]
-time_list_hours = time_list_hours[cutoff_hour:n_hours-1]
-volumes_hours = volumes_hours[exc, cutoff_hour:n_hours-1]
-returns_hours= jake_supp.logreturn(prices_hours)
-
-
-prices_minutes = prices_minutes[exc, cutoff_minute:n_mins-1]
-time_list_minutes = time_list_minutes[cutoff_minute:n_mins-1]
-volumes_minutes = volumes_minutes[exc, cutoff_minute:n_mins-1]
-
-print("These should be the same:", len(prices_minutes), len(time_list_minutes), len(volumes_minutes))
-returns_minutes = jake_supp.logreturn(prices_minutes)
-
-plt.figure()
-plt.plot(volumes_hours[0:240])
-plt.figure()
-plt.plot(volumes_minutes[0:(240*60)])
-plt.show()
-"""
-
-#for i in range(0, 360):
-#    print(time_list_minutes[i], " ", str("{0:.2f}".format(volumes_minutes[i])), " ", str("{0:.0f}".format(prices_minutes[i])))
+for i in range(0, 2880):
+    ask = 0
+    if np.random.uniform(0,1) > 0.5:
+        ask = 1
+    price.append(100 + ask)
 
 print()
-print()
-#illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, day_or_hour=0,
-#                                            threshold=0, kill_output=0)
-#for i in range(0, 6):
-#    print(time_list_hours[i], " ", str("{0:.2f}".format(volumes_hours[i])), " ", str("{0:.0f}".format(prices_hours[i])), " ", str("{0:.0f}".format(1000*illiq_hours[i])))
+print(draw)
+test_prices = [99.57688314413653, 99.20659038539112, 100.457004034158, 100.64286833323169, 100.81733623209406,
+          100.7499352208313, 100.87608990478634, 100.315908865317, 100.99366483118992, 99.71946633598326,
+          99.50504810944739, 99.6271177385977, 100.6872821194026, 100.95346717423052, 99.02688841447322,
+          100.20029575130413, 99.57133305521137, 99.12714867790027, 99.09283758724655, 99.40434965309441,
+          100.37918688640224, 99.3146713138428, 99.11995381003176, 100.6487180243608, 99.94318852612062,
+          99.29400676204082, 100.01139260268408, 99.75115499064027, 99.06507889654529, 99.24973180922862,
+          99.09684457811403, 99.07913619673235, 100.4315449840724, 99.67457990858826, 100.70742732548202,
+          100.38130015133821, 100.10159579631504, 99.6713736870137, 100.02603215180005, 100.3622946421771,
+          100.73229205818195, 99.54717051228883, 99.14132895210415, 100.07131877993281, 100.72836499742324,
+          100.34760391925471, 100.60398221103054, 100.81937927240617, 99.29646620364444, 99.24135044922402,
+          100.0844258921368, 99.28559604154607, 100.75332936218882, 99.15939420927722, 100.48984044793907,
+          99.74240567533771, 100.94750075415526, 99.37354835405394, 100.2536205825651, 100.92552411795238,
+          99.28053811379255, 99.21811262372869, 99.76143449745838, 99.07527602519635, 99.26289767580897,
+          99.97111558341585, 99.29442733820036, 99.0510617112783, 99.43633013246239, 100.61639880370959,
+          100.4247165221396, 100.56033257809777, 99.79441142179247, 99.32947126775873, 99.87058325841829,
+          100.89827233537238, 99.25897097049939, 99.65195886908884, 100.96610187831435, 100.00969985332274,
+          99.49974452185126, 99.31070509746023, 99.44509215893366, 99.20260503598666, 99.95943588367494,
+          100.38124665155999, 100.06472111883153, 99.70230278586901, 100.65393693751209, 99.0615548408998,
+          100.69793080801159, 100.54228375077359, 99.62182601915131, 100.73179641654202, 99.17225588443851,
+          100.16865466825358, 99.08274887239155, 99.40421825073079, 99.77568594973074, 99.42714413051716,
+          99.84416720629571, 100.15051364560362, 99.93339842046068, 99.70297623003243, 99.7675883781071,
+          100.74850475213431, 100.12972476872817, 100.97206938965441, 99.74228557284425, 100.50381013323106,
+          100.03195259148997, 99.60750886645654, 99.24137789040198, 99.51076880238386, 100.22974360427177,
+          100.65270217527943, 100.87195781681467, 100.75906252633858, 100.0522443192676, 100.27490923499587]
 
+test_time_list_minutes = ['01.01.2012 00:00', '01.01.2012 00:01', '01.01.2012 00:02', '01.01.2012 00:03', '01.01.2012 00:04',
+                     '01.01.2012 00:05', '01.01.2012 00:06', '01.01.2012 00:07', '01.01.2012 00:08', '01.01.2012 00:09',
+                     '01.01.2012 00:10', '01.01.2012 00:11', '01.01.2012 00:12', '01.01.2012 00:13', '01.01.2012 00:14',
+                     '01.01.2012 00:15', '01.01.2012 00:16', '01.01.2012 00:17', '01.01.2012 00:18', '01.01.2012 00:19',
+                     '01.01.2012 00:20', '01.01.2012 00:21', '01.01.2012 00:22', '01.01.2012 00:23', '01.01.2012 00:24',
+                     '01.01.2012 00:25', '01.01.2012 00:26', '01.01.2012 00:27', '01.01.2012 00:28', '01.01.2012 00:29',
+                     '01.01.2012 00:30', '01.01.2012 00:31', '01.01.2012 00:32', '01.01.2012 00:33', '01.01.2012 00:34',
+                     '01.01.2012 00:35', '01.01.2012 00:36', '01.01.2012 00:37', '01.01.2012 00:38', '01.01.2012 00:39',
+                     '01.01.2012 00:40', '01.01.2012 00:41', '01.01.2012 00:42', '01.01.2012 00:43', '01.01.2012 00:44',
+                     '01.01.2012 00:45', '01.01.2012 00:46', '01.01.2012 00:47', '01.01.2012 00:48', '01.01.2012 00:49',
+                     '01.01.2012 00:50', '01.01.2012 00:51', '01.01.2012 00:52', '01.01.2012 00:53', '01.01.2012 00:54',
+                     '01.01.2012 00:55', '01.01.2012 00:56', '01.01.2012 00:57', '01.01.2012 00:58', '01.01.2012 00:59',
+                     '01.01.2012 01:00', '01.01.2012 01:01', '01.01.2012 01:02', '01.01.2012 01:03', '01.01.2012 01:04',
+                     '01.01.2012 01:05', '01.01.2012 01:06', '01.01.2012 01:07', '01.01.2012 01:08', '01.01.2012 01:09',
+                     '01.01.2012 01:10', '01.01.2012 01:11', '01.01.2012 01:12', '01.01.2012 01:13', '01.01.2012 01:14',
+                     '01.01.2012 01:15', '01.01.2012 01:16', '01.01.2012 01:17', '01.01.2012 01:18', '01.01.2012 01:19',
+                     '01.01.2012 01:20', '01.01.2012 01:21', '01.01.2012 01:22', '01.01.2012 01:23', '01.01.2012 01:24',
+                     '01.01.2012 01:25', '01.01.2012 01:26', '01.01.2012 01:27', '01.01.2012 01:28', '01.01.2012 01:29',
+                     '01.01.2012 01:30', '01.01.2012 01:31', '01.01.2012 01:32', '01.01.2012 01:33', '01.01.2012 01:34',
+                     '01.01.2012 01:35', '01.01.2012 01:36', '01.01.2012 01:37', '01.01.2012 01:38', '01.01.2012 01:39',
+                     '01.01.2012 01:40', '01.01.2012 01:41', '01.01.2012 01:42', '01.01.2012 01:43', '01.01.2012 01:44',
+                     '01.01.2012 01:45', '01.01.2012 01:46', '01.01.2012 01:47', '01.01.2012 01:48', '01.01.2012 01:49',
+                     '01.01.2012 01:50', '01.01.2012 01:51', '01.01.2012 01:52', '01.01.2012 01:53', '01.01.2012 01:54',
+                     '01.01.2012 01:55', '01.01.2012 01:56', '01.01.2012 01:57', '01.01.2012 01:58', '01.01.2012 01:59']
 
+spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes, calc_basis=0)
 
-
-
-
-
-
-
-"""
-time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
-illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_days(
-    time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=1, days_excluded=1)
-"""
-
-
-
-"""
-price_volume = 0
-if price_volume == 1:
-    n_labels = 5
-    labels = []
-    len_x = len(time_list_days)
-    for i in range(0, n_labels):
-        if i == n_labels - 1:
-            index = len_x - 1
-        else:
-            index = i * (len_x / (n_labels - 1))
-        index = int(index)
-        labels.append(time_list_days[index][0:11])
-
-
-    plt.figure(figsize=(8, 2), dpi=1000)
-    plt.xticks(np.arange(0, len(time_list_days) + 1, len(time_list_days) / (n_labels - 1)), labels)
-    plt.plot(prices_days[0,:], linewidth=0.5, color="black")
-    ymin=0
-    ymax=max(prices_days[0,:])
-
-    plt.ylim([ymin, ymax])
-    plt.xlim([0, len(time_list_days)])
-    ax = plt.gca()
-    vals = ax.get_yticks()
-    frmt = '{:3.0f} USD'
-    ax.set_yticklabels([frmt.format(x) for x in vals])
-
-    title="price"
-    location = "figures/variables_over_time/" + title + ".png"
-    plt.savefig(location)
-
-    # Volume
-    plt.figure(figsize=(8, 2), dpi=1000)
-    plt.xticks(np.arange(0, len(time_list_days) + 1, len(time_list_days) / (n_labels - 1)), labels)
-    plt.plot(volumes_days[0,:], linewidth=0.5, color="black")
-    ymin=0
-    ymax=max(volumes_days[0,:])
-
-    plt.ylim([ymin, ymax])
-    plt.xlim([0, len(time_list_days)])
-    ax = plt.gca()
-    vals = ax.get_yticks()
-    ax.set_yticklabels(["0 BTC", "50 000 BTC", "100 000 BTC"])
-
-
-    title="volume"
-    location = "figures/variables_over_time/" + title + ".png"
-    plt.savefig(location)
-
-"""
-
-"""
-time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
-illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_2013(
-    time_list_minutes, prices_minutes,
-    volumes_minutes, full_week=1)
-"""
-
-
-"""
-# Realized volatility
-volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes[0, :])
-# Annualize the volatility
-volatility_days = np.multiply(volatility_days, 365 ** 0.5)
-
-y_min = max(0.00001, min(volatility_days))
-y_max = max(volatility_days)
-
-ylims = [y_min*0.99, y_max*1.01]
-
-plt.figure()
-plt.ylim(ylims)
-
-plt.plot(volatility_days)
-plt.yscale("log", basey=np.exp(1))
-labels = [y_min,y_min + 0.3*(y_max-y_min), y_min + 0.5*(y_max-y_min), y_max]
-plt.yticks(labels, labels)
-
-ax = plt.gca()
-vals = ax.get_yticks()
-ndigits=3
-frmt = '{:3.' + str(ndigits) + 'f}%'
-ax.set_yticklabels([frmt.format(x * 100) for x in vals])
-
-plt.show()
-"""
-
-
-compex = 0
-if compex == 1:
-    time_list_days, prices_days, volumes_days = dis.convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
-    # lower frequency:
-    n_in = len(time_list_days)
-    print(n_in)
-    n_out = 63 # bimonthly
-    factor = int(n_in/n_out)
-
-    volumes_new = np.zeros([len(exchanges), n_out])
-    time_list_new = []
-    for i in range(0, n_out):
-        for j in range(0, len(exchanges)):
-            volumes_new[j, i] = np.sum(volumes_days[j, i*factor:(i+1)*factor])  # To get monthly
-            if volumes_new[j, i] < 2000:
-                volumes_new[j, i] = -1000000
-        time_list_new.append(time_list_days[i*factor])
-
-
-    plt.figure(figsize=(8, 3), dpi=1000)
-    i = 0
-    plt.plot(volumes_new[i, :], label=exchanges[i], linewidth=0.5, color="black", marker="+")
-    i += 1
-    plt.plot(volumes_new[i, :], label=exchanges[i], linewidth=0.5, color="black", marker="d")
-    i += 1
-    plt.plot(volumes_new[i, :], label=exchanges[i], linewidth=0.5,  color="black", marker="*")
-    i += 1
-    plt.plot(volumes_new[i, :], label=exchanges[i], linewidth=0.5, color="black", marker= "o")
-
-
-    n_labels = 5
-    labels = []
-    len_x = len(time_list_days)
-    for i in range(0, n_labels):
-        if i == n_labels - 1:
-            index = len_x - 1
-        else:
-            index = i * (len_x / (n_labels - 1))
-        index = int(index)
-        labels.append(time_list_days[index][0:11])
-
-
-    plt.xticks(np.arange(0, len(time_list_new) + 1, len(time_list_new) / (n_labels - 1)), labels)
-    plt.xlim([0, len(time_list_new)])
-    plt.ylim([0, 1150000])
-
-    ax = plt.gca()
-    ax.set_yticklabels(["0", "200", "400", "600", "800", "1 000"])
-
-    plt.ylabel("Volume ['000 BTC/month]")
-    plt.legend()
-    location = "figures/compex/compare_exchanges_volume.png"
-    plt.savefig(location)
-
-
-
-
-    plt.figure(figsize=(8, 3), dpi=1000)
-
-    n_labels = 5
-    labels = []
-    len_x = len(time_list_days)
-    for i in range(0, n_labels):
-        if i == n_labels - 1:
-            index = len_x - 1
-        else:
-            index = i * (len_x / (n_labels - 1))
-        index = int(index)
-        labels.append(time_list_days[index][0:11])
-
-    plt.xticks(np.arange(0, len(time_list_days) + 1, len(time_list_days) / (n_labels - 1)), labels)
-    plt.xlim([0, len(time_list_days)])
-    plt.ylim([0, 2500])
-
-    i = 0
-    plt.plot(prices_days[i, :], label=exchanges[i], linewidth=0.7, color="black")
-    i += 1
-    plt.plot(prices_days[i, :], label=exchanges[i], linewidth=0.7, color="black", linestyle=":")
-    i += 1
-    plt.plot(prices_days[i, :], label=exchanges[i], linewidth=0.7,  color="black", linestyle="-.")
-    i += 1
-    plt.plot(prices_days[i, :], label=exchanges[i], linewidth=0.7, color="black", linestyle="--")
-    ax = plt.gca()
-    ax.set_yticklabels(["0", "500", "1 000", "1 500", "2 000", "2 500"])
-
-    plt.ylabel("Price [USD/BTC]")
-    plt.legend()
-    location = "figures/compex/compare_exchanges_price.png"
-    plt.savefig(location)
-
-
+for i in range(len(spread_rel)):
+    print(time_list[i], "{0:.3f}".format(spread[i]), "{0:.3f}%".format(100*spread_rel[i]))

@@ -16,7 +16,7 @@ def fuse_files(exchanges):
     n_exc = len(exchanges)
     time_old = []
     price_old1 = []
-    volume_old1= []
+    volume_old1 = []
     price_old2 = []
     volume_old2 = []
 
@@ -35,8 +35,8 @@ def fuse_files(exchanges):
             volume_old2.append(float(row[4]))
 
     print("Her 1")
-    print("Time old",len(time_old))
-    print("Price old1",len(price_old1))
+    print("Time old", len(time_old))
+    print("Price old1", len(price_old1))
 
     location = "data/bitcoincharts/"
     year = "2017"
@@ -68,12 +68,12 @@ def fuse_files(exchanges):
     volume_new2 = remove_nan(volume_new)
 
     print("Her 2")
-    print("time old:",len(time_old))
-    print("price old1:",len(price_old1))
-    print("price old2:",len(price_old2))
-    print("time new2: ",len(time_new))
-    print("price new1:",len(price_new1))
-    print("price new2:",len(price_new2))
+    print("time old:", len(time_old))
+    print("price old1:", len(price_old1))
+    print("price old2:", len(price_old2))
+    print("time new2: ", len(time_new))
+    print("price new1:", len(price_new1))
+    print("price new2:", len(price_new2))
 
     time_list = time_old
     for i in range(0, len(time_new)):
@@ -91,12 +91,12 @@ def fuse_files(exchanges):
         prices[1, i] = price_old2[i]
         volumes[1, i] = volume_old2[i]
 
-    k = 0 # Counts the entries in the new lists
+    k = 0  # Counts the entries in the new lists
     for i in range(len(price_old1), len(time_list)):
         try:
             prices[0, i] = price_new1[k]
         except IndexError:
-            print("Error when i =",i," k =",k)
+            print("Error when i =", i, " k =", k)
             try:
                 print(price_new1[k])
             except IndexError:
@@ -243,7 +243,6 @@ def hilo_from_raw(file_name, time_list, high, low):
         return time_list, high, low
 
 
-
 def make_excel_stamp(y, mo, d, h, mi):
     ys = str(y)
     if mo < 10:
@@ -280,7 +279,8 @@ def get_price_volume_from_fulls(exchanges):
         single_volume = []
         time_list = []
         file_name = raw_folder + exchanges[i] + ".csv"
-        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price, single_volume, semi=0)
+        time_list, single_price, single_volume = price_volume_from_raw(file_name, time_list, single_price,
+                                                                       single_volume, semi=0)
 
         # Gjør om nan til 0 og så fyller inn tomme priser
         single_price = remove_nan(single_price)
@@ -326,13 +326,11 @@ def get_hilo_from_fulls(exchanges):
         file_name = raw_folder + exchanges[i] + ".csv"
         time_list, single_high, single_low = hilo_from_raw(file_name, time_list, single_high, single_low)
 
-
         # Gjør om nan til 0 og så fyller inn tomme priser
         single_high = remove_nan(single_high)
         single_low = remove_nan(single_low)
         single_high = supp.fill_blanks(single_high)
         single_low = supp.fill_blanks(single_low)
-
 
         # Må nå finne hvilken rad vi skal lime inn på
         n = len(single_high)
@@ -514,106 +512,89 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     return out_excel_stamps, out_prices, out_volumes
 
 
-def convert_to_hour(time_stamps, list1, list2, list1_basis=0, list2_basis=1):
-    # basis=0 --> start/end     basis=1 --> sum
+def convert_to_hour(time_stamps, prices, volumes, ):
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
+
+    try:
+        np.size(prices, 1)
+        n_exc = np.size(prices, 0)
+    except IndexError:
+        n_exc = 1
+
+    n_hours = int((n_mins) / 60)
+
     time_stamps_out = []
-    k = 0
+    time_stamps_out.append(time_stamps[0])
 
-    n_exc = np.size(list1, 0)
-
-    if hour[0] == 0:
-        opening_hours_only = 0
-    else:
-        opening_hours_only = 1
-        print("  Opening hours only")
-
-    if opening_hours_only == 1:
-        n_hours = int(math.ceil(n_mins * (7 / 390)))
-        matrix1_out = np.zeros([n_exc, n_hours])
-        matrix2_out = np.zeros([n_exc, n_hours])
-        for i in range(n_mins - 59):
-            if hour[i] == 14 and minute[i] == 30:
-                time_stamps_out.append(time_stamps[i])
-                for j in range(n_exc):
-                    if list1_basis == 0:
-                        matrix1_out[j, k] = list1[j, i + 29]  # The price at the last minute of the hour
-                    else:
-                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 30)]) * 2  # The price at the last minute of the hour
-                    if list2_basis == 0:
-                        matrix2_out[j, k] = list2[j, i + 29]    # To make up for missing half hour
-                    else:
-                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 30)]) * 2  # To make up for missing half hour
-                k += 1
-            elif minute[i] == 0:
-                time_stamps_out.append(time_stamps[i])
-                for j in range(n_exc):
-                    if list1_basis == 0:
-                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
-                    else:
-                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
-                    if list2_basis == 0:
-                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
-                    else:
-                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
+    if n_exc > 1:
+        volumes_out = np.zeros([n_exc, n_hours])
+        prices_out = np.zeros([n_exc, n_hours])
+        for exc in range(n_exc):
+            k = 0
+            for t in range(60, n_mins, 60):
+                volumes_out[exc, k] = sum(volumes[exc, t - 60:t])
+                prices_out[exc, k] = prices[exc, t]
+                time_stamps_out.append(time_stamps[t])
                 k += 1
     else:
-        n_hours = int(n_mins / 60)
-        matrix1_out = np.zeros([n_exc, n_hours])
-        matrix2_out = np.zeros([n_exc, n_hours])
-        for i in range(n_mins - 59):
-            if minute[i] == 0:
-                time_stamps_out.append(time_stamps[i])
-                for j in range(n_exc):
-                    if list1_basis == 0:
-                        matrix1_out[j, k] = list1[j, i + 59]  # The price at the last minute of the hour
-                    else:
-                        matrix1_out[j, k] = np.sum(list1[j, i:(i + 60)])
-                    if list2_basis == 0:
-                        matrix2_out[j, k] = list2[j, i + 59]  # The price at the last minute of the hour
-                    else:
-                        matrix2_out[j, k] = np.sum(list2[j, i:(i + 60)])
-                k += 1
-    return time_stamps_out, matrix1_out, matrix2_out
+        volumes_out = [0]
+        prices_out = [0]
+        for t in range(60, n_mins, 60):
+            volumes_out.append(sum(volumes[t - 60:t]))
+            prices_out.append(prices[t])
+            time_stamps_out.append(time_stamps[t])
+
+    return time_stamps_out, prices_out, volumes_out
 
 
 def convert_to_day(time_stamps, prices, volumes):
     print(" \033[32;0;0mConverting to daily data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
+
+    try:
+        np.size(prices, 1)
+        n_exc = np.size(prices, 0)
+    except IndexError:
+        n_exc = 1
+
+    start_minute = hour[0] * 60 + minute[0]
+    minutes_first_day = 1440 - start_minute
+
+    n_days = int((n_mins) / 1440) + 1
+
     time_stamps_out = []
-    k = 0
-    n_exc = np.size(prices, 0)
-
-    if hour[0] == 0:
-        opening_hours_only = 0
-    else:
-        opening_hours_only = 1
-
-    if opening_hours_only == 1:
-        n_days = int(math.ceil(n_mins / 390))
-        prices_out = np.zeros([n_exc, n_days])
+    time_stamps_out.append(time_stamps[0])
+    if n_exc > 1:
         volumes_out = np.zeros([n_exc, n_days])
-        for i in range(n_mins - 59):
-            if hour[i] == 14 and minute[i] == 30:
-                time_stamps_out.append(time_stamps[i])
-                for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 389]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 390)])
-                k += 1
-    else:
-        n_days = int(n_mins / 1440)
         prices_out = np.zeros([n_exc, n_days])
-        volumes_out = np.zeros([n_exc, n_days])
-        for i in range(n_mins - 59):
-            if hour[i] == 0 and minute[i] == 0:
-                time_stamps_out.append(time_stamps[i])
-                for j in range(n_exc):
-                    prices_out[j, k] = prices[j, i + 1439]  # The price at the last minute of the hour
-                    volumes_out[j, k] = np.sum(volumes[j, i:(i + 1440)])
+        for exc in range(n_exc):
+
+            for t in range(0, minutes_first_day):
+                volumes_out[exc, 0] += volumes[exc, t]
+            prices_out[exc, 0] = prices[exc, minutes_first_day - 1]
+
+            k = 1
+            for t in range(minutes_first_day, n_mins, 1440):
+                volumes_out[exc, k] = sum(volumes[exc, t - 1440:t])
+                prices_out[exc, k] = prices[exc, t]
+                time_stamps_out.append(time_stamps[t])
                 k += 1
+
+    else:
+        volumes_out = [0]
+        prices_out = [0]
+        for t in range(0, minutes_first_day):
+            volumes_out[0] += volumes[t]
+            prices_out[0] = prices[minutes_first_day - 1]
+
+        for t in range(minutes_first_day, n_mins, 1440):
+            volumes_out.append(sum(volumes[t - 1440:t]))
+            prices_out.append(prices[t])
+            time_stamps_out.append(time_stamps[t])
+
     return time_stamps_out, prices_out, volumes_out
 
 
@@ -702,8 +683,8 @@ def get_month(month_string):
     return month_num
 
 
-def cyclical_average(time_list, data, frequency="h"):
-    year, month, day, hour, minute = supp.fix_time_list(time_list)
+def cyclical_average(time_list, data, frequency="h", print_entries=0, time_zone_conversion=0):
+    year, month, day, hour, minute = supp.fix_time_list(time_list, move_n_hours=time_zone_conversion)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
     h_list = []  # integer indicating which hour it is
@@ -711,119 +692,47 @@ def cyclical_average(time_list, data, frequency="h"):
 
     # Generating day_time ---------------
     if frequency == "h":
-        if hour[0] == 14:
-            for h in range(14, 21):
-                if h < 10:
-                    hs = "0" + str(h)
-                else:
-                    hs = str(h)
-                day_time.append(hs + ":" + "00")
-                h_list.append(h)
-        else:
-            for h in range(0, 24):
-                if h < 10:
-                    hs = "0" + str(h)
-                else:
-                    hs = str(h)
-                day_time.append(hs + ":" + "00")
-                h_list.append(h)
-    elif frequency == "m":
-        if hour[0] == 14:
-            for h in range(14, 21):
-                if h < 10:
-                    hs = "0" + str(h)
-                else:
-                    hs = str(h)
-                if h == 14:
-                    mins_in_hour = 30
-                else:
-                    mins_in_hour = 60
-                for m in range(0, mins_in_hour):
-                    if m < 10:
-                        ms = "0" + str(m)
-                    else:
-                        ms = str(m)
-                    day_time.append(hs + ":" + ms)
-                    h_list.append(h)
-                    m_list.append(m)
-        else:
-            for h in range(0, 24):
-                if h < 10:
-                    hs = "0" + str(h)
-                else:
-                    hs = str(h)
-                for m in range(0, 60):
-                    if m < 10:
-                        ms = "0" + str(m)
-                    else:
-                        ms = str(m)
-                    day_time.append(hs + ":" + ms)
-                    h_list.append(h)
-                    m_list.append(m)
+        for h in range(0, 24):
+            if h < 10:
+                hs = "0" + str(h)
+            else:
+                hs = str(h)
+            day_time.append(hs + ":" + "00")
+            h_list.append(h)
     elif frequency == "d":
-        if hour[0] == 0:
-            day_time = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
-        else:
-            day_time = ["Mon", "Tue", "Wed", "Thur", "Fri"]
-    else:
-        print("di.average_over_day: Something was wrong with the time_list....")
-        return None
+        day_time = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
     # -----------------------------------
 
     # Calculating averages
     n_out = len(day_time)
     lower = np.zeros(n_out)
     upper = np.zeros(n_out)
-    out_data = np.zeros(n_out)
+    data_average = np.zeros(n_out)
+    count_entries = np.zeros(n_out)  # Will count actual observations, to get correct numerator in mean
     temp_list = np.zeros(n_out)
-    temp_matrix = []
-    k = -1
-    if frequency == "h":
-        for i in range(n_entries):
-            index = hour[i] - hour[0]  # Hvis dagen starter på 14:30 vil vi også at indexen skal starte der
-            if index == 0:
-                temp_list[index] = data[i]
-                temp_matrix.append(temp_list)
-                k += 1
-                temp_list = np.zeros(n_out)
-            else:
-                temp_list[index] = data[i]
-    elif frequency == "m":
-        for i in range(n_entries):
-            index = (hour[i] - hour[0]) * 60 + minute[i] - minute[0]  # Hvis dagen starter på 14:30 vil vi også...
-            if index == 0:
-                try:
-                    temp_list[index] = data[i]
-                except ValueError:
-                    print("Error on index = %i and i = %i" % (index, i))
-                    print("Data: ", data[i])
-                    print("templist: ", temp_list[index])
-                    return
-                temp_matrix.append(temp_list)
-                k += 1
-                temp_list = np.zeros(n_out)
-            else:
-                temp_list[index] = data[i]
-    elif frequency == "d":
-        for i in range(n_entries):
-            index = int(date(year[i], month[i], day[i]).isoweekday()) - 1
-            if index == 0:
-                temp_list[index] = data[i]
-                temp_matrix.append(temp_list)
-                k += 1
-                temp_list = np.zeros(n_out)
-            else:
-                temp_list[index] = data[i]
+    n_cycles = int(2 * n_entries / n_out)  # trenger bare være minst like stor. Sikkerhetsmargin på 50%
+    temp_matrix = np.zeros([n_cycles, n_out])
+    for i in range(n_entries):
+        if data[i] != 0:
+            if frequency == "h":
+                index = int(hour[i])
+            elif frequency == "d":
+                index = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+            cycle_nr = int(count_entries[index])
+            count_entries[index] += 1
+            temp_matrix[cycle_nr, index] = data[i]
 
     temp_matrix = np.matrix(temp_matrix)
-
     percentile = 0.95
+
+    if print_entries == 1:
+        print(count_entries)
     for i in range(n_out):
-        out_data[i] = np.mean(temp_matrix[:, i])
-        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=np.mean(temp_matrix[:, i]),
+        data_average[i] = float(np.sum(temp_matrix[:, i]) / count_entries[i])  # takes the mean
+        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=data_average[i],
                                            scale=st.sem(temp_matrix[:, i]))
 
-    return day_time, out_data, lower, upper
+    return day_time, data_average, lower, upper
 
 
 def volume_transformation(volume, initial_mean_volume, daily=1):
@@ -835,7 +744,8 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
         n_entries_in_window = 365 * 24
     out_volume = np.zeros(n_entries)
     for i in range(0, n_entries_in_window):
-        floating_mean = (initial_mean_volume * (n_entries_in_window - i) + i * np.mean(volume[0: i])) / n_entries_in_window
+        floating_mean = (initial_mean_volume * (n_entries_in_window - i) + i * np.mean(
+            volume[0: i])) / n_entries_in_window
         out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
     for i in range(n_entries_in_window, n_entries):
         if volume[i] == 0 or np.mean(volume[i - n_entries_in_window:i]) == 0:
@@ -846,117 +756,148 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
     return out_volume
 
 
-def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exchange=0, days_excluded=0):
+def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, print_days_excluded=0,
+                     convert_time_zones=1):
+    prices_minutes = prices_minutes[exc, :]
+    volumes_minutes = volumes_minutes[exc, :]
 
-    # Opening hours only
+    if convert_time_zones:
+        if exc == 0:
+            n_hours = 0
+        elif exc == 1:
+            n_hours = 9
+        else:
+            n_hours = 0
+    else:
+        n_hours = 0
+
     print("Transforming data series...")
-    time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes,
-                                                                   volumes_minutes)
+
+    year, month, day, hour, minute = supp.fix_time_list(time_list_minutes, move_n_hours=n_hours)
+    if n_hours != 0:
+        time_list_minutes = supp.make_time_list(year, month, day, hour, minute)
+
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    if full_week == 0:
-        if exchange == 0:
-            cutoff_day = 261
-        else:
-            cutoff_day = 0  # Don't know which day to put here
-        cutoff_hour = cutoff_day * 7
-        cutoff_min = cutoff_day * 390
+    print(len(time_list_days), len(prices_days))
+
+    if exc == 0:
+        cutoff_day = 366
+        cutoff_min = cutoff_day * 1440
     else:
-        if exchange == 0:
-            cutoff_day = 366
-        else:
-            cutoff_day = 366+365+365 # Years 2013 and 2014 removed
-        cutoff_hour = cutoff_day * 24
+        cutoff_day = 366 + 365 + 365  # Years 2012, 2013, 2014 removed
         cutoff_min = cutoff_day * 1440
 
-    mean_volume_prev_year = np.mean(volumes_days[exchange, 0:cutoff_day])
+    mean_volume_prev_year = np.mean(volumes_days[cutoff_day - 365:cutoff_day])
     n_days = len(time_list_days)
-    n_hours = len(time_list_hours)
     n_mins = len(time_list_minutes)
     print("Only including days after", time_list_days[cutoff_day])
 
     n_total = len(time_list_days)
     n_0 = n_days
 
-    prices_minutes = prices_minutes[exchange, cutoff_min:n_mins]
-    volumes_minutes = volumes_minutes[exchange, cutoff_min:n_mins]
+    prices_minutes = prices_minutes[cutoff_min:n_mins]
+    volumes_minutes = volumes_minutes[cutoff_min:n_mins]
     time_list_minutes = time_list_minutes[cutoff_min:n_mins]
-    prices_hours = prices_hours[exchange, cutoff_hour:n_hours]
-    volumes_hours = volumes_hours[exchange, cutoff_hour:n_hours]
-    prices_days = prices_days[exchange, cutoff_day:n_days]
-    volumes_days = volumes_days[exchange, cutoff_day:n_days]
+    prices_days = prices_days[cutoff_day:n_days]
+    volumes_days = volumes_days[cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
 
-    n_1 = len(time_list_days) # After removing 2012
+    n_1 = len(time_list_days)  # After removing 2012
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
                                                                               calc_basis=1, kill_output=1)
 
     # Realized volatility
-    volatility_days, rVol_time = realized_volatility.daily_Rvol(time_list_minutes, prices_minutes)
-    # Annualize the volatility
-    if full_week == 0:
-        volatility_days = np.multiply(volatility_days, 252 ** 0.5)
-    else:
-        volatility_days = np.multiply(volatility_days, 365 ** 0.5)
+    volatility_days, rVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
+
     # Returns
     returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_time, illiq_days_clean = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)  # Already clean
+    illiq_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)  # Already clean
 
-    # --------------------------------------------
+    plot_raw = 0
+    if plot_raw == 1:
+        plt.plot(volatility_days)
+        plt.title("Raw rvol")
+        plt.figure()
+        plt.plot(spread_days)
+        plt.title("Raw spread")
+        plt.figure()
+        plt.plot(volumes_days)
+        plt.title("Raw volume")
+        plt.figure()
+        plt.plot(illiq_days)
+        plt.title("Raw illiq")
+        plt.figure()
+        plt.plot(returns_days)
+        plt.title("Raw returns")
+        plt.figure()
 
-    if exchange == 0:
-        if full_week == 0:  # Denne må fikses!
-            cray_s = 69
-            cray_e = 74
-        else:
-            cray_days =    [97, 98, 99, 100, 101, 102, 105, 106, 123, 124, 171, 351, 420, 735, 736, 737, 743, 1037, 1269]
-            illiq_adjust = [97, 98, 99, 100, 101, 102, 105, 106, 123, 124, 171, 351, 420, 740, 1034, 1266]
-    else:
-        if full_week == 0:  # Denne må fikses!
-            cray_s = 69
-            cray_e = 74
-        else:
-            cray_days = [12, 13, 14, 22, 60, 62, 106, 307, 307, 308, 309, 310, 378, 528, 537, 734, 735, 736, 737, 741, 742, 875, 876, 877, 986, 987, 988, 1046, 1063, 1070, 1071, 1072, 1086]
-            illiq_adjust = cray_days
-
+    n_2 = len(time_list_days)  # After removing zero-volume
     time_list_removed = []
-
-    for d in cray_days:
-        time_list_removed = np.append(time_list_removed, time_list_days[d])
-    time_list_days = np.delete(time_list_days, cray_days)
-    returns_days = np.delete(returns_days, cray_days)
-    volumes_days = np.delete(volumes_days, cray_days)
-    spread_days = np.delete(spread_days, cray_days)
-    volatility_days = np.delete(volatility_days, cray_days)
-    illiq_days_clean = np.delete(illiq_days_clean, illiq_adjust)
-    illiq_time = np.delete(illiq_time, illiq_adjust)
-
-
-
-    n_2 = len(time_list_days) # After removing the crazy
-
     # Removing all days where Volume is zero
-    time_list_days_clean, time_list_removed, volumes_days_clean, spread_days_clean, returns_days_clean, volatility_days_clean \
+    time_list_days, time_list_removed, volumes_days, spread_days, returns_days, volatility_days \
         = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
                                                  returns_days, volatility_days)
 
-    n_3 = len(time_list_days_clean) # After removing the zero-volume
+    # --------------------------------------------
+    days_to_remove = []
+    if exc == 0:
+        days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.006)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.003)
+    elif exc == 1:
+        days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.003)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.002)
+
+    for d in days_to_remove:
+        time_list_removed = np.append(time_list_removed, time_list_days[d])
+    time_list_days = np.delete(time_list_days, days_to_remove)
+    returns_days = np.delete(returns_days, days_to_remove)
+    volumes_days = np.delete(volumes_days, days_to_remove)
+    spread_days = np.delete(spread_days, days_to_remove)
+    volatility_days = np.delete(volatility_days, days_to_remove)
+    illiq_days = np.delete(illiq_days, days_to_remove)
+    illiq_time = np.delete(illiq_time, days_to_remove)
+
+    plot_after_removal = 0
+    if plot_after_removal == 1:
+        plt.plot(volatility_days)
+        plt.title("rvol")
+        plt.figure()
+        plt.plot(spread_days)
+        plt.title("spread")
+        plt.figure()
+        plt.plot(volumes_days)
+        plt.title("volume")
+        plt.figure()
+        plt.plot(illiq_days)
+        plt.title("illiq")
+        plt.figure()
+        plt.plot(returns_days)
+        plt.title("returns")
+        plt.show()
+
+    n_3 = len(time_list_days)  # After removing the extremes
 
     # Removing all days where Roll is zero
     time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
-    volatility_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
+    volatility_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days,
                                                                                      time_list_removed,
-                                                                                     spread_days_clean,
-                                                                                     volumes_days_clean,
-                                                                                     returns_days_clean,
-                                                                                     volatility_days_clean,
-                                                                                     illiq_days_clean)
+                                                                                     spread_days,
+                                                                                     volumes_days,
+                                                                                     returns_days,
+                                                                                     volatility_days,
+                                                                                     illiq_days)
 
-    n_4 = len(time_list_days_clean) # After removing the zero-roll
+    n_4 = len(time_list_days_clean)  # After removing the zero-roll
 
     # Removing all days where Volatility is zero
     time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
@@ -967,20 +908,19 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
                                                                                  returns_days_clean,
                                                                                  spread_days_clean, illiq_days_clean)
 
-    n_5 = len(time_list_days_clean) # After removing the zero-volatility
+    n_5 = len(time_list_days_clean)  # After removing the zero-volatility
 
-    show_days_table = days_excluded
+    show_days_table = print_days_excluded
     if show_days_table == 1:
         print()
         print()
         print("Total days:", n_total)
         print("Week only:", n_0)
         print("Removing 2012:", n_1)
-        print("Removing extreme week:", n_2)
-        print("Removing zero-volume:", n_3)
+        print("Removing zero-volume:", n_2)
+        print("Removing extreme days:", n_3)
         print("Removing zero-roll:", n_4)
         print("Removing zero-volatility:", n_5)
-
 
     # Turning ILLIQ, Volume and RVol into log
     log_illiq_days_clean = np.log(illiq_days_clean)
@@ -991,49 +931,87 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_we
            illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
 
 
-def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0):
+def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0, convert_time_zones=1):
+
+    if convert_time_zones:  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
+        if exc == 0:
+            n_hours = 0
+        elif exc == 1:
+            n_hours = 9
+        else:
+            n_hours = 0
+    else:
+        n_hours = 0
+
+    year, month, day, hour, minute = supp.fix_time_list(time_list_minutes, move_n_hours=n_hours) # Flytter nå Coincheck ni timer, men lar Bitstamp stå
+    if n_hours != 0:
+        time_list_minutes = supp.make_time_list(year, month, day, hour, minute)  # Lager en ny tidsliste fra de flyttede listene
+
+    prices_minutes = prices_minutes[exc, :]
+    volumes_minutes = volumes_minutes[exc, :]
+    returns_minutes = jake_supp.logreturn(prices_minutes)
 
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-    prices_hours = prices_hours[exc, :]
-    prices_minutes = prices_minutes[exc, :]
-    volumes_hours = volumes_hours[exc, :]
-    volumes_minutes = volumes_minutes[exc, :]
-
-    returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_hours = jake_supp.logreturn(prices_hours)
 
     spread_hours = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
-    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, day_or_hour=0, threshold=0)
+    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily=0,
+                                                threshold=0)
+    rvol_hours = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)[0]  # not extracting time list
 
-
-    n_0= len(time_list_hours)
+    n_0 = len(time_list_hours)
     if exc == 0:
         cutoff_hour = 8784  # 2012
-    elif exc == 1:  # For Coincheck we want to remove 2012, 2013, 2014 and 2015
-        #cutoff_hour = 35064 # 2012-2015
-        cutoff_hour = 26304 # 2012-2014  # NBNB! HVis du bruker denne må også linje 1041 være aktivert!!!!!
+    elif exc == 1:
+        # cutoff_hour = 35064  # 2012-2015
+        cutoff_hour = 26304  # 2012-2014
     else:
         print("Choose an exchange!")
 
-    mean_volume_prev_year = np.average(volumes_hours[cutoff_hour-8784:cutoff_hour])
+    mean_volume_prev_year = np.average(volumes_hours[cutoff_hour - 8784:cutoff_hour])
 
-    total_hours = len(time_list_hours)-1
+    total_hours = len(time_list_hours) - 1
     time_list_hours = time_list_hours[cutoff_hour:total_hours]
     returns_hours = returns_hours[cutoff_hour:total_hours]
     prices_hours = prices_hours[cutoff_hour:total_hours]
     volumes_hours = volumes_hours[cutoff_hour:total_hours]
     spread_hours = spread_hours[cutoff_hour:total_hours]
-    illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours)-1]
-    illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time)-1]
+    illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
+    illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time) - 1]
+    rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
+    plot_raw = 0
+    if plot_raw == 1:
+        plt.plot(rvol_hours)
+        plt.title("Raw rvol")
+        plt.figure()
+        plt.plot(spread_hours)
+        plt.title("Raw spread")
+        plt.figure()
+        plt.plot(volumes_hours)
+        plt.title("Raw volume")
+        plt.figure()
+        plt.plot(illiq_hours)
+        plt.title("Raw illiq")
+        plt.figure()
+        plt.plot(returns_hours)
+        plt.title("Raw returns")
+        plt.figure()
 
     n_1 = len(time_list_hours)
+
+    hours_to_remove = []
+
     if exc == 0:
-        hours_to_remove = [2393, 2410, 2945, 2963, 3005, 3116, 3471, 4021, 4108,  5844, 6564, 7337, 7390, 7889, 8013, 17228, 26712, 30468, 33819]
-    else:
-        hours_to_remove = [318, 1503, 1504, 7389, 10336, 11070, 11094,  11188, 11335, 11793,  12674, 12890, 17649, 17653, 21022, 21052, 21053,  25726]
-        for i in range(len(hours_to_remove)):
-            hours_to_remove[i] += (35064 - 26304) # NBNB! Hvis 2015 er inkludert i datasettet
+        hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.1, threshold_lower=-0.1)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.02)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
+    elif exc == 1:
+        hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.01)
+        hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
 
     time_list_hours = np.delete(time_list_hours, hours_to_remove)
     returns_hours = np.delete(returns_hours, hours_to_remove)
@@ -1041,42 +1019,67 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0)
     spread_hours = np.delete(spread_hours, hours_to_remove)
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
+    rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
+    plot_after_removal = 0
+    if plot_after_removal == 1:
+        plt.plot(rvol_hours)
+        plt.title("rvol")
+        plt.figure()
+        plt.plot(spread_hours)
+        plt.title("spread")
+        plt.figure()
+        plt.plot(volumes_hours)
+        plt.title("volume")
+        plt.figure()
+        plt.plot(illiq_hours)
+        plt.title("illiq")
+        plt.figure()
+        plt.plot(returns_hours)
+        plt.title("returns")
+        plt.show()
 
     print()
     n_2 = len(time_list_hours)
 
-
     time_list_removed = []
     # Removing all hours where Volume is zero
-    time_list_hours_clean, time_list_removed, volumes_hours_clean, spread_hours_clean, returns_hours_clean, illiq_hours_clean\
+    time_list_hours_clean, time_list_removed, volumes_hours_clean, spread_hours_clean, returns_hours_clean, illiq_hours_clean, rvol_hours_clean \
         = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
-                                                 returns_hours, illiq_hours)
+                                                 returns_hours, illiq_hours, rvol_hours)
 
-
-
-    n_3 = len(time_list_hours_clean) # After removing the zero-volume
+    n_3 = len(time_list_hours_clean)  # After removing the zero-volume
 
     # Removing all days where Roll is zero
     time_list_hours_clean, time_list_removed, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
+    illiq_hours_clean, rvol_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
+                                                                                 time_list_removed,
+                                                                                 spread_hours_clean,
+                                                                                 volumes_hours_clean,
+                                                                                 returns_hours_clean,
+                                                                                 illiq_hours_clean, rvol_hours_clean)
+
+    n_4 = len(time_list_hours_clean)  # After removing the zero-roll
+
+    # Removing all hours where Rvol is zero
+    time_list_hours_clean, time_list_removed, rvol_hours_clean, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
     illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
-                                                                                     time_list_removed,
-                                                                                     spread_hours_clean,
-                                                                                     volumes_hours_clean,
-                                                                                     returns_hours_clean,
-                                                                                     illiq_hours_clean)
+                                                               time_list_removed,
+                                                               rvol_hours_clean,
+                                                               spread_hours_clean,
+                                                               volumes_hours_clean,
+                                                               returns_hours_clean,
+                                                               illiq_hours_clean)
 
+    n_5 = len(time_list_hours_clean)  # After removing the zero-volatility
 
-
-    n_4 = len(time_list_hours_clean) # After removing the zero-roll
-
-    # Removing all days where ILLIQ is zero (NB! only from ILLIQ)
+    # Removing all hours where ILLIQ is zero (NB! only from ILLIQ)
     illiq_hours_time = time_list_hours_clean
 
-    illiq_hours_time, time_list_removed, illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
-                                                                                     time_list_removed,
-                                                                                     illiq_hours_clean)
-
+    illiq_hours_time, time_list_removed, illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(
+        time_list_hours_clean,
+        time_list_removed,
+        illiq_hours_clean)
 
     show_hours_table = 0
     if show_hours_table == 1:
@@ -1087,12 +1090,14 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0)
         print("Removing crazy :", n_2)
         print("Removing zero-volume:", n_3)
         print("Removing zero-roll:", n_4)
+        print("Removing zero-vol:", n_5)
 
-    # Turning ILLIQ and Volume into log
+    # Turning ILLIQ, Volume and rvol into log
     log_illiq_hours_clean = np.log(illiq_hours_clean)
     log_volumes_hours_clean = volume_transformation(volumes_hours_clean, mean_volume_prev_year)
+    log_rvol_hours_clean = np.log(rvol_hours_clean)
 
-    return time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean
+    return time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

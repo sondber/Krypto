@@ -17,7 +17,6 @@ intraday = 0
 intraweek = 1
 
 exch = [0, 1]  # 0=bitstamp, 1=coincheck
-convert_time_zones = True
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
@@ -35,6 +34,7 @@ for exc in exch:
         illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
             dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
 
+        n_hours = 0
         # Finding average for every hour of the day
         hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours_clean, returns_hours_clean, frequency="h", time_zone_conversion=n_hours)
         hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours_clean, log_volumes_hours_clean,frequency="h", time_zone_conversion=n_hours)

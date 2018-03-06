@@ -12,14 +12,13 @@ from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exch = [0, 1]  # 0=bitstamp, 1=coincheck
-exch = [0, 1]  # 0=bitstamp, 1=coincheck
 
 dayofweek = 1
 subtract_means = 1  # from day-of-week regression
 convert_coeffs_to_percentage = 1
 convert_logs = 0
 
-multivariate_regs = 0
+multivariate_regs = 1
 autoreg = 0
 
 rolls_multi = 1

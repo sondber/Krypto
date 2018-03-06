@@ -864,10 +864,16 @@ test_time_list_minutes = ['01.01.2012 00:00', '01.01.2012 00:01', '01.01.2012 00
                           '02.01.2012 23:52', '02.01.2012 23:53', '02.01.2012 23:54', '02.01.2012 23:55',
                           '02.01.2012 23:56', '02.01.2012 23:57', '02.01.2012 23:58', '02.01.2012 23:59']
 
-year, month, day, hour, minute = supp.fix_time_list(test_time_list_minutes, 3)
+year, month, day, hour, minute = supp.fix_time_list(test_time_list_minutes, 0)
 test_time_list_minutes_moved = supp.make_time_list(year, month, day, hour, minute)
 
-spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes_moved, calc_basis=1)
+
+
+
+spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes_moved,
+                                                               calc_basis="d")
+
+# spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes, calc_basis="d")
 
 for i in range(len(spread_rel)):
     print(time_list[i], "{0:.3f}".format(spread[i]), "{0:.3f}%".format(100 * spread_rel[i]))

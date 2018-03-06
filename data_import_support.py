@@ -1007,7 +1007,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     for i in range(50):
         print(i, time_list_hours[i], illiq_hours_time[i])
 
-    print(" STOPP HER! ---------------------")
 
     supp.print_n(2)
     print("After removing the zero-volume: ")

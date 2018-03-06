@@ -3,6 +3,7 @@ import math
 from Sondre import sondre_support_formulas as supp
 
 
+<<<<<<< HEAD
 def daily_Rvol(time_series_minutes, prices_list_minutes, window=15):
 =======
 def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=0):

@@ -6,7 +6,7 @@ import os
 import linreg
 import time
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
+#os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=0):

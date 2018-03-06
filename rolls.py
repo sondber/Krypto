@@ -62,16 +62,16 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
         if hour[0] == 0:
             start_index = 0
         else:
-            start_index = 24*60 - hour[0]*60  # this is for the continued calc after day 1
+            start_index = hour[0]*60  # this is for the continued calc after day 1
 
             minutes_in_window_day1 = (24 - hour[0]) * 60
             sum_inside = 0
-            list1 = price_differences[i:i + minutes_in_window_day1 - 1]
-            list2 = price_differences[i + 1:i + minutes_in_window_day1]
-            corr = np.corrcoef(list1, list2)[0, 1]
-            p_val = linreg.linreg_coeffs(list1, list2)[3]
-            if abs(corr) < corr_threshold:
-                count_corr_below += 1
+            #list1 = price_differences[0:minutes_in_window_day1 - 1]
+            #list2 = price_differences[1:minutes_in_window_day1]
+            #corr = np.corrcoef(list1, list2)[0, 1]
+            #p_val = linreg.linreg_coeffs(list1, list2)[3]
+            #if abs(corr) < corr_threshold:
+            #    count_corr_below += 1
 
             for y in range(1, minutes_in_window_day1):
                 sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
@@ -91,12 +91,12 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
     sum_inside = 0
     for i in range(start_index, len(price_differences),
                    minutes_in_window):
-        list1 = price_differences[i:i + minutes_in_window - 1]
-        list2 = price_differences[i + 1:i + minutes_in_window]
-        corr = np.corrcoef(list1, list2)[0, 1]
-        p_val = linreg.linreg_coeffs(list1, list2)[3]
-        if abs(corr) < corr_threshold:
-            count_corr_below += 1
+        #list1 = price_differences[i:i + minutes_in_window - 1]
+        #list2 = price_differences[i + 1:i + minutes_in_window]
+        #corr = np.corrcoef(list1, list2)[0, 1]
+        #p_val = linreg.linreg_coeffs(list1, list2)[3]
+        #if abs(corr) < corr_threshold:
+        #    count_corr_below += 1
 
         for y in range(i + 1, min(i + minutes_in_window, len(time_list_minute))):
             sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
@@ -122,8 +122,8 @@ def rolls(prices_minute, time_list_minute, calc_basis=0, kill_output=0):  # calc
               "value errors were counted when calculating Roll-spreads")
         print(count_corr_below, "correlations below threshold(", corr_threshold, ") were counted(",
               round(100 * (count_corr_below / len(spread_rel)), 2), "%)")
-        print(alpha_count_below, "of the  value-error correlations were  significantly different from zero at the",
-              round(100 * alpha, 0), "% level(",
-              round(100 * alpha_count_below / count_value_error, 1), "%)")
+        #print(alpha_count_below, "of the  value-error correlations were  significantly different from zero at the",
+        #      round(100 * alpha, 0), "% level(",
+        #      round(100 * alpha_count_below / count_value_error, 1), "%)")
 
     return spread, spread_rel, time_list, count_value_error

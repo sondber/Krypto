@@ -115,12 +115,12 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
     print("Starting the second iteration:")
 
     for i in range(second_iteration_start, n_entries, window):  # looping through windows
-        if i in range(5000, 50000):
+        if i in range(0, 10):
             print(" i =", i)
-            print(" time[i] =", timestamps[i])
-            print(" j from %i to %i" % (i, min(i + window, n_entries)))
-            print(" time[j_f] =", timestamps[min(i + window, n_entries)-1])
-            print(" volumes in this period", sum(minute_volumes[i:min(i + window, n_entries)]))
+            print("  time[i] =", timestamps[i])
+            print("  time[end] =", timestamps[min(i + window, n_entries)-1])
+            print("  j from %i to %i" % (i, min(i + window, n_entries)))
+            print("  volumes in this period", sum(minute_volumes[i:min(i + window, n_entries)]))
 
         window_adjusted = window
         for j in range(i, min(i + window, n_entries)):  # looping through minutes in window. min to ensure it does not exceed size of list

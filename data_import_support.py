@@ -959,7 +959,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     print()
     print("FØR NOE ER SLETTET")
     for i in range(96, 150):
-        print(time_list_hours[i], volumes_hours[i], str(volumes_hours[i] == 0))
+        print(time_list_hours[i], '{0:.1} BTC'.format(volumes_hours[i]), "    Null volum:",str(volumes_hours[i] == 0))
     print("-------------------")
 
     spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
@@ -1009,12 +1009,13 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
 
     supp.print_n(2)
-    print("After removing the zero-volume: ")
+    print("After removing the zero-volume:  (DISSE MÅ VÆRE LIKE!)")
     print(" returns", len(returns_hours))
     print(" spread", len(spread_hours))
     print(" illiq", len(illiq_hours))
     print(" rvol", len(rvol_hours))
 
+    print(" STOPP HER! ---------------------")
     if exc == 0:
         cutoff_hour = 8784  # 2012
     elif exc == 1:

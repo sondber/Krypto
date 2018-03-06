@@ -6,7 +6,6 @@ from Sondre import sondre_support_formulas as supp
 import descriptive_stats as desc
 import data_import_support as dis
 import os
-import high_low_spread as hilo
 from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import realized_volatility

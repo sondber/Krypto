@@ -4,24 +4,29 @@ from Sondre import sondre_support_formulas as supp
 # Cuts any volumes less than "volume_limit". If all minutes in a window is zero, the window is omitted, resulting in a time-gap in the return-vector.
 
 
-def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily=1,
-          kill_output=1, threshold=0.05):  # 0=hourly, 1=daily
+def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
+          kill_output=1, threshold=0.05):
     year, month, day, hour, minute = supp.fix_time_list(timestamps)
     illiq = []
-    time_list = []
+    time_list_illiq = []
     value_errors = 0
     zero_count_window = 0
 
-    start_hour = hour[0]
-    start_minute = start_hour * 60 + minute[0]
+    n_entries = len(timestamps)
+    if hourly_or_daily == "d":
+        start_hour = hour[0]
+        start_minute = start_hour * 60 + minute[0]
+    elif hourly_or_daily =="h":
+        start_hour = hour[0]
+        start_minute = 0
 
     hours_in_day = 24
     day_desc = "full day"
 
-    if hourly_or_daily == 1:
+    if hourly_or_daily == "d":
         window = int(hours_in_day * 60)
         freq_desc = "daily"
-    else:
+    elif hourly_or_daily == "h":
         window = int(60)
         freq_desc = "hourly"
 
@@ -85,38 +90,51 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily=1,
                     pos += 60
     """
 
-    if hourly_or_daily == 1:
-            window_adjusted = window - start_minute
-            for j in range(0, window - start_minute):  # looping through minutes in window
-                # print("We are in the %d i and %d j",i,j)
-                if minute_volumes[j] < threshold:
-                    value_errors += 1
-                    partsum += 0
-                    window_adjusted -= 1
-                else:
-                    partsum += abs(minute_returns[j]) / minute_volumes[j]
-            if window_adjusted != 0:
-                window_illiq = partsum / window_adjusted
-                illiq.append(window_illiq)
-                time_list.append(timestamps[0])
-            else:
-                zero_count_window += 1
-            partsum = 0
-
-    for i in range(0, len(minute_returns), window):  # looping through windows
-        window_adjusted = window
-        for j in range(i, i + window):  # looping through minutes in window
-            # print("We are in the %d i and %d j",i,j)
-            if minute_volumes[j] < threshold:
+    if hourly_or_daily == "d":
+        window_adjusted = window - start_minute
+        for j in range(0, window - start_minute):  # looping through minutes in window
+            if minute_volumes[j] <= threshold:
                 value_errors += 1
                 partsum += 0
                 window_adjusted -= 1
             else:
                 partsum += abs(minute_returns[j]) / minute_volumes[j]
-        if window_adjusted != 0:
+        if window_adjusted > 0:
             window_illiq = partsum / window_adjusted
             illiq.append(window_illiq)
-            time_list.append(timestamps[i])
+            time_list_illiq.append(timestamps[0])
+        else:
+            zero_count_window += 1
+        partsum = 0
+
+    if hourly_or_daily == "d":
+        second_iteration_start = window - start_minute
+    else:
+        second_iteration_start = 0
+
+    print("Starting the second iteration:")
+
+    for i in range(second_iteration_start, n_entries, window):  # looping through windows
+        if i in range(5000, 50000):
+            print(" i =", i)
+            print(" time[i] =", timestamps[i])
+            print(" j from %i to %i" % (i, min(i + window, n_entries)))
+            print(" time[j_f] =", timestamps[min(i + window, n_entries)-1])
+            print(" volumes in this period", sum(minute_volumes[i:min(i + window, n_entries)]))
+
+        window_adjusted = window
+        for j in range(i, min(i + window, n_entries)):  # looping through minutes in window. min to ensure it does not exceed size of list
+            if minute_volumes[j] <= threshold:
+                value_errors += 1
+                partsum += 0
+                window_adjusted -= 1
+            else:
+                partsum += abs(minute_returns[j]) / minute_volumes[j]
+        if window_adjusted > 0:
+            window_illiq = partsum / window_adjusted
+            illiq.append(window_illiq)
+            time_list_illiq.append(timestamps[i])
+            #print("  timestamp added:", timestamps[i])
         else:
             zero_count_window += 1
 
@@ -125,8 +143,8 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily=1,
     if kill_output == 0:
         print("ILLIQ-calculation is finished")
         print("The length of the ILLIQ-vector is", len(illiq))
-        print("The length of the time-vector is", len(time_list))
+        print("The length of the time-vector is", len(time_list_illiq))
         print("Number of value errors:", value_errors)
         print("Number of zero-count windows", zero_count_window)
 
-    return time_list, illiq
+    return time_list_illiq, illiq

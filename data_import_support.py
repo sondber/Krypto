@@ -526,8 +526,6 @@ def convert_to_hour(time_stamps, prices, volumes, ):
     n_hours = int((n_mins) / 60)
 
     time_stamps_out = []
-    time_stamps_out.append(time_stamps[0])
-
     if n_exc > 1:
         volumes_out = np.zeros([n_exc, n_hours])
         prices_out = np.zeros([n_exc, n_hours])
@@ -539,12 +537,12 @@ def convert_to_hour(time_stamps, prices, volumes, ):
                 time_stamps_out.append(time_stamps[t])
                 k += 1
     else:
-        volumes_out = [0]
-        prices_out = [0]
-        for t in range(60, n_mins, 60):
-            volumes_out.append(sum(volumes[t - 60:t]))
-            prices_out.append(prices[t])
+        volumes_out = []
+        prices_out = []
+        for t in range(0, n_mins, 60):
+            volumes_out.append(sum(volumes[t:t+59]))
             time_stamps_out.append(time_stamps[t])
+            prices_out.append(prices[t+59])
 
     return time_stamps_out, prices_out, volumes_out
 
@@ -584,8 +582,8 @@ def convert_to_day(time_stamps, prices, volumes):
                 k += 1
 
     else:
-        volumes_out = [0]
-        prices_out = [0]
+        volumes_out = []
+        prices_out = []
         for t in range(0, minutes_first_day):
             volumes_out[0] += volumes[t]
             prices_out[0] = prices[minutes_first_day - 1]
@@ -810,7 +808,10 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
                                                                               calc_basis=1, kill_output=1)
 
     # Realized volatility
-    volatility_days, rVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
+    volatility_days, RVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
+
+    print("Printing daily rvol time")
+    print(RVol_time[0], RVol_time[len(RVol_time)-1])
 
     # Returns
     returns_minutes = jake_supp.logreturn(prices_minutes)
@@ -954,12 +955,66 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
     returns_hours = jake_supp.logreturn(prices_hours)
 
-    spread_hours = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=0, kill_output=1)[1]  # Rolls
-    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily=0,
-                                                threshold=0)
-    rvol_hours = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)[0]  # not extracting time list
 
-    n_0 = len(time_list_hours)
+    print()
+    print("FØR NOE ER SLETTET")
+    for i in range(96, 150):
+        print(time_list_hours[i], volumes_hours[i], str(volumes_hours[i] == 0))
+    print("-------------------")
+
+    spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=0, kill_output=1)
+    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
+    rvol_hours, time_list_rvol = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)
+
+    print()
+    print("Sjekker at start og slutt er likt på alle (illiq skal ikke være lik)")
+    print("prices:", time_list_hours[0], time_list_hours[len(time_list_hours)-1])
+    print("rvol:", time_list_rvol[0], time_list_rvol[len(time_list_rvol)-1])
+    print("illiq:", illiq_hours_time[0], illiq_hours_time[len(illiq_hours_time)-1])
+
+    supp.print_n(2)
+    print("Initial: ")
+    print(" time prices", len(time_list_hours))
+    print(" prices", len(prices_hours))
+    print(" returns", len(returns_hours))
+    print(" spread", len(spread_hours))
+    print(" time spread", len(time_list_spread))
+    print(" illiq", len(illiq_hours))
+    print(" time illiq", len(illiq_hours_time))
+    print(" rvol", len(rvol_hours))
+    print(" time rvol", len(time_list_rvol))
+
+    print()
+    n_0 = len(time_list_hours) # initial number of hours
+
+    time_list_removed = []
+    # Removing all hours where Volume is zero
+    time_list_hours, time_list_removed, volumes_hours, spread_hours, returns_hours, rvol_hours \
+        = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
+                                                 returns_hours, rvol_hours)
+
+    n_1 = len(time_list_hours)  # After removing the zero-volume
+
+
+    print("This shit")
+    for i in range(96,145):
+        print(time_list_removed[i])
+    print(time_list_hours[0:24])
+    print("This shit")
+
+
+    print()
+    for i in range(50):
+        print(i, time_list_hours[i], illiq_hours_time[i])
+
+
+    supp.print_n(2)
+    print("After removing the zero-volume: ")
+    print(" returns", len(returns_hours))
+    print(" spread", len(spread_hours))
+    print(" illiq", len(illiq_hours))
+    print(" rvol", len(rvol_hours))
+
     if exc == 0:
         cutoff_hour = 8784  # 2012
     elif exc == 1:
@@ -979,6 +1034,11 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
     illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
+
+
+
+
+
 
     plot_raw = 0
     if plot_raw == 1:
@@ -1021,6 +1081,16 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
     rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
+    supp.print_n(5)
+    print("After removal of crazy: ")
+    print(" prices", len(prices_hours))
+    print(" returns", len(returns_hours))
+    print(" spread", len(spread_hours))
+    print(" illiq", len(illiq_hours))
+    print(" rvol", len(rvol_hours))
+
+
+
     plot_after_removal = 0
     if plot_after_removal == 1:
         plt.plot(rvol_hours)
@@ -1039,25 +1109,16 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.title("returns")
         plt.show()
 
-    print()
-    n_2 = len(time_list_hours)
 
-    time_list_removed = []
-    # Removing all hours where Volume is zero
-    time_list_hours_clean, time_list_removed, volumes_hours_clean, spread_hours_clean, returns_hours_clean, illiq_hours_clean, rvol_hours_clean \
-        = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
-                                                 returns_hours, illiq_hours, rvol_hours)
-
-    n_3 = len(time_list_hours_clean)  # After removing the zero-volume
 
     # Removing all days where Roll is zero
     time_list_hours_clean, time_list_removed, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
-    illiq_hours_clean, rvol_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
+    illiq_hours_clean, rvol_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours,
                                                                                  time_list_removed,
-                                                                                 spread_hours_clean,
-                                                                                 volumes_hours_clean,
-                                                                                 returns_hours_clean,
-                                                                                 illiq_hours_clean, rvol_hours_clean)
+                                                                                 spread_hours,
+                                                                                 volumes_hours,
+                                                                                 returns_hours,
+                                                                                 illiq_hours, rvol_hours)
 
     n_4 = len(time_list_hours_clean)  # After removing the zero-roll
 
@@ -1072,6 +1133,14 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                                illiq_hours_clean)
 
     n_5 = len(time_list_hours_clean)  # After removing the zero-volatility
+
+    supp.print_n(5)
+    print("After removal of zeros: ")
+    print(" returns", len(returns_hours_clean))
+    print(" spread", len(spread_hours_clean))
+    print(" illiq", len(illiq_hours_clean))
+    print(" rvol", len(rvol_hours_clean))
+
 
     # Removing all hours where ILLIQ is zero (NB! only from ILLIQ)
     illiq_hours_time = time_list_hours_clean

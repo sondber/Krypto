@@ -540,7 +540,7 @@ def convert_to_hour(time_stamps, prices, volumes, ):
         volumes_out = []
         prices_out = []
         for t in range(0, n_mins, 60):
-            volumes_out.append(sum(volumes[t:t+59]))
+            volumes_out.append(sum(volumes[t:t+60]))
             time_stamps_out.append(time_stamps[t])
             prices_out.append(prices[t+59])
 

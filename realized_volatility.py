@@ -3,11 +3,6 @@ import math
 from Sondre import sondre_support_formulas as supp
 
 
-<<<<<<< HEAD
-def daily_Rvol(time_series_minutes, prices_list_minutes, window=15):
-=======
-def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=0):
->>>>>>> master
 def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
     year, month, day, hour, minute = supp.fix_time_list(time_series_minutes)
 
@@ -15,7 +10,6 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
         mins = int(1440)
     else:
         mins = int(60)
-
 
     n_entries = int(len(prices_list_minutes) / mins)
     minutes_in_first_period = daily * (1440 - (23 - hour[0]) * 60)

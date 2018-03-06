@@ -962,7 +962,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         print(time_list_hours[i], volumes_hours[i], str(volumes_hours[i] == 0))
     print("-------------------")
 
-    spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis=0, kill_output=1)
+    spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
     illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
     rvol_hours, time_list_rvol = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)
 

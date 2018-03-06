@@ -34,13 +34,15 @@ def gamma_calc(high_two, low_two):  # to implement: check for 0s
 def beta_calc(two_highs, two_lows):  # two lists of two prices each
     total = 0
     for i in range(2):
-<<<<<<< HEAD
+
+
         if gamma_calc(two_highs[i],two_lows[i]) == 0:
             return 0
         else:
             total = total + gamma_calc(two_highs[i], two_lows[i])
     return total
-=======
+
+
         try:
             total = total + gamma_calc(two_highs[i], two_lows[i])
         except IndexError:
@@ -50,7 +52,6 @@ def beta_calc(two_highs, two_lows):  # two lists of two prices each
             print("i:", i)
 
     return total  # should this be divided by two? I dont think so
->>>>>>> master
 
 
 def determine_hilo(two_highs, two_lows):
@@ -99,13 +100,10 @@ def hi_lo_spread(timestamps, highs, lows, prices,
         partsum = 0  # for averaging
         averager_adjusted = window - 1
         for j in range(i, i + window - 1):  # iterates through minutes in day
-<<<<<<< HEAD
             two_highs = highs[i:i + 2]
             two_lows = lows[i:i + 2]
-=======
             two_highs = highs[i:i + 2]  # endret denne fra 1 til 2 (09.02.18)
             two_lows = lows[i:i + 2]  # endret denne fra 1 til 2 (09.02.18)
->>>>>>> master
             high_two = determine_hilo(two_highs, two_lows)[0]
             low_two = determine_hilo(two_highs, two_lows)[1]
             gamma = gamma_calc(high_two, low_two)

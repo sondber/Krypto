@@ -827,6 +827,9 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     print("RV tid first entry:", RVol_time[0])
     print("Time-list tid first entry:", time_list_days[0])
 
+    print("ILLIQ tid first entry:", illiq_time[0])
+    print("ILLIQ tid last entry:", illiq_time[len(illiq_days)-1])
+
     time.sleep(4)
 
 
@@ -909,8 +912,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
                                                                                      volatility_days,
                                                                                      illiq_days)
 
-    #DEBUG JACOB
-    print("FIRST FIVER OK")
 
     n_4 = len(time_list_days_clean)  # After removing the zero-roll
 
@@ -922,9 +923,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
                                                                                  volumes_days_clean,
                                                                                  returns_days_clean,
                                                                                  spread_days_clean, illiq_days_clean)
-
-
-    print("SECOND FIVER OK")
 
 
     n_5 = len(time_list_days_clean)  # After removing the zero-volatility
@@ -1150,7 +1148,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                                                  returns_hours,
                                                                                  illiq_hours, rvol_hours)
 
-    print("THIRD FIVER OK")
 
     n_4 = len(time_list_hours_clean)  # After removing the zero-roll
 
@@ -1164,7 +1161,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                                returns_hours_clean,
                                                                illiq_hours_clean)
 
-    print("FOURTH FIVER OK")
 
     n_5 = len(time_list_hours_clean)  # After removing the zero-volatility
 

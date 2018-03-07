@@ -5,6 +5,7 @@ from Sondre import sondre_support_formulas as supp
 import numpy as np
 from datetime import date
 import math
+import time
 from matplotlib import pyplot as plt
 import scipy.stats as st
 import rolls
@@ -575,7 +576,7 @@ def convert_to_day(time_stamps, prices, volumes):
             prices_out[exc, 0] = prices[exc, minutes_first_day - 1]
 
             k = 1
-            for t in range(minutes_first_day, n_mins, 1440):
+            for t in range(minutes_first_day, min(n_mins, n_mins-start_minute), 1440):
                 volumes_out[exc, k] = sum(volumes[exc, t - 1440:t])
                 prices_out[exc, k] = prices[exc, t]
                 time_stamps_out.append(time_stamps[t])
@@ -587,7 +588,7 @@ def convert_to_day(time_stamps, prices, volumes):
             volumes_out[0] += volumes[t]
             prices_out[0] = prices[minutes_first_day - 1]
 
-        for t in range(minutes_first_day, n_mins, 1440):
+        for t in range(minutes_first_day, min(n_mins, n_mins-start_minute), 1440):
             volumes_out.append(sum(volumes[t - 1440:t]))
             prices_out.append(prices[t])
             time_stamps_out.append(time_stamps[t])
@@ -774,8 +775,10 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     if n_hours != 0:
         time_list_minutes = supp.make_time_list(year, month, day, hour, minute)
 
-    time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+    #Debugging Jacob
+    print("Time_list_minutes last entry", time_list_minutes[len(time_list_minutes)-1])
 
+    time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
     if exc == 0:
         cutoff_day = 366
@@ -805,6 +808,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
                                                                               calc_basis=1, kill_output=1)
 
+
     # Realized volatility
     volatility_days, RVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
 
@@ -812,7 +816,19 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     returns_minutes = jake_supp.logreturn(prices_minutes)
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
-    illiq_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes)  # Already clean
+    illiq_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, threshold=0)  # Already clean
+
+    #
+    #  debug
+    print("Rolls tid last entry:", time_list_rolls[len(time_list_rolls)-1], "Verdi:", spread_abs[len(spread_abs)-1])
+    print("RV tid last entry:", RVol_time[len(RVol_time)-1], "Verdi:", volatility_days[len(volatility_days)-1])
+    print("Time-list tid last entry:", time_list_days[len(time_list_days)-1])
+    print("Rolls tid first entry:", time_list_rolls[0])
+    print("RV tid first entry:", RVol_time[0])
+    print("Time-list tid first entry:", time_list_days[0])
+
+    time.sleep(4)
+
 
     plot_raw = 0
     if plot_raw == 1:
@@ -893,6 +909,9 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
                                                                                      volatility_days,
                                                                                      illiq_days)
 
+    #DEBUG JACOB
+    print("FIRST FIVER OK")
+
     n_4 = len(time_list_days_clean)  # After removing the zero-roll
 
     # Removing all days where Volatility is zero
@@ -903,6 +922,10 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
                                                                                  volumes_days_clean,
                                                                                  returns_days_clean,
                                                                                  spread_days_clean, illiq_days_clean)
+
+
+    print("SECOND FIVER OK")
+
 
     n_5 = len(time_list_days_clean)  # After removing the zero-volatility
 
@@ -1127,6 +1150,8 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                                                  returns_hours,
                                                                                  illiq_hours, rvol_hours)
 
+    print("THIRD FIVER OK")
+
     n_4 = len(time_list_hours_clean)  # After removing the zero-roll
 
     # Removing all hours where Rvol is zero
@@ -1138,6 +1163,8 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                                volumes_hours_clean,
                                                                returns_hours_clean,
                                                                illiq_hours_clean)
+
+    print("FOURTH FIVER OK")
 
     n_5 = len(time_list_hours_clean)  # After removing the zero-volatility
 

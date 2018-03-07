@@ -12,7 +12,7 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
         mins = int(60)
 
     n_entries = int(len(prices_list_minutes) / mins)
-    minutes_in_first_period = daily * (1440 - (23 - hour[0]) * 60)
+    minutes_in_first_period = daily * (1440 - (hour[0] * 60))
     window = 15
     rvol = np.zeros(n_entries)
     time_list_rvol = []

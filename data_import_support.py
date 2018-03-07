@@ -561,7 +561,7 @@ def convert_to_day(time_stamps, prices, volumes):
     start_minute = hour[0] * 60 + minute[0]
     minutes_first_day = 1440 - start_minute
 
-    n_days = int((n_mins) / 1440) + 1
+    n_days = int((n_mins) / 1440)  #THIS IS A POSSIBLE BUG WITHOUT +1
 
     time_stamps_out = []
     time_stamps_out.append(time_stamps[0])
@@ -581,8 +581,8 @@ def convert_to_day(time_stamps, prices, volumes):
                 time_stamps_out.append(time_stamps[t])
                 k += 1
     else:
-        volumes_out = []
-        prices_out = []
+        volumes_out = [0]
+        prices_out = [0]
         for t in range(0, minutes_first_day):
             volumes_out[0] += volumes[t]
             prices_out[0] = prices[minutes_first_day - 1]
@@ -776,7 +776,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    print(len(time_list_days), len(prices_days))
 
     if exc == 0:
         cutoff_day = 366
@@ -808,9 +807,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     # Realized volatility
     volatility_days, RVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
-
-    print("Printing daily rvol time")
-    print(RVol_time[0], RVol_time[len(RVol_time)-1])
 
     # Returns
     returns_minutes = jake_supp.logreturn(prices_minutes)

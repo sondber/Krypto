@@ -478,7 +478,7 @@ def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, lis
             if t_list6:
                 out_list6.append(list6[i])
         else:
-            time_list_removed.append(time_list[i])
+            time_list_removed = np.append(time_list_removed, time_list[i])
     if t_list6:
         return time_list_out, time_list_removed, out_list1, out_list2, out_list3, out_list4, out_list5, out_list6
     elif t_list5:

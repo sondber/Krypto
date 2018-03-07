@@ -5,7 +5,7 @@ from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 import plot
 
-exc = 1
+exc = 0
 hours_in_window = [1, 2, 3, 4]  # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1  # Convert coeffs and std.errs. of returns and spread to percentage
 convert_logs = 0  # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work

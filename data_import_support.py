@@ -1090,7 +1090,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
     supp.print_n(5)
     print("After removal of crazy: ")
-    print(" prices", len(prices_hours))
     print(" returns", len(returns_hours))
     print(" spread", len(spread_hours))
     print(" illiq", len(illiq_hours))
@@ -1114,7 +1113,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.figure()
         plt.plot(returns_hours)
         plt.title("returns")
-        plt.show()
 
 
 
@@ -1149,13 +1147,14 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     print(" rvol", len(rvol_hours_clean))
 
 
-    # Removing all hours where ILLIQ is zero (NB! only from ILLIQ)
     illiq_hours_time = time_list_hours_clean
 
     illiq_hours_time, time_list_removed, illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(
         time_list_hours_clean,
         time_list_removed,
         illiq_hours_clean)
+    print()
+    print("After zero-illiq removed: ", len(illiq_hours_clean))
 
     show_hours_table = 0
     if show_hours_table == 1:
@@ -1172,6 +1171,9 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     log_illiq_hours_clean = np.log(illiq_hours_clean)
     log_volumes_hours_clean = volume_transformation(volumes_hours_clean, mean_volume_prev_year)
     log_rvol_hours_clean = np.log(rvol_hours_clean)
+
+    if plot_raw + plot_after_removal > 0:
+        plt.show()
 
     return time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean
 

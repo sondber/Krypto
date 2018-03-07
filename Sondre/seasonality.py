@@ -13,8 +13,8 @@ import math
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-intraday = 0
-intraweek = 1
+intraday = 1
+intraweek = 0
 
 exch = [0, 1]  # 0=bitstamp, 1=coincheck
 
@@ -32,7 +32,7 @@ for exc in exch:
 
         time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
         illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
-            dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
+            dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
         n_hours = 0
         # Finding average for every hour of the day

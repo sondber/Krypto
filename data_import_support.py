@@ -944,9 +944,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     else:
         n_hours = 0
 
-    # JACOB SE HER!
-    n_hours = 0
-    ############
     year, month, day, hour, minute = supp.fix_time_list(time_list_minutes, move_n_hours=n_hours) # Flytter nå Coincheck ni timer, men lar Bitstamp stå
     if n_hours != 0:
         time_list_minutes = supp.make_time_list(year, month, day, hour, minute)  # Lager en ny tidsliste fra de flyttede listene
@@ -960,10 +957,10 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
 
     print()
-    print("FØR NOE ER SLETTET------------------------------")
-    for i in range(0, 150):
-        print(time_list_hours[i], '{0:.1f} BTC'.format(volumes_hours[i]), "    Null volum:",str(volumes_hours[i] == 0))
-    print("-------------------")
+    #print("FØR NOE ER SLETTET------------------------------")
+    #for i in range(0, 150):
+    #    print(time_list_hours[i], '{0:.1f} BTC'.format(volumes_hours[i]), "    Null volum:",str(volumes_hours[i] == 0))
+    #print("-------------------")
 
     spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
     illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
@@ -999,16 +996,16 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     n_1 = len(time_list_hours)  # After removing the zero-volume
 
 
-    print("etter nullvolum fjernet")
-    for i in range(96,145):
-        print(time_list_removed[i])
-    print(time_list_hours[0:24])
-    print("This shit")
+    # print("etter nullvolum fjernet")
+    # for i in range(96,145):
+    #     print(time_list_removed[i])
+    # print(time_list_hours[0:24])
+    # print("This shit")
 
-
-    print()
-    for i in range(50):
-        print(i, time_list_hours[i], illiq_hours_time[i])
+    #
+    # print()
+    # for i in range(50):
+    #     print(i, time_list_hours[i], illiq_hours_time[i])
 
 
     supp.print_n(2)
@@ -1039,12 +1036,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
-
-
-
-
-
-    plot_raw = 0
+    plot_raw = 1
     if plot_raw == 1:
         plt.plot(rvol_hours)
         plt.title("Raw rvol")
@@ -1095,7 +1087,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
 
 
-    plot_after_removal = 0
+    plot_after_removal = 1
     if plot_after_removal == 1:
         plt.plot(rvol_hours)
         plt.title("rvol")

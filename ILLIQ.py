@@ -112,7 +112,7 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
     else:
         second_iteration_start = 0
 
-    for i in range(second_iteration_start, min(n_entries, n_entries-(window-start_minute)), window):  # looping through windows
+    for i in range(second_iteration_start, min(n_entries, n_entries-start_minute), window):  # looping through windows
         # if i in range(8000, 10000):
         #     print(" i =", i)
         #     print("  time[i] =", timestamps[i])

@@ -580,7 +580,6 @@ def convert_to_day(time_stamps, prices, volumes):
                 prices_out[exc, k] = prices[exc, t]
                 time_stamps_out.append(time_stamps[t])
                 k += 1
-
     else:
         volumes_out = []
         prices_out = []
@@ -939,6 +938,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
             n_hours = 0
         elif exc == 1:
             n_hours = 9
+            print("Converting time zones: moving series %i hours" % n_hours)
         else:
             n_hours = 0
     else:
@@ -1016,15 +1016,23 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     print(" rvol", len(rvol_hours))
 
     print(" STOPP HER! ---------------------------------------------")
+
     if exc == 0:
-        cutoff_hour = 8784  # 2012
+        #cutoff_hour = 8784  # 2012
+        cutoff_date = "01.01.2013 00:00"
+        start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
         # cutoff_hour = 35064  # 2012-2015
-        cutoff_hour = 26304  # 2012-2014
+        #cutoff_hour = 26304  # 2012-2014
+        cutoff_date = "01.01.2015 00:00"
+        start_averaging_date = "30.10.2014 00:00"
     else:
         print("Choose an exchange!")
 
-    mean_volume_prev_year = np.average(volumes_hours[cutoff_hour - 8784:cutoff_hour])
+    cutoff_hour = supp.find_date_index(cutoff_date, time_list_hours)
+    start_averaging_hour = supp.find_date_index(start_averaging_date, time_list_hours)
+
+    mean_volume_prev_year = np.average(volumes_hours[start_averaging_hour:cutoff_hour])
 
     total_hours = len(time_list_hours) - 1
     time_list_hours = time_list_hours[cutoff_hour:total_hours]
@@ -1036,7 +1044,14 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
-    plot_raw = 1
+    supp.print_n(2)
+    print("After removing the first year(s):  (DISSE MÅ VÆRE LIKE!)")
+    print(" returns", len(returns_hours))
+    print(" spread", len(spread_hours))
+    print(" illiq", len(illiq_hours))
+    print(" rvol", len(rvol_hours))
+
+    plot_raw = 0
     if plot_raw == 1:
         plt.plot(rvol_hours)
         plt.title("Raw rvol")
@@ -1087,7 +1102,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
 
 
-    plot_after_removal = 1
+    plot_after_removal = 0
     if plot_after_removal == 1:
         plt.plot(rvol_hours)
         plt.title("rvol")

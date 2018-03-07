@@ -7,7 +7,8 @@ import numpy as np
 
 import linreg
 
-#os.chdir("/Users/sondre/Documents/GitHub/krypto")
+
+# os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=0):
@@ -23,18 +24,18 @@ def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols,
             aic = "$-$" + str(int(abs(aic_array[c])))
 
         print_rows[n_rows - 3] += "   " + n_obs
-        for i in range(8-len(n_obs)):
+        for i in range(8 - len(n_obs)):
             print_rows[n_rows - 3] += " "
         print_rows[n_rows - 3] += "&"
 
         print_rows[n_rows - 2] += "   " + r2
-        for i in range(8-len(r2)):
+        for i in range(8 - len(r2)):
             print_rows[n_rows - 2] += " "
         print_rows[n_rows - 2] += "&"
 
         print_rows[n_rows - 1] += " " + aic
 
-        for i in range(10-len(aic)):
+        for i in range(10 - len(aic)):
             print_rows[n_rows - 1] += " "
         print_rows[n_rows - 1] += "&"
 
@@ -46,8 +47,9 @@ def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols,
 
     return print_rows
 
+
 def final_print_regressions_latex(print_rows):
-    tightness = 1 #
+    tightness = 1  #
     t_string = "[-" + str(tightness) + "ex]"
 
     for i in range(0, len(print_rows)):
@@ -68,6 +70,7 @@ def final_print_regressions_latex(print_rows):
             print(print_rows[i] + "  \\\\" + "[-0.5ex]")  # Fjerner det siste &-tegnet og legger til backslash
     print()
     print()
+
 
 def read_single_exc_csvs(file_name, time_list, price, volume):
     with open(file_name, newline='') as csvfile:
@@ -106,20 +109,28 @@ def fill_blanks(in_list):
     return out_list
 
 
-def fix_time_list(time_list, move_n_hours=0):
+def fix_time_list(time_list, move_n_hours=0, single_time_stamp=0):
     day = []
     month = []
     year = []
     hour = []
     minute = []
-    for i in range(0, len(time_list)):
-        day.append(int(time_list[i][0:2]))
-        month.append(int(time_list[i][3:5]))
-        year.append(int(time_list[i][6:10]))
-        hour.append(int(time_list[i][11:13]))
-        minute.append(int(time_list[i][14:16]))
+    if single_time_stamp == 0:
+        for i in range(0, len(time_list)):
+            day.append(int(time_list[i][0:2]))
+            month.append(int(time_list[i][3:5]))
+            year.append(int(time_list[i][6:10]))
+            hour.append(int(time_list[i][11:13]))
+            minute.append(int(time_list[i][14:16]))
 
-    if move_n_hours < 0:
+    else:
+        day = (int(time_list[0:2]))
+        month = (int(time_list[3:5]))
+        year = (int(time_list[6:10]))
+        hour = (int(time_list[11:13]))
+        minute = (int(time_list[14:16]))
+
+    if move_n_hours < 0:  # Funker ikke for single_time_stamp
         n = -move_n_hours
         for i in range(0, len(time_list)):
             if hour[i] >= n:
@@ -214,6 +225,7 @@ def make_time_list(year, month, day, hour, minute):
 
         time_list_out.append(stamp)
     return time_list_out
+
 
 def data_analysis(in_list, number_of_intervals):
     b = number_of_intervals
@@ -602,3 +614,25 @@ def remove_extremes(time_list, data, threshold_upper, threshold_lower=0):
         if data[i] > threshold_upper or data[i] < threshold_lower:
             time_list.append(i)
     return time_list
+
+
+def find_date_index(cutoff_date, time_list_hours):
+    c_year, c_month, c_day, c_hour, c_minute = fix_time_list(cutoff_date, single_time_stamp=1)
+    year, month, day, hour, minute = fix_time_list(time_list_hours)
+
+    print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
+
+    index = 0
+    while year[index] < c_year:
+        index += 1
+    while month[index] < c_month:
+        index += 1
+    while day[index] < c_day:
+        index += 1
+    while hour[index] < c_hour:
+        index += 1
+    while minute[index] < c_minute:
+        index += 1
+
+    print("The cutoff is", time_list_hours[index])
+    return index

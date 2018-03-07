@@ -17,13 +17,20 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
     rvol = np.zeros(n_entries)
     time_list_rvol = []
 
-    rvol[0] += ((prices_list_minutes[minutes_in_first_period] - prices_list_minutes[0]) /
-                prices_list_minutes[0]) ** 2
-    rvol[0] = math.sqrt(rvol[0])
-    time_list_rvol.append(time_series_minutes[0])
+    #first iteration
+    for k in range(0,minutes_in_first_period):
+        if (k % window==0):
+            try:
+                rvol[0] += ((prices_list_minutes[k + window] - prices_list_minutes[k]) /
+                            prices_list_minutes[k]) ** 2
+            except IndexError:
+                print("index =", k+window)
+        rvol[0] = math.sqrt(rvol[0])
+        time_list_rvol.append(time_series_minutes[k*mins])
+
 
     for i in range(1, n_entries):
-        for j in range(0, mins - window):
+        for j in range(0, mins - window): #needs to account for the first iteration
             if (j % window == 0):
                 try:
                     rvol[i] += ((prices_list_minutes[i * mins + j + window] - prices_list_minutes[i * mins + j]) /

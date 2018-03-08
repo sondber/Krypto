@@ -587,11 +587,11 @@ def convert_to_day(time_stamps, prices, volumes):
         prices_out = [0]
         for t in range(0, minutes_first_day):
             volumes_out[0] += volumes[t]
-            prices_out[0] = prices[minutes_first_day - 1]
+        prices_out[0] = prices[minutes_first_day - 1]
 
         for t in range(minutes_first_day, min(n_mins, n_mins-start_minute), 1440):
-            volumes_out.append(sum(volumes[t - 1440:t]))
-            prices_out.append(prices[t])
+            volumes_out.append(sum(volumes[t:t+1440]))
+            prices_out.append(prices[t+1439])
             time_stamps_out.append(time_stamps[t])
 
     return time_stamps_out, prices_out, volumes_out

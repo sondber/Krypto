@@ -1,6 +1,5 @@
 import csv
 import math
-import os
 from datetime import date
 
 import numpy as np
@@ -70,23 +69,6 @@ def final_print_regressions_latex(print_rows):
             print(print_rows[i] + "  \\\\" + "[-0.5ex]")  # Fjerner det siste &-tegnet og legger til backslash
     print()
     print()
-
-
-def read_single_exc_csvs(file_name, time_list, price, volume):
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        for row in reader:
-            try:
-                time_list.append(row[0])
-                price.append(float(row[7]))
-                volume.append(float(row[5]))
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            i = i + 1
-        return time_list, price, volume
 
 
 def fill_blanks(in_list):
@@ -319,59 +301,6 @@ def convert_currencies(exchanges, prices):
     print("All prices converted to USD")
     prices_in_usd = prices
     return prices_in_usd
-
-
-def write_to_raw_file(volumes, prices, time_list, exchanges, filename):
-    n_exc = len(exchanges)
-    print("Exporting data to csv-file...")
-    with open(filename, 'w', newline='') as csvfile:
-        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        n_rows = np.size(volumes, 1)
-
-        header1 = [" "]
-        header2 = [" "]
-        header3 = ["Time"]
-        for exc in exchanges:
-            currency = exc[len(exc) - 3: len(exc)]
-            header1.append(exc)
-            header1.append("")
-            header2.append("Price")
-            header2.append("Volume")
-            header3.append(currency.upper())
-            header3.append("BTC")
-
-        writ.writerow(header1)
-        writ.writerow(header2)
-        writ.writerow(header3)
-        for i in range(0, n_rows):
-            rowdata = [time_list[i]]
-            for j in range(0, n_exc):
-                rowdata.append(prices[j, i])
-                rowdata.append(volumes[j, i])
-            writ.writerow(rowdata)
-    print("Export to aggregate csv \033[33;0;0m'%s'\033[0;0;0m successful" % filename)
-
-
-def fetch_aggregate_csv(file_name, n_exc):
-    n_rows = count_rows(file_name)
-    n_exc = int(n_exc)
-    print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        i = 0
-        time_list = []
-        prices = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
-        volumes = np.zeros([n_exc, n_rows - 3])  # minus tre for å ikke få med headere
-        next(reader)
-        next(reader)
-        next(reader)
-        for row in reader:
-            time_list.append(row[0])
-            for j in range(0, n_exc):
-                prices[j, i] = row[1 + 2 * j]
-                volumes[j, i] = row[2 + 2 * j]
-            i = i + 1
-    return time_list, prices, volumes
 
 
 def count_rows(file_name):

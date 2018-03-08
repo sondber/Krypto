@@ -3,7 +3,7 @@ import data_import as di
 import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
-import data_import_s∂upport as dis
+import data_import_support as dis
 import os
 import rolls
 import scipy.stats as st

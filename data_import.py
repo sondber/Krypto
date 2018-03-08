@@ -1,3 +1,4 @@
+import data_import_support
 from Sondre import sondre_support_formulas as supp, user_interface as ui
 import data_import_support as dis
 import numpy as np
@@ -16,7 +17,7 @@ def get_lists(data="all", opening_hours="y", make_totals="y"):
         oh = "_full_day"
 
     file_name = "data/export_csv/minute_data" + oh + ".csv"
-    time_list, prices, volumes = supp.fetch_aggregate_csv(file_name, n_exc)
+    time_list, prices, volumes = data_import_support.fetch_aggregate_csv(file_name, n_exc)
 
     if make_totals == "y":
         total_volume, total_price = supp.make_totals(volumes, prices)

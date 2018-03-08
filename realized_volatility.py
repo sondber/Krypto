@@ -22,7 +22,7 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
     for k in range(0, minutes_in_first_period):  # this only loops if minutes_in_first_period is positive
         if (k % window == 0):
             try:
-                rvol[0] += ((prices_list_minutes[k + window] - prices_list_minutes[k]) /
+                rvol[0] += ((prices_list_minutes[k + window-1] - prices_list_minutes[k]) /
                             prices_list_minutes[k]) ** 2
             except IndexError:
                 print("ERROR at index =", k + window)
@@ -34,7 +34,7 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
         for j in range(0, mins - window):
             if (j % window == 0):
                 try:
-                    rvol[i] += ((prices_list_minutes[i * mins + j + window + minutes_in_first_period] -
+                    rvol[i] += ((prices_list_minutes[i * mins + j + window - 1 + minutes_in_first_period] -
                                  prices_list_minutes[i * mins + j + minutes_in_first_period]) /
                                 prices_list_minutes[i * mins + j + minutes_in_first_period]) ** 2
                 except IndexError:

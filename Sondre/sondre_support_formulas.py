@@ -620,7 +620,7 @@ def find_date_index(cutoff_date, time_list_hours):
     c_year, c_month, c_day, c_hour, c_minute = fix_time_list(cutoff_date, single_time_stamp=1)
     year, month, day, hour, minute = fix_time_list(time_list_hours)
 
-    print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
+    #print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
 
     index = 0
     while year[index] < c_year:
@@ -634,5 +634,5 @@ def find_date_index(cutoff_date, time_list_hours):
     while minute[index] < c_minute:
         index += 1
 
-    print("The cutoff is", time_list_hours[index])
+    #print("The cutoff is", time_list_hours[index])
     return index

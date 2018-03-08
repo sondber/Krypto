@@ -4,9 +4,10 @@ import data_import as di
 from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 import plot
+os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exc = 0
-hours_in_window = [1, 2, 3, 4]  # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
+hours_in_window = [4, 3, 2, 1]  # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1  # Convert coeffs and std.errs. of returns and spread to percentage
 convert_logs = 0  # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
 subtract_means = 1
@@ -16,6 +17,13 @@ exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(ope
 time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
 illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
     dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc)
+
+
+print("TESTING HERE!")
+print(len(illiq_hours_clean))
+print(len(illiq_hours_time))
+print(len(spread_hours_clean))
+print(len(log_volumes_hours_clean))
 
 hour = supp.fix_time_list(time_list_hours_clean)[3]
 hour_illiq = supp.fix_time_list(illiq_hours_time)[3]
@@ -71,30 +79,30 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         twentytwo = np.zeros(n)
         twentythree = np.zeros(n)
 
-        zero_illiq = np.zeros(n_illiq)
-        one_illiq = np.zeros(n_illiq)
-        two_illiq = np.zeros(n_illiq)
-        three_illiq = np.zeros(n_illiq)
-        four_illiq = np.zeros(n_illiq)
-        five_illiq = np.zeros(n_illiq)
-        six_illiq = np.zeros(n_illiq)
-        seven_illiq = np.zeros(n_illiq)
-        eight_illiq = np.zeros(n_illiq)
-        nine_illiq = np.zeros(n_illiq)
-        ten_illiq = np.zeros(n_illiq)
-        eleven_illiq = np.zeros(n_illiq)
-        twelve_illiq = np.zeros(n_illiq)
-        thirteen_illiq = np.zeros(n_illiq)
-        fourteen_illiq = np.zeros(n_illiq)
-        fifteen_illiq = np.zeros(n_illiq)
-        sixteen_illiq = np.zeros(n_illiq)
-        seventeen_illiq = np.zeros(n_illiq)
-        eighteen_illiq = np.zeros(n_illiq)
-        nineteen_illiq = np.zeros(n_illiq)
-        twenty_illiq = np.zeros(n_illiq)
-        twentyone_illiq = np.zeros(n_illiq)
-        twentytwo_illiq = np.zeros(n_illiq)
-        twentythree_illiq = np.zeros(n_illiq)
+        # zero_illiq = np.zeros(n_illiq)
+        # one_illiq = np.zeros(n_illiq)
+        # two_illiq = np.zeros(n_illiq)
+        # three_illiq = np.zeros(n_illiq)
+        # four_illiq = np.zeros(n_illiq)
+        # five_illiq = np.zeros(n_illiq)
+        # six_illiq = np.zeros(n_illiq)
+        # seven_illiq = np.zeros(n_illiq)
+        # eight_illiq = np.zeros(n_illiq)
+        # nine_illiq = np.zeros(n_illiq)
+        # ten_illiq = np.zeros(n_illiq)
+        # eleven_illiq = np.zeros(n_illiq)
+        # twelve_illiq = np.zeros(n_illiq)
+        # thirteen_illiq = np.zeros(n_illiq)
+        # fourteen_illiq = np.zeros(n_illiq)
+        # fifteen_illiq = np.zeros(n_illiq)
+        # sixteen_illiq = np.zeros(n_illiq)
+        # seventeen_illiq = np.zeros(n_illiq)
+        # eighteen_illiq = np.zeros(n_illiq)
+        # nineteen_illiq = np.zeros(n_illiq)
+        # twenty_illiq = np.zeros(n_illiq)
+        # twentyone_illiq = np.zeros(n_illiq)
+        # twentytwo_illiq = np.zeros(n_illiq)
+        # twentythree_illiq = np.zeros(n_illiq)
 
         for i in range(0, n):
             hr = hour[i]
@@ -147,58 +155,59 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
             elif hr == 23:
                 twentythree[i] = 1
 
-        for i in range(0, n_illiq):
-            hr = hour_illiq[i]
-            if hr == 0:
-                zero_illiq[i] = 1
-            elif hr == 1:
-                one_illiq[i] = 1
-            elif hr == 2:
-                two_illiq[i] = 1
-            elif hr == 3:
-                three_illiq[i] = 1
-            elif hr == 4:
-                four_illiq[i] = 1
-            elif hr == 5:
-                five_illiq[i] = 1
-            elif hr == 6:
-                six_illiq[i] = 1
-            elif hr == 7:
-                seven[i] = 1
-            elif hr == 8:
-                eight_illiq[i] = 1
-            elif hr == 9:
-                nine_illiq[i] = 1
-            elif hr == 10:
-                ten_illiq[i] = 1
-            elif hr == 11:
-                eleven_illiq[i] = 1
-            elif hr == 12:
-                twelve_illiq[i] = 1
-            elif hr == 13:
-                thirteen_illiq[i] = 1
-            elif hr == 14:
-                fourteen_illiq[i] = 1
-            elif hr == 15:
-                fifteen_illiq[i] = 1
-            elif hr == 16:
-                sixteen_illiq[i] = 1
-            elif hr == 17:
-                seventeen_illiq[i] = 1
-            elif hr == 18:
-                eighteen_illiq[i] = 1
-            elif hr == 19:
-                nineteen_illiq[i] = 1
-            elif hr == 20:
-                twenty_illiq[i] = 1
-            elif hr == 21:
-                twentyone_illiq[i] = 1
-            elif hr == 22:
-                twentytwo_illiq[i] = 1
-            elif hr == 23:
-                twentythree_illiq[i] = 1
+        # for i in range(0, n_illiq):
+        #     hr = hour_illiq[i]
+        #     if hr == 0:
+        #         zero_illiq[i] = 1
+        #     elif hr == 1:
+        #         one_illiq[i] = 1
+        #     elif hr == 2:
+        #         two_illiq[i] = 1
+        #     elif hr == 3:
+        #         three_illiq[i] = 1
+        #     elif hr == 4:
+        #         four_illiq[i] = 1
+        #     elif hr == 5:
+        #         five_illiq[i] = 1
+        #     elif hr == 6:
+        #         six_illiq[i] = 1
+        #     elif hr == 7:
+        #         seven[i] = 1
+        #     elif hr == 8:
+        #         eight_illiq[i] = 1
+        #     elif hr == 9:
+        #         nine_illiq[i] = 1
+        #     elif hr == 10:
+        #         ten_illiq[i] = 1
+        #     elif hr == 11:
+        #         eleven_illiq[i] = 1
+        #     elif hr == 12:
+        #         twelve_illiq[i] = 1
+        #     elif hr == 13:
+        #         thirteen_illiq[i] = 1
+        #     elif hr == 14:
+        #         fourteen_illiq[i] = 1
+        #     elif hr == 15:
+        #         fifteen_illiq[i] = 1
+        #     elif hr == 16:
+        #         sixteen_illiq[i] = 1
+        #     elif hr == 17:
+        #         seventeen_illiq[i] = 1
+        #     elif hr == 18:
+        #         eighteen_illiq[i] = 1
+        #     elif hr == 19:
+        #         nineteen_illiq[i] = 1
+        #     elif hr == 20:
+        #         twenty_illiq[i] = 1
+        #     elif hr == 21:
+        #         twentyone_illiq[i] = 1
+        #     elif hr == 22:
+        #         twentytwo_illiq[i] = 1
+        #     elif hr == 23:
+        #         twentythree_illiq[i] = 1
 
-        X = np.matrix(one)
+        X = np.matrix(zero)
+        X = np.append(X, np.matrix(one), axis=0)
         X = np.append(X, np.matrix(two), axis=0)
         X = np.append(X, np.matrix(three), axis=0)
         X = np.append(X, np.matrix(four), axis=0)
@@ -223,33 +232,34 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         X = np.append(X, np.matrix(twentythree), axis=0)
         X = np.transpose(X)
 
-        X_illiq = np.matrix(one_illiq)
-        X_illiq = np.append(X_illiq, np.matrix(two_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(three_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(four_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(five_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(six_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(seven_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(eight_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(nine_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(ten_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(eleven_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(twelve_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(thirteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(fourteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(fifteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(sixteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(seventeen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(eighteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(nineteen_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(twenty_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(twentyone_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(twentytwo_illiq), axis=0)
-        X_illiq = np.append(X_illiq, np.matrix(twentythree_illiq), axis=0)
-        X_illiq = np.transpose(X_illiq)
+        # X_illiq = np.matrix(zero_illiq)
+        # X_illiq = np.append(X_illiq, np.matrix(one_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(two_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(three_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(four_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(five_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(six_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(seven_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(eight_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(nine_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(ten_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(eleven_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(twelve_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(thirteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(fourteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(fifteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(sixteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(seventeen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(eighteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(nineteen_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(twenty_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(twentyone_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(twentytwo_illiq), axis=0)
+        # X_illiq = np.append(X_illiq, np.matrix(twentythree_illiq), axis=0)
+        # X_illiq = np.transpose(X_illiq)
 
-        n_rows = 51  # in final table
         n_entries = 24  # Må bare være minst like stor som antall forklaringsvariable
+        n_rows = 3 + n_entries * 2  # in final table
 
     elif two_hours == 1:
         first = np.zeros(n)
@@ -555,7 +565,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
     Y = spread_hours_clean
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
-        m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
+        m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0, prints=0)
     Y = log_illiq_hours_clean
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X_illiq, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
@@ -592,11 +602,11 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         Y = spread_hours_clean
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0)
+            intercept=0, prints=0)
         Y = log_illiq_hours_clean
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
-            m_col, Y, X_illiq, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0, prints=0)
+            m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
+            intercept=0, prints=1)
 
     if convert_coeffs_to_percentage == 1:
         print()

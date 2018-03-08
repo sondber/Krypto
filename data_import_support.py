@@ -775,9 +775,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     if n_hours != 0:
         time_list_minutes = supp.make_time_list(year, month, day, hour, minute)
 
-    #Debugging Jacob
-    print("Time_list_minutes last entry", time_list_minutes[len(time_list_minutes)-1])
-
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
     if exc == 0:
@@ -817,21 +814,6 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     returns_days = jake_supp.logreturn(prices_days)
     # Amihud's ILLIQ
     illiq_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, threshold=0)  # Already clean
-
-    #
-    #  debug
-    print("Rolls tid last entry:", time_list_rolls[len(time_list_rolls)-1], "Verdi:", spread_abs[len(spread_abs)-1])
-    print("RV tid last entry:", RVol_time[len(RVol_time)-1], "Verdi:", volatility_days[len(volatility_days)-1])
-    print("Time-list tid last entry:", time_list_days[len(time_list_days)-1])
-    print("Rolls tid first entry:", time_list_rolls[0])
-    print("RV tid first entry:", RVol_time[0])
-    print("Time-list tid first entry:", time_list_days[0])
-
-    print("ILLIQ tid first entry:", illiq_time[0])
-    print("ILLIQ tid last entry:", illiq_time[len(illiq_days)-1])
-
-    time.sleep(4)
-
 
     plot_raw = 0
     if plot_raw == 1:

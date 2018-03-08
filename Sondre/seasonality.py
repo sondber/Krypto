@@ -3,7 +3,7 @@ import data_import as di
 import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
-import data_import_support as dis
+import data_import_s∂upport as dis
 import os
 import rolls
 import scipy.stats as st
@@ -14,8 +14,8 @@ import math
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 # os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
-intraday = 1
-intraweek = 0
+intraday = 0
+intraweek = 1
 
 exch = [0,1]  # 0=bitstamp, 1=coincheck
 

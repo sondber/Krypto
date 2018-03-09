@@ -1,5 +1,5 @@
 import csv
-
+import plot
 import realized_volatility
 from Sondre import sondre_support_formulas as supp
 import numpy as np
@@ -787,20 +787,33 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-    if exc == 0:
-        cutoff_day = 366
-        cutoff_min = cutoff_day * 1440
-    else:
-        cutoff_day = 366 + 365 + 365  # Years 2012, 2013, 2014 removed
-        cutoff_min = cutoff_day * 1440
 
-    mean_volume_prev_year = np.mean(volumes_days[cutoff_day - 365:cutoff_day])
+    if exc == 0:
+        #cutoff_hour = 8784  # 2012
+        cutoff_date = "01.01.2013 00:00"
+        start_averaging_date = "01.01.2012 00:00"
+    elif exc == 1:
+        # cutoff_hour = 35064  # 2012-2015
+        #cutoff_hour = 26304  # 2012-2014
+        cutoff_date = "01.01.2016 00:00"
+        #start_averaging_date = "30.10.2014 00:00"
+        start_averaging_date = "01.01.2015 00:00"
+    else:
+        print("Choose an exchange!")
+
+    cutoff_day = supp.find_date_index(cutoff_date, time_list_days)
+    cutoff_min = supp.find_date_index(cutoff_date, time_list_minutes)
+    start_averaging_day = supp.find_date_index(start_averaging_date, time_list_days)
+
+    mean_volume_prev_year = np.average(volumes_days[start_averaging_day:cutoff_day])
+
     n_days = len(time_list_days)
     n_mins = len(time_list_minutes)
     print("Only including days after", time_list_days[cutoff_day])
 
     n_total = len(time_list_days)
     n_0 = n_days
+
 
     prices_minutes = prices_minutes[cutoff_min:n_mins]
     volumes_minutes = volumes_minutes[cutoff_min:n_mins]
@@ -967,7 +980,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
     illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
     rvol_hours, time_list_rvol = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)
-
 
     n_0 = len(time_list_hours) # initial number of hours
 

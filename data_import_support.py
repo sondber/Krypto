@@ -964,36 +964,11 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
     returns_hours = jake_supp.logreturn(prices_hours)
 
-
-    print()
-    #print("FØR NOE ER SLETTET------------------------------")
-    #for i in range(0, 150):
-    #    print(time_list_hours[i], '{0:.1f} BTC'.format(volumes_hours[i]), "    Null volum:",str(volumes_hours[i] == 0))
-    #print("-------------------")
-
     spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
     illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
     rvol_hours, time_list_rvol = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)
 
-    print()
-    print("Sjekker at start og slutt er likt på alle (illiq skal ikke være lik)")
-    print("prices:", time_list_hours[0], time_list_hours[len(time_list_hours)-1])
-    print("rvol:", time_list_rvol[0], time_list_rvol[len(time_list_rvol)-1])
-    print("illiq:", illiq_hours_time[0], illiq_hours_time[len(illiq_hours_time)-1])
 
-    supp.print_n(2)
-    print("Initial: ")
-    print(" time prices", len(time_list_hours))
-    print(" prices", len(prices_hours))
-    print(" returns", len(returns_hours))
-    print(" spread", len(spread_hours))
-    print(" time spread", len(time_list_spread))
-    print(" illiq", len(illiq_hours))
-    print(" time illiq", len(illiq_hours_time))
-    print(" rvol", len(rvol_hours))
-    print(" time rvol", len(time_list_rvol))
-
-    print()
     n_0 = len(time_list_hours) # initial number of hours
 
     time_list_removed = []
@@ -1003,28 +978,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
                                                  returns_hours, rvol_hours)
 
     n_1 = len(time_list_hours)  # After removing the zero-volume
-
-
-    # print("etter nullvolum fjernet")
-    # for i in range(96,145):
-    #     print(time_list_removed[i])
-    # print(time_list_hours[0:24])
-    # print("This shit")
-
-    #
-    # print()
-    # for i in range(50):
-    #     print(i, time_list_hours[i], illiq_hours_time[i])
-
-
-    supp.print_n(2)
-    print("After removing the zero-volume:  (DISSE MÅ VÆRE LIKE!)")
-    print(" returns", len(returns_hours))
-    print(" spread", len(spread_hours))
-    print(" illiq", len(illiq_hours))
-    print(" rvol", len(rvol_hours))
-
-    print(" STOPP HER! ---------------------------------------------")
 
     if exc == 0:
         #cutoff_hour = 8784  # 2012
@@ -1050,13 +1003,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     spread_hours = spread_hours[cutoff_hour:total_hours]
     illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
-
-    supp.print_n(2)
-    print("After removing the first year(s):  (DISSE MÅ VÆRE LIKE!)")
-    print(" returns", len(returns_hours))
-    print(" spread", len(spread_hours))
-    print(" illiq", len(illiq_hours))
-    print(" rvol", len(rvol_hours))
 
     plot_raw = 0
     if plot_raw == 1:
@@ -1098,15 +1044,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
-    supp.print_n(5)
-    print("After removal of crazy: ")
-    print(" returns", len(returns_hours))
-    print(" spread", len(spread_hours))
-    print(" illiq", len(illiq_hours))
-    print(" rvol", len(rvol_hours))
-
-
-
     plot_after_removal = 0
     if plot_after_removal == 1:
         plt.plot(rvol_hours)
@@ -1127,46 +1064,37 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
 
 
     # Removing all days where Roll is zero
-    time_list_hours_clean, time_list_removed, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
-    illiq_hours_clean, rvol_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours,
-                                                                                 time_list_removed,
-                                                                                 spread_hours,
-                                                                                 volumes_hours,
-                                                                                 returns_hours,
-                                                                                 illiq_hours, rvol_hours)
+    time_list_hours, time_list_removed, spread_hours, volumes_hours, returns_hours, \
+    illiq_hours, rvol_hours = supp.remove_list1_zeros_from_all_lists(time_list_hours,
+                                                                     time_list_removed,
+                                                                     spread_hours,
+                                                                     volumes_hours,
+                                                                     returns_hours,
+                                                                     illiq_hours, rvol_hours)
 
 
-    n_4 = len(time_list_hours_clean)  # After removing the zero-roll
+    n_4 = len(time_list_hours)  # After removing the zero-roll
 
     # Removing all hours where Rvol is zero
-    time_list_hours_clean, time_list_removed, rvol_hours_clean, spread_hours_clean, volumes_hours_clean, returns_hours_clean, \
-    illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(time_list_hours_clean,
-                                                               time_list_removed,
-                                                               rvol_hours_clean,
-                                                               spread_hours_clean,
-                                                               volumes_hours_clean,
-                                                               returns_hours_clean,
-                                                               illiq_hours_clean)
+    time_list_hours, time_list_removed, rvol_hours, spread_hours, volumes_hours, returns_hours, \
+    illiq_hours = supp.remove_list1_zeros_from_all_lists(time_list_hours,
+                                                         time_list_removed,
+                                                         rvol_hours,
+                                                         spread_hours,
+                                                         volumes_hours,
+                                                         returns_hours,
+                                                         illiq_hours)
 
 
-    n_5 = len(time_list_hours_clean)  # After removing the zero-volatility
-
-    supp.print_n(5)
-    print("After removal of zeros: ")
-    print(" returns", len(returns_hours_clean))
-    print(" spread", len(spread_hours_clean))
-    print(" illiq", len(illiq_hours_clean))
-    print(" rvol", len(rvol_hours_clean))
+    n_5 = len(time_list_hours)  # After removing the zero-volatility
 
 
-    illiq_hours_time = time_list_hours_clean
+    illiq_hours_time = time_list_hours
 
-    illiq_hours_time, time_list_removed, illiq_hours_clean = supp.remove_list1_zeros_from_all_lists(
-        time_list_hours_clean,
+    illiq_hours_time, time_list_removed, illiq_hours = supp.remove_list1_zeros_from_all_lists(
+        time_list_hours,
         time_list_removed,
-        illiq_hours_clean)
-    print()
-    print("After zero-illiq removed: ", len(illiq_hours_clean))
+        illiq_hours)
 
     show_hours_table = 0
     if show_hours_table == 1:
@@ -1180,14 +1108,14 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         print("Removing zero-vol:", n_5)
 
     # Turning ILLIQ, Volume and rvol into log
-    log_illiq_hours_clean = np.log(illiq_hours_clean)
-    log_volumes_hours_clean = volume_transformation(volumes_hours_clean, mean_volume_prev_year)
-    log_rvol_hours_clean = np.log(rvol_hours_clean)
+    log_illiq_hours = np.log(illiq_hours)
+    log_volumes_hours = volume_transformation(volumes_hours, mean_volume_prev_year)
+    log_rvol_hours = np.log(rvol_hours)
 
     if plot_raw + plot_after_removal > 0:
         plt.show()
 
-    return time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean
+    return time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, illiq_hours_time, log_illiq_hours, rvol_hours, log_rvol_hours
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

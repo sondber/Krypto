@@ -6,16 +6,16 @@ import data_import_support as dis
 import plot
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exc = 1
+exc = 0
 hours_in_window = [4, 3, 2, 1]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1    # Convert coeffs and std.errs. of returns and spread to percentage
 convert_logs = 0                    # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
 subtract_means = 1
-log_illiq = False
+log_illiqs = False
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
+time_list_hours, returns_hours, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
 illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
     dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
@@ -26,7 +26,7 @@ print(len(illiq_hours_time))
 print(len(spread_hours_clean))
 print(len(log_volumes_hours_clean))
 
-hour = supp.fix_time_list(time_list_hours_clean)[3]
+hour = supp.fix_time_list(time_list_hours)[3]
 hour_illiq = supp.fix_time_list(illiq_hours_time)[3]
 
 
@@ -558,7 +558,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
     m_col = 0
 
-    Y = returns_hours_clean
+    Y = returns_hours
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
     Y = log_volumes_hours_clean
@@ -571,7 +571,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0, prints=0)
 
-    if log_illiq == True:
+    if log_illiqs == True:
         Y = log_illiq_hours_clean # LOG / LINEAR !
     else:
         Y = illiq_hours_clean  # LOG / LINEAR !
@@ -582,12 +582,12 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
     if subtract_means == 1:  # Turns analysis into
         # Now we need to subtract the means from the coefficient matrix
-        returns_hours_clean -= np.mean(coeff_matrix[:, 0])
+        returns_hours -= np.mean(coeff_matrix[:, 0])
         log_volumes_hours_clean -= np.mean(coeff_matrix[:, 1])
         log_rvol_hours_clean -= np.mean(coeff_matrix[:, 2])
         spread_hours_clean -= np.mean(coeff_matrix[:, 3])
 
-        if log_illiq == True:
+        if log_illiqs == True:
             log_illiq_hours_clean -= np.mean(coeff_matrix[:, 4])
         else:
             illiq_hours_clean -= np.mean(coeff_matrix[:, 4])
@@ -600,7 +600,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         p_values_matrix = np.zeros([n_entries, n_cols])
         std_errs_matrix = np.zeros([n_entries, n_cols])
 
-        Y = returns_hours_clean
+        Y = returns_hours
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
@@ -617,7 +617,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0, prints=0)
 
-        if log_illiq == True:
+        if log_illiqs == True:
             Y = log_illiq_hours_clean  # LOG / LINEAR !
         else:
             Y = illiq_hours_clean  # LOG / LINEAR !

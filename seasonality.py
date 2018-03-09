@@ -13,9 +13,9 @@ import math
 
 
 intraday = 1
-intraweek = 0
+intraweek = 1
 
-exch = [0]  # 0=bitstamp, 1=coincheck
+exch = [0, 1]  # 0=bitstamp, 1=coincheck
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 

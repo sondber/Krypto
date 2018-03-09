@@ -23,24 +23,23 @@ for exc in exch:
     exc_name = "_" + exchanges[exc]
     print()
     print("SEASONALITY FOR", exchanges[exc].upper())
-    print()
 
     if intraday == 1:
         # HOURS ----------------------------------------------------------------------------------------------------
-        print("INTRADAY  ------")
+        print("------ INTRADAY  ------")
 
-        time_list_hours_clean, returns_hours_clean, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, \
-        illiq_hours_time, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
+        time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, \
+        illiq_hours_time, log_illiq_hours, rvol_hours, log_rvol_hours = \
             dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
         # Finding average for every hour of the day
-        hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours_clean, returns_hours_clean, frequency="h")
-        hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours_clean, log_volumes_hours_clean, frequency="h")
-        hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours_clean, spread_hours_clean, frequency="h")
-        hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_list_hours_clean, rvol_hours_clean, frequency="h")
-        hour_of_day, avg_log_rvol_hour, low_log_rvol_hour, upper_log_rvol_hour = dis.cyclical_average(time_list_hours_clean, log_rvol_hours, frequency="h")
-        hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_list_hours_clean, illiq_hours_clean, frequency="h")
-        #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_hours_time, log_illiq_hours_clean, frequency="h")
+        hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours, returns_hours, frequency="h")
+        hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, log_volumes_hours, frequency="h")
+        hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours, spread_hours, frequency="h")
+        hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_list_hours, rvol_hours, frequency="h")
+        #hour_of_day, avg_log_rvol_hour, low_log_rvol_hour, upper_log_rvol_hour = dis.cyclical_average(time_list_hours, log_rvol_hours, frequency="h")
+        hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_list_hours, illiq_hours, frequency="h")
+        #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_hours_time, log_illiq_hours, frequency="h")
 
         plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return" + exc_name, perc=1, ndigits=2, yzero=1)
         plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Log_Volume" + exc_name, perc=0)
@@ -51,7 +50,7 @@ for exc in exch:
         #plot.intraday(avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour, title="Log_ILLIQ" + exc_name, perc=0, ndigits=3, logy=0)  # Skulle helst brukt vanlig illiq med log-skala i stedet
 
     if intraweek == 1:
-        print("INTRAWEEK ------")
+        print("------ INTRAWEEK ------")
         # DAYS ----------------------------------------------------------------------------------------------------
         # Converting to daily data
         returns_minutes = jake_supp.logreturn(prices_minutes[exc, :])

@@ -745,15 +745,15 @@ def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_va
 
 def volume_transformation(volume, initial_mean_volume, daily=1):
     n_entries = len(volume)
-
     if daily == 1:
-        n_entries_in_window = 365
+        n_entries_in_window = min(365, n_entries)
     else:
-        n_entries_in_window = 365 * 24
+        n_entries_in_window = min((365 * 24, n_entries))
+
     out_volume = np.zeros(n_entries)
     for i in range(0, n_entries_in_window):
         floating_mean = (initial_mean_volume * (n_entries_in_window - i) + i * np.mean(
-            volume[0: i])) / n_entries_in_window
+        volume[0: i])) / n_entries_in_window
         out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
     for i in range(n_entries_in_window, n_entries):
         if volume[i] == 0 or np.mean(volume[i - n_entries_in_window:i]) == 0:
@@ -787,22 +787,23 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
 
-
     if exc == 0:
         #cutoff_hour = 8784  # 2012
         cutoff_date = "01.01.2013 00:00"
+        cutoff_min_date = cutoff_date
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
         # cutoff_hour = 35064  # 2012-2015
         #cutoff_hour = 26304  # 2012-2014
-        cutoff_date = "01.01.2016 00:00"
+        cutoff_date = "01.01.2017 00:00"
+        cutoff_min_date = "01.01.2017 09:00"
         #start_averaging_date = "30.10.2014 00:00"
         start_averaging_date = "01.01.2015 00:00"
     else:
         print("Choose an exchange!")
 
     cutoff_day = supp.find_date_index(cutoff_date, time_list_days)
-    cutoff_min = supp.find_date_index(cutoff_date, time_list_minutes)
+    cutoff_min = supp.find_date_index(cutoff_min_date, time_list_minutes)
     start_averaging_day = supp.find_date_index(start_averaging_date, time_list_days)
 
     mean_volume_prev_year = np.average(volumes_days[start_averaging_day:cutoff_day])
@@ -810,14 +811,15 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     n_days = len(time_list_days)
     n_mins = len(time_list_minutes)
     print("Only including days after", time_list_days[cutoff_day])
+    print("Only including days after", time_list_minutes[cutoff_min])
 
     n_total = len(time_list_days)
     n_0 = n_days
 
-
+    time_list_minutes = time_list_minutes[cutoff_min:n_mins]
+    print("Only including days after", time_list_minutes[0], "to", time_list_minutes[len(time_list_minutes)-1])
     prices_minutes = prices_minutes[cutoff_min:n_mins]
     volumes_minutes = volumes_minutes[cutoff_min:n_mins]
-    time_list_minutes = time_list_minutes[cutoff_min:n_mins]
     prices_days = prices_days[cutoff_day:n_days]
     volumes_days = volumes_days[cutoff_day:n_days]
     time_list_days = time_list_days[cutoff_day:n_days]
@@ -826,7 +828,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     # Rolls
     spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
-                                                                              calc_basis=1, kill_output=1)
+                                                                              calc_basis="d", kill_output=1)
 
 
     # Realized volatility
@@ -998,7 +1000,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     elif exc == 1:
         # cutoff_hour = 35064  # 2012-2015
         #cutoff_hour = 26304  # 2012-2014
-        cutoff_date = "01.01.2015 00:00"
+        cutoff_date = "01.01.2017 00:00"
         start_averaging_date = "30.10.2014 00:00"
     else:
         print("Choose an exchange!")

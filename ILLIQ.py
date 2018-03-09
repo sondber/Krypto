@@ -1,5 +1,5 @@
 from Sondre import sondre_support_formulas as supp
-
+import time
 # Illiq as described in Amihud.
 # Cuts any volumes less than "volume_limit". If all minutes in a window is zero, the window is omitted, resulting in a time-gap in the return-vector.
 
@@ -128,6 +128,7 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
                 window_adjusted -= 1
             else:
                 partsum += abs(minute_returns[j]) / minute_volumes[j]
+
         if window_adjusted > 0:
             window_illiq = partsum / window_adjusted
             illiq.append(window_illiq)
@@ -135,7 +136,6 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
             #print("  timestamp added:", timestamps[i])
         else:
             zero_count_window += 1
-
         partsum = 0
 
     if kill_output == 0:

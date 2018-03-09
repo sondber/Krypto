@@ -682,7 +682,8 @@ def get_month(month_string):
     return month_num
 
 
-def cyclical_average(time_list, data, frequency="h", print_entries=0, time_zone_conversion=0):
+def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, time_zone_conversion=0):
+
     year, month, day, hour, minute = supp.fix_time_list(time_list, move_n_hours=time_zone_conversion)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -709,6 +710,7 @@ def cyclical_average(time_list, data, frequency="h", print_entries=0, time_zone_
     data_average = np.zeros(n_out)
     count_entries = np.zeros(n_out)  # Will count actual observations, to get correct numerator in mean
     temp_list = np.zeros(n_out)
+
     n_cycles = int(2 * n_entries / n_out)  # trenger bare være minst like stor. Sikkerhetsmargin på 50%
     temp_matrix = np.zeros([n_cycles, n_out])
     for i in range(n_entries):
@@ -724,8 +726,15 @@ def cyclical_average(time_list, data, frequency="h", print_entries=0, time_zone_
     temp_matrix = np.matrix(temp_matrix)
     percentile = 0.95
 
-    if print_entries == 1:
+    if print_val_tab == 1:
+        for i in range(n_cycles):
+            for j in range(7):
+                print('{0:.3f}'.format(temp_matrix[i, j]), end='   ')
+            print()
+
+    if print_n_entries == 1:
         print(count_entries)
+
     for i in range(n_out):
         data_average[i] = float(np.sum(temp_matrix[:, i]) / count_entries[i])  # takes the mean
         lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=data_average[i],
@@ -1037,11 +1046,9 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     total_hours = len(time_list_hours) - 1
     time_list_hours = time_list_hours[cutoff_hour:total_hours]
     returns_hours = returns_hours[cutoff_hour:total_hours]
-    prices_hours = prices_hours[cutoff_hour:total_hours]
     volumes_hours = volumes_hours[cutoff_hour:total_hours]
     spread_hours = spread_hours[cutoff_hour:total_hours]
     illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
-    illiq_hours_time = illiq_hours_time[cutoff_hour:len(illiq_hours_time) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
     supp.print_n(2)
@@ -1089,7 +1096,6 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     volumes_hours = np.delete(volumes_hours, hours_to_remove)
     spread_hours = np.delete(spread_hours, hours_to_remove)
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
-    illiq_hours_time = np.delete(illiq_hours_time, hours_to_remove)
     rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
     supp.print_n(5)

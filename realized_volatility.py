@@ -26,20 +26,21 @@ def RVol(time_series_minutes, prices_list_minutes, daily=1, annualize=1):
                             prices_list_minutes[k]) ** 2
             except IndexError:
                 print("ERROR at index =", k + window)
-        rvol[0] = math.sqrt(rvol[0])
+    rvol[0] = math.sqrt(rvol[0])
     time_list_rvol.append(time_series_minutes[0])
 
     # remaining iterations
-    for i in range(daily * 1, n_entries-1):  # starts at index 1 if daily, 0 otherwise
-        for j in range(0, mins - window):
+    for i in range(daily * 1, n_entries):  # starts at index 1 if daily, 0 otherwise
+        for j in range(0, mins):
             if (j % window == 0):
                 try:
-                    rvol[i] += ((prices_list_minutes[i * mins + j + window - 1 + minutes_in_first_period] -
-                                 prices_list_minutes[i * mins + j + minutes_in_first_period]) /
-                                prices_list_minutes[i * mins + j + minutes_in_first_period]) ** 2
+                    rvol[i] += ((prices_list_minutes[(i-daily) * mins + j + window - 1 + minutes_in_first_period] -
+                                 prices_list_minutes[(i-daily) * mins + j + minutes_in_first_period]) /
+                                 prices_list_minutes[(i-daily) * mins + j + minutes_in_first_period]) ** 2
                 except IndexError:
                     print("index =", i * mins + j + window + minutes_in_first_period)
         rvol[i] = math.sqrt(rvol[i])
+        print("i =", i)
         time_list_rvol.append(time_series_minutes[(i * mins) + minutes_in_first_period])
     if annualize == 1:
         if daily == 1:

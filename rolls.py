@@ -49,7 +49,7 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
         sum_inside = 0
         for i in range(0, len(price_differences), minutes_in_window):
             for y in range(i + 1, i + minutes_in_window):
-                sum_inside = sum_inside + (price_differences[y] * price_differences[y - 1])
+                sum_inside += (price_differences[y] * price_differences[y - 1])
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 2))
             except ValueError:
@@ -73,7 +73,7 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
                 ba_calc = 0
             spread.append(ba_calc)
             time_list.append(time_list_minute[0])
-            spread_rel.append(ba_calc / prices_minute[60 * hour[0] - 1])
+            spread_rel.append(ba_calc / prices_minute[start_index - 1])
             sum_inside = 0
         for i in range(start_index, min(len(price_differences), len(price_differences)-hour[0]*60), minutes_in_window):  # rest of days except overshooting
             for y in range(i + 1, i + minutes_in_window):

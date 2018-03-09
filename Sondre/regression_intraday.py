@@ -6,12 +6,12 @@ import data_import_support as dis
 import plot
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exc = 0
+exc = 1
 hours_in_window = [4, 3, 2, 1]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1    # Convert coeffs and std.errs. of returns and spread to percentage
 convert_logs = 0                    # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
 subtract_means = 1
-log_illiqs = False
+log_illiqs = True
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 

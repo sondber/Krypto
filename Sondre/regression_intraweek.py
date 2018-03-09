@@ -28,18 +28,21 @@ return_multi = 1
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-
 for exc in exch:
-    time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, illiq_days, log_illiq_days, volatility_days, log_volatility_days = dis.clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, full_week=1, exc=exc, print_days_excluded=0)
+    time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, illiq_days, log_illiq_days, rvol_days, log_rvol_days = \
+        dis.clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
+
+    if log_illiqs:
+        illiq = illiq_days
+    else:
+        illiq = log_illiq_days
 
     if multivariate_regs == 1:
         stdzd_log_volumes_days = supp.standardize(log_volumes_days)
-        stdzd_spread_days_clean = supp.standardize(spread_days)
-        if log_illiqs:
-            stdzd_illiq_days_clean = supp.standardize(log_illiq_days)
-
-        stdzd_returns_days_clean = supp.standardize(returns_days)
-        stdzd_log_volatility_days_clean = supp.standardize(log_volatility_days)
+        stdzd_spread_days = supp.standardize(spread_days)
+        stdzd_illiq_days = supp.standardize(illiq)
+        stdzd_returns_days = supp.standardize(returns_days)
+        stdzd_log_rvol_days = supp.standardize(log_rvol_days)
 
     print()
     print()
@@ -48,8 +51,7 @@ for exc in exch:
           "-----------------------------------------")
     print()
 
-
-    mon, tue, wed, thu, fri, sat, sun= supp.week_vars(time_list_days)
+    mon, tue, wed, thu, fri, sat, sun = supp.week_vars(time_list_days)
     weekend = np.zeros(len(mon))
     for data_r in range(0, len(mon)):
         if sat[data_r] + sun[data_r] > 0:
@@ -92,7 +94,7 @@ for exc in exch:
             m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             prints=0)
 
-        Y = log_volatility_days
+        Y = log_rvol_days
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
@@ -106,7 +108,7 @@ for exc in exch:
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
             m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
-        Y = log_illiq_days
+        Y = illiq
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
@@ -118,9 +120,9 @@ for exc in exch:
 
             returns_days -= np.mean(coeff_matrix[:, 0])
             log_volumes_days -= np.mean(coeff_matrix[:, 2])
-            log_volatility_days -= np.mean(coeff_matrix[:, 4])
+            log_rvol_days -= np.mean(coeff_matrix[:, 4])
             spread_days -= np.mean(coeff_matrix[:, 6])
-            log_illiq_days -= np.mean(coeff_matrix[:, 8])
+            illiq -= np.mean(coeff_matrix[:, 8])
 
             coeff_matrix = np.zeros([n_entries, n_cols])
             rsquared_array = np.zeros(n_cols)
@@ -148,7 +150,7 @@ for exc in exch:
                 n_obs_array,
                 prints=0)
 
-            Y = log_volatility_days
+            Y = log_rvol_days
             m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0)
@@ -163,8 +165,7 @@ for exc in exch:
             m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
                 m_col, Y, weekend, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array,
                 n_obs_array)
-
-            Y = log_illiq_days
+            Y = illiq
             m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0)
@@ -188,9 +189,8 @@ for exc in exch:
                         coeff_matrix[i, c] = 100 * np.exp(coeff_matrix[i, c])
                         std_errs_matrix[i, c] = 100 * np.exp(std_errs_matrix[i, c])
 
-
-
-        first_col_entries = ['\\textit{Mon}', '\\textit{Tue}', '\\textit{Wed}', '\\textit{Thu}', '\\textit{Fri}', '\\textit{Sat}', '\\textit{Sun}', '\\textit{Weekday}', '\\textit{Weekend}',
+        first_col_entries = ['\\textit{Mon}', '\\textit{Tue}', '\\textit{Wed}', '\\textit{Thu}', '\\textit{Fri}',
+                             '\\textit{Sat}', '\\textit{Sun}', '\\textit{Weekday}', '\\textit{Weekend}',
                              '\\textit{\\# Obs.}', '$R^2$',
                              '\\textit{AIC}']
 
@@ -218,7 +218,8 @@ for exc in exch:
 
         for print_r in range(0, 14, 2):
             for c in range(0, n_cols, 2):
-                print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c], p_values_matrix[data_r, c],
+                print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
+                                                p_values_matrix[data_r, c],
                                                 type="coeff")
                 print_rows[print_r] += "          & &"
                 print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
@@ -231,7 +232,8 @@ for exc in exch:
             print_rows[print_r + 1] += "           &"
 
             for c in range(1, n_cols, 2):
-                print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c], p_values_matrix[data_r, c],
+                print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
+                                                p_values_matrix[data_r, c],
                                                 type="coeff")
                 print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
                 if c < n_cols - 1:
@@ -244,7 +246,8 @@ for exc in exch:
             data_r += 1
 
         # Dette fikser de tre nedreste radene
-        print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=1)
+        print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows,
+                                           double_cols=1)
 
         print(
             "     ------------------------------------------------Regression table for Intraweek seasonality-----------------------------------------")
@@ -256,11 +259,10 @@ for exc in exch:
 
         # Fetch the standardized variables from earlier
         log_volumes_days = stdzd_log_volumes_days
-        spread_days = stdzd_spread_days_clean
-        log_illiq_days = stdzd_days_clean
-        returns_days = stdzd_returns_days_clean
-        log_volatility_days = stdzd_log_volatility_days_clean
-
+        spread_days = stdzd_spread_days
+        illiq = stdzd_illiq_days
+        returns_days = stdzd_returns_days
+        log_rvol_days = stdzd_log_rvol_days
 
         lags = [1, 7, 60]
         max_lag = 60  # Locked
@@ -379,7 +381,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Spread - Volatility
-            x = log_volatility_days[start_index: end_index]
+            x = log_rvol_days[start_index: end_index]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_contemporary = np.append(X_contemporary, x, axis=1)
@@ -391,7 +393,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Spread - Volatility with lag
-            x = log_volatility_days[start_index - 1: end_index - 1]
+            x = log_rvol_days[start_index - 1: end_index - 1]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_lagged = np.append(X_lagged, x, axis=1)
@@ -418,7 +420,6 @@ for exc in exch:
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
-
             first_col_entries = ['Intercept', '$bas^D$', '$bas^W$', '$bas^{2M}$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
                                  '$v_{t-1}$', '$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 
@@ -426,7 +427,8 @@ for exc in exch:
             j = 0
             for data_r in range(0, len(first_col_entries)):
                 first_col.append(first_col_entries[data_r])
-                for k in range(len(first_col_entries[data_r]), 18):  # Tallet her skal være lengden på den lengste entrien
+                for k in range(len(first_col_entries[data_r]),
+                               18):  # Tallet her skal være lengden på den lengste entrien
                     first_col[j] += ' '  # Passer på at alle blir like lange
                 j += 1
                 if data_r < 10:
@@ -446,7 +448,8 @@ for exc in exch:
                 for c in range(0, n_cols):
                     print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
                                                     p_values_matrix[data_r, c], type="coeff")
-                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
+                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c],
+                                                        type="std_err")
                 data_r += 1
 
             # Dette er regresjonene mot en og en annen variabel
@@ -490,10 +493,10 @@ for exc in exch:
             supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
         if illiq_multi == 1:
-            Y = log_illiq_days[max_lag: len(log_illiq_days)]
+            Y = illiq[max_lag: len(illiq)]
             n_entries = len(Y)
-            start_index = len(log_illiq_days) - n_entries
-            end_index = len(log_illiq_days)
+            start_index = len(illiq) - n_entries
+            end_index = len(illiq)
             X = []
 
             # print("ILLIQ")
@@ -501,8 +504,7 @@ for exc in exch:
             # print("----------------------------------------------------------------------------------------------------------------------------")
 
             for j in range(n_lags):
-                # print("x%i: ILLIQ with %i days lag" % (j + 1, lags[j]))
-                x = supp.mean_for_n_entries(log_illiq_days, lags[j])
+                x = supp.mean_for_n_entries(illiq, lags[j])
                 x = np.matrix(x[len(x) - n_entries: len(x)])
                 if j == 0:
                     X = x
@@ -590,7 +592,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # ILLIQ  - Volatility
-            x = log_volatility_days[start_index: end_index]
+            x = log_rvol_days[start_index: end_index]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_contemporary = np.append(X_contemporary, x, axis=1)
@@ -602,7 +604,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # ILLIQ - Volatility with lag
-            x = log_volatility_days[start_index - 1: end_index - 1]
+            x = log_rvol_days[start_index - 1: end_index - 1]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_lagged = np.append(X_lagged, x, axis=1)
@@ -629,7 +631,6 @@ for exc in exch:
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
-
             first_col_entries = ['Intercept', '$illiq^D$', '$illiq^W$', '$illiq^{2M}$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
                                  '$v_{t-1}$', '$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 
@@ -637,7 +638,8 @@ for exc in exch:
             j = 0
             for data_r in range(0, len(first_col_entries)):
                 first_col.append(first_col_entries[data_r])
-                for k in range(len(first_col_entries[data_r]), 18):  # Tallet her skal være lengden på den lengste entrien
+                for k in range(len(first_col_entries[data_r]),
+                               18):  # Tallet her skal være lengden på den lengste entrien
                     first_col[j] += ' '  # Passer på at alle blir like lange
                 j += 1
                 if data_r < 10:
@@ -657,7 +659,8 @@ for exc in exch:
                 for c in range(0, n_cols):
                     print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
                                                     p_values_matrix[data_r, c], type="coeff")
-                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
+                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c],
+                                                        type="std_err")
                 data_r += 1
 
             # Dette er regresjonene mot en og en annen variabel
@@ -774,7 +777,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Return - Volatility
-            x = log_volatility_days[start_index: end_index]
+            x = log_rvol_days[start_index: end_index]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_contemporary = np.append(X_contemporary, x, axis=1)
@@ -786,7 +789,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Return - Volatility with lag
-            x = log_volatility_days[start_index - 1: end_index - 1]
+            x = log_rvol_days[start_index - 1: end_index - 1]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_lagged = np.append(X_lagged, x, axis=1)
@@ -822,7 +825,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Return - ILLIQ
-            x = log_illiq_days[start_index: end_index]
+            x = illiq[start_index: end_index]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_contemporary = np.append(X_contemporary, x, axis=1)
@@ -834,7 +837,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Return - ILLIQ with lag
-            x = log_illiq_days[start_index - 1: end_index - 1]
+            x = illiq[start_index - 1: end_index - 1]
             x = np.transpose(np.matrix(x))
             X = np.append(X_benchmark, x, axis=1)
             X_lagged = np.append(X_lagged, x, axis=1)
@@ -861,7 +864,6 @@ for exc in exch:
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
-
             first_col_entries = ['Intercept', '$r^D$', '$r^W$', '$r^{2M}$', '$v_t$', '$v_{t-1}$', '$rv_{t}$',
                                  '$rv_{t-1}$', '$bas_{t}$', '$bas_{t-1}$', '$illiq_{t}$', '$illiq_{t-1}$',
                                  '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
@@ -870,7 +872,8 @@ for exc in exch:
             j = 0
             for data_r in range(0, len(first_col_entries)):
                 first_col.append(first_col_entries[data_r])
-                for k in range(len(first_col_entries[data_r]), 18):  # Tallet her skal være lengden på den lengste entrien
+                for k in range(len(first_col_entries[data_r]),
+                               18):  # Tallet her skal være lengden på den lengste entrien
                     first_col[j] += ' '  # Passer på at alle blir like lange
                 j += 1
                 if data_r < 12:
@@ -890,7 +893,8 @@ for exc in exch:
                 for c in range(0, n_cols):
                     print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
                                                     p_values_matrix[data_r, c], type="coeff")
-                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
+                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c],
+                                                        type="std_err")
                 data_r += 1
 
             # Dette er regresjonene mot en og en annen variabel
@@ -920,7 +924,6 @@ for exc in exch:
                         print_rows[print_r + 1] += "           &"
 
             print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
-
 
             print()
             print()

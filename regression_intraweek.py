@@ -13,13 +13,13 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exch = [1]  # 0=bitstamp, 1=coincheck
 
-dayofweek = 1
+intraweek_pattern_regression = 1
 subtract_means = 1  # from day-of-week regression
 convert_coeffs_to_percentage = 1
 convert_logs = 0
 log_illiqs = True
 
-multivariate_regs = 1
+determinants_regression = 1
 autoreg = 0
 
 rolls_multi = 1
@@ -33,11 +33,11 @@ for exc in exch:
         dis.clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
 
     if log_illiqs:
-        illiq = illiq_days
-    else:
         illiq = log_illiq_days
+    else:
+        illiq = illiq_days
 
-    if multivariate_regs == 1:
+    if determinants_regression == 1:
         stdzd_log_volumes_days = supp.standardize(log_volumes_days)
         stdzd_spread_days = supp.standardize(spread_days)
         stdzd_illiq_days = supp.standardize(illiq)
@@ -57,7 +57,7 @@ for exc in exch:
         if sat[data_r] + sun[data_r] > 0:
             weekend[data_r] = 1
 
-    if dayofweek == 1:  # Er ikke oppdatert med ny output!
+    if intraweek_pattern_regression == 1:  # Er ikke oppdatert med ny output!
         X = np.matrix(mon)
         X = np.append(X, np.matrix(tue), axis=0)
         X = np.append(X, np.matrix(wed), axis=0)
@@ -177,8 +177,8 @@ for exc in exch:
             print()
             print()
             print()
-            print("NB!! Converting returns and spread back into percentage")
-            for c in [0, 1, 6, 7]:  # 0-1=returns 6-7=spread
+            print("NB!! Converting returnsH and spreadH back into percentage")
+            for c in [0, 1, 6, 7]:  # 0-1=returnsH 6-7=spreadH
                 for i in range(0, n_entries):
                     coeff_matrix[i, c] = 100 * coeff_matrix[i, c]
                     std_errs_matrix[i, c] = 100 * std_errs_matrix[i, c]
@@ -255,7 +255,7 @@ for exc in exch:
         print()
         supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
-    if multivariate_regs == 1:
+    if determinants_regression == 1:
 
         # Fetch the standardized variables from earlier
         log_volumes_days = stdzd_log_volumes_days
@@ -287,15 +287,15 @@ for exc in exch:
 
         if rolls_multi == 1:
             Y = spread_days[max_lag: len(spread_days)]
-            n_entries = len(Y)
-            start_index = len(spread_days) - n_entries
+            n_days = len(Y)
+            start_index = len(spread_days) - n_days
             end_index = len(spread_days)
             X = []
 
             for j in range(n_lags):
                 # print("x%i: BAS with %i days lag" % (j + 1, lags[j]))
                 x = supp.mean_for_n_entries(spread_days, lags[j])
-                x = np.matrix(x[len(x) - n_entries: len(x)])
+                x = np.matrix(x[len(x) - n_days: len(x)])
                 if j == 0:
                     X = x
                 else:
@@ -487,7 +487,7 @@ for exc in exch:
             print()
             print()
             print(
-                "           -----------------------------------------Regression table for Bid-ask spread----------------------------------------")
+                "           -----------------------------------------Regression table for Bid-ask spreadH----------------------------------------")
             print()
             print()
             supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben

@@ -48,7 +48,7 @@ if intraday == 1:
     print()
     print("Lengths:")
     print("Time: ", len(time_list_hours))
-    print("spread: ", len(spread_hours))
+    print("spreadH: ", len(spread_hours))
     print("illiq: ", len(illiq_hours))
     print()
 
@@ -77,7 +77,7 @@ if intraday == 1:
         plt.title("volum")
         plt.figure()
         plt.plot(avg_spread_hour)
-        plt.title("spread")
+        plt.title("spreadH")
         plt.figure()
         plt.plot(avg_rvol_hour)
         plt.title("rvol")
@@ -108,7 +108,7 @@ if intraweek == 1:
 
     if plots == 1:
         plt.plot(avg_spread_day)
-        plt.title("spread dag")
+        plt.title("spreadH dag")
         plt.figure()
         plt.plot(avg_volume_day)
         plt.title("volum dag")

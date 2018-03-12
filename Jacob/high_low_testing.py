@@ -23,14 +23,14 @@ exchanges1, time_list1, prices, volumes = di.get_lists(data="all", opening_hours
 #Index-finder
 start = 5000
 end = 6000
-for i in range(len(time_list[start:end])):
-    print("Time: ", time_list[start+i], "Index: ", i+start)
+for i in range(len(time_listH[start:end])):
+    print("Time: ", time_listH[start+i], "Index: ", i+start)
 """
 """
 
 #"""
 """
-timestamps = time_list[305370:]
+timestamps = time_listH[305370:]
 highs = hi[0][305370:]
 lows = lo[0][305370:]
 prices = prices[0][305370:]

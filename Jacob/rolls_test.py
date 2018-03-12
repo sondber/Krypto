@@ -873,7 +873,7 @@ test_time_list_minutes_moved = supp.make_time_list(year, month, day, hour, minut
 spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes_moved,
                                                                calc_basis="d")
 
-# spread, spread_rel, time_list, count_value_error = rolls.rolls(test_prices, test_time_list_minutes, calc_basis="d")
+# spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(test_prices, test_time_list_minutes, calc_basis="d")
 
 for i in range(len(spread_rel)):
     print(time_list[i], "{0:.3f}".format(spread[i]), "{0:.3f}%".format(100 * spread_rel[i]))

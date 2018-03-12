@@ -18,7 +18,7 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 exc = 1
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-#time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, illiq_hours_time, log_illiq_hours, rvol_hours, log_rvol_hours = dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=0)
+#time_listH, returnsH, spreadH, log_volumesH, illiq_hours, illiq_timeH, log_illiq_hours, rvol_hours, log_rvol_hours = dis.clean_trans_hours(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
 
 
 time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, \

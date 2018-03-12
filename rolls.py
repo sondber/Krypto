@@ -5,7 +5,7 @@ import linreg
 import time
 
 
-def first_price_differences(prices):  # takes list of prices, returns equal length list of first price differences
+def first_price_differences(prices):  # takes list of prices, returnsH equal length list of first price differences
     returnlist = [float(0)]
     for i in range(1, len(prices)):  # check the logic of setting first index to zero in relation to return calculation
         try:
@@ -90,7 +90,7 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
 
     if kill_output == 0:
         print("Spreads-calculation is finished")
-        print("The length of the spread-vector is", len(spread_rel))
+        print("The length of the spreadH-vector is", len(spread_rel))
         print("The length of the time-vector is", len(time_list))
         print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
               "value errors were counted when calculating Roll-spreads")

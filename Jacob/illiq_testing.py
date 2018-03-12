@@ -19,7 +19,7 @@ returns = jacsup.logreturn(prices)
 
 print("length of prices",len(prices))
 print("length of volume",len(volumes))
-print("length of returns", len(returns))
+print("length of returnsH", len(returns))
 
 
 <<<<<<< HEAD
@@ -58,18 +58,18 @@ print(value_errors)
 
 
 
-exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(data="all", opening_hours="y",
+exchanges, time_listH, prices, volumes, total_price, total_volume = di.get_lists(data="all", opening_hours="y",
                                                                                 make_totals="y")
 
 prices = total_price
 volumes = total_volume
-returns = jacsup.logreturn(prices)
+returnsH = jacsup.logreturn(prices)
 
 print("length of prices",len(prices))
 print("length of volume",len(volumes))
-print("length of returns", len(returns))
+print("length of returnsH", len(returnsH))
 
-time_illiq, illiq = ilq.illiq_new(time_list, returns, volumes, day_or_hour=0, kill_output=0)
+time_illiq, illiq = ilq.illiq_new(time_listH, returnsH, volumes, day_or_hour=0, kill_output=0)
 
 plt.plot(illiq)
 plt.show()

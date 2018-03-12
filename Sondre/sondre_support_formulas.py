@@ -89,7 +89,6 @@ def fill_blanks(in_list):
 
 
 def move_time_list(year, month, day, hour, minute, move_n_hours=0, single_time_stamp=0):
-
     if single_time_stamp == 1:
         if move_n_hours < 0:  # Funker ikke for single_time_stamp
             n = -move_n_hours
@@ -146,7 +145,7 @@ def move_time_list(year, month, day, hour, minute, move_n_hours=0, single_time_s
                     else:
                         month += 1
     else:
-        n_entries=len(year)
+        n_entries = len(year)
         if move_n_hours < 0:  # Funker ikke for single_time_stamp
             n = -move_n_hours
             for i in range(0, n_entries):
@@ -230,7 +229,8 @@ def fix_time_list(time_list, move_n_hours=0, single_time_stamp=0):
         minute = (int(time_list[14:16]))
 
     if move_n_hours != 0:
-        year, month, day, hour, minute = move_time_list(year, month, day, hour, minute, move_n_hours=move_n_hours, single_time_stamp=single_time_stamp)
+        year, month, day, hour, minute = move_time_list(year, month, day, hour, minute, move_n_hours=move_n_hours,
+                                                        single_time_stamp=single_time_stamp)
 
     return year, month, day, hour, minute
 
@@ -611,7 +611,7 @@ def find_date_index(cutoff_date, time_list_hours):
     c_year, c_month, c_day, c_hour, c_minute = fix_time_list(cutoff_date, single_time_stamp=1)
     year, month, day, hour, minute = fix_time_list(time_list_hours)
 
-    #print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
+    # print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
 
     index = 0
     while year[index] < c_year:
@@ -625,12 +625,11 @@ def find_date_index(cutoff_date, time_list_hours):
     while minute[index] < c_minute:
         index += 1
 
-    #print("The cutoff is", time_listH[index])
+    # print("The cutoff is", time_listH[index])
     return index
 
 
-def find_which_time_period(time_list, hours_in_period=4):
-
+def time_of_day_dummies(time_list, hours_in_period=4):
     hour = fix_time_list(time_list)[3]
     n = len(time_list)
 
@@ -805,8 +804,8 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
     lagged_list = np.zeros(n_entries)
 
     # Jacob: Make nice
-        # Starter med siste entry
-        # Let etter forrige
+    # Starter med siste entry
+    # Let etter forrige
     d, mo, y, h, mi = fix_time_list(time_list[n_entries - 1], single_time_stamp=1, move_n_hours=-1)
 
     return lagged_list
@@ -821,15 +820,25 @@ def get_last_day_average(data, time_list):
 
 # Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
 def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
-    X_dummies, n_dummies = find_which_time_period(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
+    X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
 
     X_HAR = []
-    if HAR_config == 0:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
+    if HAR_config == 0:  # AR(1)
+        X_HAR = Y[0:len(Y - 2)]
+        max_lag = 1
+
+    elif HAR_config == 1:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
         # 6.3 Finne forrige entry med samme tidspunkt
+
         lagged_list = get_lagged_list(Y, time_listH, lag=24)
+
         X_HAR = lagged_list
         last_day_average = get_last_day_average(Y, time_listH)
         X_HAR = np.append(X_HAR, last_day_average, axis=0)
+
+        print("These lengths should be the same:")
+        print(len(last_day_average))
+        print(len(lagged_list))
         max_lag = 24
 
     # 6.3.1 Dette vil også være indeksen som skal brukes som 24-timerssnitt
@@ -839,5 +848,10 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
 
     X_benchmark = np.append(X_dummies, X_HAR, axis=0)
     X_benchmark = np.transpose(X_benchmark)
+    Y = Y[max_lag:len(Y) - 1]
 
-    return X_benchmark, max_lag
+    print("These lengths should be the same:")
+    print(len(Y))
+    print(np.size(X_benchmark, 1))
+
+    return Y, X_benchmark, max_lag

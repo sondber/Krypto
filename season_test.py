@@ -28,7 +28,7 @@ for exc in exch:
         hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, log_volumes_hours, frequency="h")
         hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours, spread_hours, frequency="h")
         hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_list_hours, illiq_hours, frequency="h")
-        #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_hours_time, log_illiq_hours, frequency="h")
+        #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_timeH, log_illiq_hours, frequency="h")
 
         plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Log_Volume" + exc_name, perc=0)
         plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title="Spread" + exc_name, perc=1)

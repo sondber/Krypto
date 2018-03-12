@@ -7,12 +7,12 @@ os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 """
 #### ALL DATA  #####
 
-exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists(data="all", opening_hours="y",
+exchanges, time_listH, prices, volumes, total_price, total_volume = di.get_lists(data="all", opening_hours="y",
                                                                                 make_totals="y")
 
-#spread, spread_rel, time_list, count_value_error = rolls.rolls(total_price, time_list, calc_basis = 1, kill_output=0)
+#spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(total_price, time_listH, calc_basis = 1, kill_output=0)
 
-spread, spread_rel, time_list, count_value_error = rolls.rolls(total_price[407550:], time_list[407550:], calc_basis=1,
+spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(total_price[407550:], time_listH[407550:], calc_basis=1,
                                                                kill_output=0)
                                                                
 """
@@ -34,11 +34,11 @@ for i in range(len(time_list[start:end])):
         break
 
 
-# spread, spread_rel, time_list, count_value_error = rolls.rolls(prices[527040:], time_list[527040:], calc_basis=1,
+# spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(prices[527040:], time_listH[527040:], calc_basis=1,
 #                                                               kill_output=0)
 
 
-# spread, spread_rel, time_list, count_value_error = rolls.rolls(prices[2103840:], time_list[2103840:], calc_basis=1,
+# spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(prices[2103840:], time_listH[2103840:], calc_basis=1,
 #                                                               kill_output=0)
 
 

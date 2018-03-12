@@ -1,7 +1,7 @@
 import math
 
 
-def logreturn(price): # takes list of prices, returns equal length list of log returns
+def logreturn(price): # takes list of prices, returnsH equal length list of log returnsH
     returnlist = [0.00] * len(price)
     for i in range(0, len(price) - 1):  # The last entry will always be zero
         try:
@@ -21,7 +21,7 @@ def first_price_differences(price): # takes list of prices, returns equal length
             print("Something wrong happened when calculating price difference")
     return returnlist
 
-def percentage_return(price): # takes list of prices, returns equal length list of returns per tick
+def percentage_return(price): # takes list of prices, returnsH equal length list of returnsH per tick
     returnlist = [0.00]*len(price)
     for i in range(0, len(price)-1): #The last entry will always be zero
         try:

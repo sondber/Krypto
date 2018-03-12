@@ -56,7 +56,7 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
                 if half_hour_adjusted != 0:
                     window_illiq = partsum / window_adjusted
                     illiq.append(window_illiq)
-                    time_list.append(timestamps[pos])
+                    time_listH.append(timestamps[pos])
                 else:
                     zero_count_window += 1
 
@@ -75,7 +75,7 @@ def illiq(timestamps, minute_returns, minute_volumes, hourly_or_daily="d",
                 if window_adjusted != 0:
                     window_illiq = partsum/window_adjusted
                     illiq.append(window_illiq)
-                    time_list.append(timestamps[pos])
+                    time_listH.append(timestamps[pos])
                 else:
                     zero_count_window += 1
 

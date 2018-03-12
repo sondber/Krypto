@@ -7,9 +7,6 @@ import numpy as np
 import linreg
 
 
-# os.chdir("/Users/sondre/Documents/GitHub/krypto")
-
-
 def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=0):
     # Dette fikser de tre nedreste radene
 
@@ -91,6 +88,126 @@ def fill_blanks(in_list):
     return out_list
 
 
+def move_time_list(year, month, day, hour, minute, move_n_hours=0, single_time_stamp=0):
+
+    if single_time_stamp == 1:
+        if move_n_hours < 0:  # Funker ikke for single_time_stamp
+            n = -move_n_hours
+            if hour >= n:
+                hour -= n
+            else:
+                hour = 24 - n + hour
+                if day >= 2:
+                    day -= 1
+                else:  # I use "mo" and "y" for brevity, and let the long version be assigned at the end
+                    if month == 1:
+                        mo = 12
+                        y = year - 1
+                    else:
+                        mo = month - 1
+                        y = year
+                    if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
+                        n_days = 31
+                    elif mo == 2:
+                        if y % 4 == 0:
+                            n_days = 29
+                        else:
+                            n_days = 28
+                    else:
+                        n_days = 30
+                    day = n_days
+                    month = mo
+                    year = y
+        elif move_n_hours > 0:
+            n = move_n_hours
+            if hour <= 23 - n:
+                hour += n
+            else:
+                hour = n + (hour - 24)
+                mo = month
+                y = year
+                if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
+                    n_days = 31
+                elif mo == 2:
+                    if y % 4 == 0:
+                        n_days = 29
+                    else:
+                        n_days = 28
+                else:
+                    n_days = 30
+
+                if day < n_days:
+                    day += 1
+                else:
+                    day = 1
+                    if mo == 12:
+                        month = 1
+                        year += 1
+                    else:
+                        month += 1
+    else:
+        n_entries=len(year)
+        if move_n_hours < 0:  # Funker ikke for single_time_stamp
+            n = -move_n_hours
+            for i in range(0, n_entries):
+                if hour[i] >= n:
+                    hour[i] -= n
+                else:
+                    hour[i] = 24 - n + hour[i]
+                    if day[i] >= 2:
+                        day[i] -= 1
+                    else:  # I use "mo" and "y" for brevity, and let the long version be assigned at the end
+                        if month[i] == 1:
+                            mo = 12
+                            y = year[i] - 1
+                        else:
+                            mo = month[i] - 1
+                            y = year[i]
+                        if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
+                            n_days = 31
+                        elif mo == 2:
+                            if y % 4 == 0:
+                                n_days = 29
+                            else:
+                                n_days = 28
+                        else:
+                            n_days = 30
+                        day[i] = n_days
+                        month[i] = mo
+                        year[i] = y
+        elif move_n_hours > 0:
+            n = move_n_hours
+            for i in range(0, n_entries):
+                if hour[i] <= 23 - n:
+                    hour[i] += n
+                else:
+                    hour[i] = n + (hour[i] - 24)
+
+                    mo = month[i]
+                    y = year[i]
+                    if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
+                        n_days = 31
+                    elif mo == 2:
+                        if y % 4 == 0:
+                            n_days = 29
+                        else:
+                            n_days = 28
+                    else:
+                        n_days = 30
+
+                    if day[i] < n_days:
+                        day[i] += 1
+                    else:
+                        day[i] = 1
+                        if mo == 12:
+                            month[i] = 1
+                            year[i] += 1
+                        else:
+                            month[i] += 1
+
+    return year, month, day, hour, minute
+
+
 def fix_time_list(time_list, move_n_hours=0, single_time_stamp=0):
     day = []
     month = []
@@ -112,63 +229,8 @@ def fix_time_list(time_list, move_n_hours=0, single_time_stamp=0):
         hour = (int(time_list[11:13]))
         minute = (int(time_list[14:16]))
 
-    if move_n_hours < 0:  # Funker ikke for single_time_stamp
-        n = -move_n_hours
-        for i in range(0, len(time_list)):
-            if hour[i] >= n:
-                hour[i] -= n
-            else:
-                hour[i] = 24 - n + hour[i]
-                if day[i] >= 2:
-                    day[i] -= 1
-                else:  # I use "mo" and "y" for brevity, and let the long version be assigned at the end
-                    if month[i] == 1:
-                        mo = 12
-                        y = year[i] - 1
-                    else:
-                        mo = month[i] - 1
-                        y = year[i]
-                    if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
-                        n_days = 31
-                    elif mo == 2:
-                        if y % 4 == 0:
-                            n_days = 29
-                        else:
-                            n_days = 28
-                    else:
-                        n_days = 30
-                    day[i] = n_days
-                    month[i] = mo
-                    year[i] = y
-    elif move_n_hours > 0:
-        n = move_n_hours
-        for i in range(0, len(time_list)):
-            if hour[i] <= 23 - n:
-                hour[i] += n
-            else:
-                hour[i] = n + (hour[i] - 24)
-
-                mo = month[i]
-                y = year[i]
-                if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
-                    n_days = 31
-                elif mo == 2:
-                    if y % 4 == 0:
-                        n_days = 29
-                    else:
-                        n_days = 28
-                else:
-                    n_days = 30
-
-                if day[i] < n_days:
-                    day[i] += 1
-                else:
-                    day[i] = 1
-                    if mo == 12:
-                        month[i] = 1
-                        year[i] += 1
-                    else:
-                        month[i] += 1
+    if move_n_hours != 0:
+        year, month, day, hour, minute = move_time_list(year, month, day, hour, minute, move_n_hours=move_n_hours, single_time_stamp=single_time_stamp)
 
     return year, month, day, hour, minute
 
@@ -563,5 +625,219 @@ def find_date_index(cutoff_date, time_list_hours):
     while minute[index] < c_minute:
         index += 1
 
-    #print("The cutoff is", time_list_hours[index])
+    #print("The cutoff is", time_listH[index])
     return index
+
+
+def find_which_time_period(time_list, hours_in_period=4):
+
+    hour = fix_time_list(time_list)[3]
+    n = len(time_list)
+
+    if hours_in_period == 2:
+        first = np.zeros(n)
+        second = np.zeros(n)
+        third = np.zeros(n)
+        fourth = np.zeros(n)
+        fifth = np.zeros(n)
+        sixth = np.zeros(n)
+        seventh = np.zeros(n)
+        eigth = np.zeros(n)
+        nineth = np.zeros(n)
+        tenth = np.zeros(n)
+        eleventh = np.zeros(n)
+        twelwth = np.zeros(n)
+
+        first_period = [0, 1]
+        second_period = [2, 3]
+        third_period = [4, 5]
+        fourth_period = [6, 7]
+        fifth_period = [8, 9]
+        sixth_period = [10, 11]
+        seventh_period = [12, 13]
+        eighth_period = [14, 15]
+        nineth_period = [16, 17]
+        tenth_period = [18, 19]
+        eleventh_period = [20, 21]
+        twelwth_period = [22, 23]
+
+        for i in range(0, n):
+            hr = hour[i]
+            if hr in first_period:
+                first[i] = 1
+            elif hr in second_period:
+                second[i] = 1
+            elif hr in third_period:
+                third[i] = 1
+            elif hr in fourth_period:
+                fourth[i] = 1
+            elif hr in fifth_period:
+                fifth[i] = 1
+            elif hr in sixth_period:
+                sixth[i] = 1
+            elif hr in seventh_period:
+                seventh[i] = 1
+            elif hr in eighth_period:
+                eigth[i] = 1
+            elif hr in nineth_period:
+                nineth[i] = 1
+            elif hr in tenth_period:
+                tenth[i] = 1
+            elif hr in eleventh_period:
+                eleventh[i] = 1
+            elif hr in twelwth_period:
+                twelwth[i] = 1
+
+        X_dummies = np.matrix(first)
+        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(seventh), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(eigth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(nineth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(tenth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(eleventh), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(twelwth), axis=0)
+        X_dummies = np.transpose(X_dummies)
+
+        n_dummies = 12  # Antall forklaringsvariable
+
+    elif hours_in_period == 3:
+        first = np.zeros(n)
+        second = np.zeros(n)
+        third = np.zeros(n)
+        fourth = np.zeros(n)
+        fifth = np.zeros(n)
+        sixth = np.zeros(n)
+        seventh = np.zeros(n)
+        eigth = np.zeros(n)
+
+        first_period = [0, 1, 2]
+        second_period = [3, 4, 5]
+        third_period = [6, 7, 8]
+        fourth_period = [9, 10, 11]
+        fifth_period = [12, 13, 14]
+        sixth_period = [15, 16, 17]
+        seventh_period = [18, 19, 20]
+        eighth_period = [21, 22, 23]
+
+        for i in range(0, n):
+            hr = hour[i]
+            if hr in first_period:
+                first[i] = 1
+            elif hr in second_period:
+                second[i] = 1
+            elif hr in third_period:
+                third[i] = 1
+            elif hr in fourth_period:
+                fourth[i] = 1
+            elif hr in fifth_period:
+                fifth[i] = 1
+            elif hr in sixth_period:
+                sixth[i] = 1
+            elif hr in seventh_period:
+                seventh[i] = 1
+            elif hr in eighth_period:
+                eigth[i] = 1
+
+        X_dummies = np.matrix(first)
+        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(seventh), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(eigth), axis=0)
+        X_dummies = np.transpose(X_dummies)
+
+        n_dummies = 8  # Må bare være minst like stor som antall forklaringsvariable
+
+    elif hours_in_period == 4:
+        first = np.zeros(n)
+        second = np.zeros(n)
+        third = np.zeros(n)
+        fourth = np.zeros(n)
+        fifth = np.zeros(n)
+        sixth = np.zeros(n)
+
+        first_period = [0, 1, 2, 3]
+        second_period = [4, 5, 6, 7]
+        third_period = [8, 9, 4, 11]
+        fourth_period = [12, 13, 14, 15]
+        fifth_period = [16, 17, 18, 19]
+        sixth_period = [20, 21, 22, 23]
+
+        for i in range(0, n):
+            hr = hour[i]
+            if hr in first_period:
+                first[i] = 1
+            elif hr in second_period:
+                second[i] = 1
+            elif hr in third_period:
+                third[i] = 1
+            elif hr in fourth_period:
+                fourth[i] = 1
+            elif hr in fifth_period:
+                fifth[i] = 1
+            elif hr in sixth_period:
+                sixth[i] = 1
+
+        X_dummies = np.matrix(first)
+        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
+        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
+        X_dummies = np.transpose(X_dummies)
+
+        n_dummies = 6
+
+    return X_dummies, n_dummies
+
+
+def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
+    if freq != "h":
+        print("FUNCTIONALITY ONLY WRITTEN FOR HOURLY FREQUENCY")
+
+    n_entries = len(data)
+    lagged_list = np.zeros(n_entries)
+
+    # Jacob: Make nice
+        # Starter med siste entry
+        # Let etter forrige
+    d, mo, y, h, mi = fix_time_list(time_list[n_entries - 1], single_time_stamp=1, move_n_hours=-1)
+
+    return lagged_list
+
+
+def get_last_day_average(data, time_list):
+    last_day_average = []
+    # Jacob make nice
+
+    return last_day_average
+
+
+# Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
+def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
+    X_dummies, n_dummies = find_which_time_period(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
+
+    X_HAR = []
+    if HAR_config == 0:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
+        # 6.3 Finne forrige entry med samme tidspunkt
+        lagged_list = get_lagged_list(Y, time_listH, lag=24)
+        X_HAR = lagged_list
+        last_day_average = get_last_day_average(Y, time_listH)
+        X_HAR = np.append(X_HAR, last_day_average, axis=0)
+        max_lag = 24
+
+    # 6.3.1 Dette vil også være indeksen som skal brukes som 24-timerssnitt
+    # 6.3.2 Hvis det ikke finnes noe tidligere tidspunkt så må det bare ikke tas noe gjennomsnitt
+
+    # 6.4 Returnere en X_benchmark
+
+    X_benchmark = np.append(X_dummies, X_HAR, axis=0)
+    X_benchmark = np.transpose(X_benchmark)
+
+    return X_benchmark, max_lag

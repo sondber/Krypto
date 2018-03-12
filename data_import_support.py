@@ -293,7 +293,7 @@ def get_price_volume_from_fulls(exchanges):
         n = len(single_price)
         r = 0
 
-        # Check whether the first entry in time_list is before the start of the unix_stamps
+        # Check whether the first entry in time_listH is before the start of the unix_stamps
         start_j = 0
         while time_list[start_j] < unix_stamps[0]:
             start_j += 1
@@ -338,7 +338,7 @@ def get_hilo_from_fulls(exchanges):
         n = len(single_high)
         r = 0
 
-        # Check whether the first entry in time_list is before the start of the unix_stamps
+        # Check whether the first entry in time_listH is before the start of the unix_stamps
         start_j = 0
         while time_list[start_j] < unix_stamps[0]:
             start_j += 1
@@ -514,7 +514,7 @@ def opening_hours_w_weekends(in_excel_stamps, in_prices, in_volumes):
     return out_excel_stamps, out_prices, out_volumes
 
 
-def convert_to_hour(time_stamps, prices, volumes, ):
+def convert_to_hour(time_stamps, prices, volumes):
     print(" \033[32;0;0mConverting to hourly data...\033[0;0;0m")
     year, month, day, hour, minute = supp.fix_time_list(time_stamps)
     n_mins = len(time_stamps)
@@ -536,7 +536,7 @@ def convert_to_hour(time_stamps, prices, volumes, ):
             for t in range(60, n_mins, 60):
                 volumes_out[exc, k] = sum(volumes[exc, t - 60:t])
                 prices_out[exc, k] = prices[exc, t]
-                time_stamps_out.append(time_stamps[t])
+                time_stamps_out.append(time_stamps[t-60])
                 k += 1
     else:
         volumes_out = []
@@ -846,7 +846,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
         plt.title("Raw rvol")
         plt.figure()
         plt.plot(spread_days)
-        plt.title("Raw spread")
+        plt.title("Raw spreadH")
         plt.figure()
         plt.plot(volumes_days)
         plt.title("Raw volume")
@@ -855,7 +855,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
         plt.title("Raw illiq")
         plt.figure()
         plt.plot(returns_days)
-        plt.title("Raw returns")
+        plt.title("Raw returnsH")
         plt.figure()
 
     n_2 = len(time_list_days)  # After removing zero-volume
@@ -895,7 +895,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
         plt.title("rvol")
         plt.figure()
         plt.plot(spread_days)
-        plt.title("spread")
+        plt.title("spreadH")
         plt.figure()
         plt.plot(volumes_days)
         plt.title("volume")
@@ -904,7 +904,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
         plt.title("illiq")
         plt.figure()
         plt.plot(returns_days)
-        plt.title("returns")
+        plt.title("returnsH")
         plt.show()
 
     n_3 = len(time_list_days)  # After removing the extremes
@@ -1026,7 +1026,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         #plt.title("Raw rvol")
         #plt.figure()
         plt.plot(spread_hours)
-        plt.title("Raw spread")
+        plt.title("Raw spreadH")
         plt.figure()
         plt.plot(volumes_hours)
         plt.title("Raw volume")
@@ -1034,8 +1034,8 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.plot(illiq_hours)
         plt.title("Raw illiq")
         plt.figure()
-        #plt.plot(returns_hours)
-        #plt.title("Raw returns")
+        #plt.plot(returnsH)
+        #plt.title("Raw returnsH")
         #plt.figure()
 
     n_1 = len(time_list_hours)
@@ -1067,7 +1067,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         #plt.title("rvol")
         #plt.figure()
         plt.plot(spread_hours)
-        plt.title("spread")
+        plt.title("spreadH")
         plt.figure()
         plt.plot(volumes_hours)
         plt.title("volume")
@@ -1075,8 +1075,8 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.plot(illiq_hours)
         plt.title("illiq")
         #plt.figure()
-        #plt.plot(returns_hours)
-        #plt.title("returns")
+        #plt.plot(returnsH)
+        #plt.title("returnsH")
 
 
 
@@ -1132,7 +1132,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     if plot_raw + plot_after_removal > 0:
         plt.show()
 
-    return time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, illiq_hours_time, log_illiq_hours, rvol_hours, log_rvol_hours
+    return time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, log_illiq_hours, rvol_hours, log_rvol_hours
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

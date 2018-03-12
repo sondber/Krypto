@@ -1002,7 +1002,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     elif exc == 1:
         # cutoff_hour = 35064  # 2012-2015
         #cutoff_hour = 26304  # 2012-2014
-        cutoff_date = "01.01.2017 00:00"
+        cutoff_date = "01.06.2016 00:00"
         start_averaging_date = "30.10.2014 00:00"
     else:
         print("Choose an exchange!")
@@ -1020,7 +1020,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
-    plot_raw = 1
+    plot_raw = 0
     if plot_raw == 1:
         #lt.plot(rvol_hours)
         #plt.title("Raw rvol")
@@ -1051,8 +1051,8 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         elif exc == 1:
             hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
             hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.05)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.03)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 15)
 
     time_list_hours = np.delete(time_list_hours, hours_to_remove)
     returns_hours = np.delete(returns_hours, hours_to_remove)
@@ -1061,7 +1061,7 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
-    plot_after_removal = 1
+    plot_after_removal = 0
     if plot_after_removal == 1:
         #plt.plot(rvol_hours)
         #plt.title("rvol")

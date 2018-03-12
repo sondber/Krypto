@@ -3,7 +3,7 @@ import plot
 from Jacob import jacob_support as jake_supp
 import data_import_support as dis
 
-spec = "2017_2"
+spec = "01012017_10"
 intraday = 1
 intraweek = 0
 

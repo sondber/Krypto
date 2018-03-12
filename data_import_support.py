@@ -795,10 +795,10 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     elif exc == 1:
         # cutoff_hour = 35064  # 2012-2015
         #cutoff_hour = 26304  # 2012-2014
-        cutoff_date = "01.01.2017 00:00"
-        cutoff_min_date = "01.01.2017 09:00"
+        cutoff_date = "01.01.2016 00:00"
+        cutoff_min_date = "01.01.2016 09:00"
         #start_averaging_date = "30.10.2014 00:00"
-        start_averaging_date = "01.01.2015 00:00"
+        start_averaging_date = "30.10.2014 00:00"
     else:
         print("Choose an exchange!")
 
@@ -957,6 +957,8 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
 def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0, convert_time_zones=1):
 
+    remove_extremes = 1
+
     if convert_time_zones:  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
         if exc == 0:
             n_hours = 0
@@ -1018,11 +1020,11 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
     rvol_hours = rvol_hours[cutoff_hour:total_hours]
 
-    plot_raw = 0
+    plot_raw = 1
     if plot_raw == 1:
-        plt.plot(rvol_hours)
-        plt.title("Raw rvol")
-        plt.figure()
+        #lt.plot(rvol_hours)
+        #plt.title("Raw rvol")
+        #plt.figure()
         plt.plot(spread_hours)
         plt.title("Raw spread")
         plt.figure()
@@ -1032,24 +1034,25 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.plot(illiq_hours)
         plt.title("Raw illiq")
         plt.figure()
-        plt.plot(returns_hours)
-        plt.title("Raw returns")
-        plt.figure()
+        #plt.plot(returns_hours)
+        #plt.title("Raw returns")
+        #plt.figure()
 
     n_1 = len(time_list_hours)
 
     hours_to_remove = []
 
-    if exc == 0:
-        hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.1, threshold_lower=-0.1)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.02)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
-    elif exc == 1:
-        hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.01)
-        hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
+    if remove_extremes == 1:
+        if exc == 0:
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.1, threshold_lower=-0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.02)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
+        elif exc == 1:
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.05)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
 
     time_list_hours = np.delete(time_list_hours, hours_to_remove)
     returns_hours = np.delete(returns_hours, hours_to_remove)
@@ -1058,11 +1061,11 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
     illiq_hours = np.delete(illiq_hours, hours_to_remove)
     rvol_hours = np.delete(rvol_hours, hours_to_remove)
 
-    plot_after_removal = 0
+    plot_after_removal = 1
     if plot_after_removal == 1:
-        plt.plot(rvol_hours)
-        plt.title("rvol")
-        plt.figure()
+        #plt.plot(rvol_hours)
+        #plt.title("rvol")
+        #plt.figure()
         plt.plot(spread_hours)
         plt.title("spread")
         plt.figure()
@@ -1071,9 +1074,9 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         plt.figure()
         plt.plot(illiq_hours)
         plt.title("illiq")
-        plt.figure()
-        plt.plot(returns_hours)
-        plt.title("returns")
+        #plt.figure()
+        #plt.plot(returns_hours)
+        #plt.title("returns")
 
 
 

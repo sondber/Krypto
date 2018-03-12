@@ -806,7 +806,9 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
     # Jacob: Make nice
     # Starter med siste entry
     # Let etter forrige
-    d, mo, y, h, mi = fix_time_list(time_list[n_entries - 1], single_time_stamp=1, move_n_hours=-1)
+    y, mo, d, h, mi = fix_time_list(time_list[n_entries - 1], single_time_stamp=1, move_n_hours=-24)
+    time_stamp = make_time_list(y, mo ,d ,h, mi)
+    print(time_stamp)
 
     return lagged_list
 

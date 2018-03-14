@@ -22,7 +22,9 @@ time_list = time_test
 
 lagged_list, index_list = supp.get_lagged_list(data, time_list)
 
-#last_day_average = supp.get_last_day_average(data,time_list)
+last_day_average = supp.get_last_day_average(data, time_list, index_list)
 
 for i in range(48):
-    print("Index: ", i, "Input:", time_list[i], "Input data:", data[i], "Lagged data:", lagged_list[i], "Index of lag:", index_list[i])
+    #print("Index: ", i, "Input:", time_list[i], "Input data:", data[i], "Lagged data:", lagged_list[i], "Index of lag:", index_list[i])
+    print("Index: ", i, "Input:", time_list[i], "Input data:", data[i], "Average:", last_day_average[i], "Index of lag:",
+          index_list[i])

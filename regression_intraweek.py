@@ -13,8 +13,8 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exch = [1]  # 0=bitstamp, 1=coincheck
 
-intraweek_pattern_regression = 1
-subtract_means = 1  # from day-of-week regression
+intraweek_pattern_regression = 0
+subtract_means = 0  # from day-of-week regression
 convert_coeffs_to_percentage = 1
 convert_logs = 0
 log_illiqs = True
@@ -23,8 +23,8 @@ determinants_regression = 1
 autoreg = 0
 
 rolls_multi = 1
-illiq_multi = 1
-return_multi = 1
+illiq_multi = 0
+return_multi = 0
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
@@ -326,6 +326,8 @@ for exc in exch:
             std_errs_matrix = np.zeros([n_entries, n_cols])
 
             m_col = 0
+            print("6: Length of Y", len(Y), "; Rows in X_benchmark", np.size(X_benchmark, 0), "; Cols in X_benchmark",
+                  np.size(X_benchmark, 1))
             coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
             coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,

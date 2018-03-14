@@ -3,11 +3,11 @@ import plot
 from Jacob import jacob_support as jake_supp
 import data_import_support as dis
 
-spec = "01012017_10"
-intraday = 1
-intraweek = 0
+spec = "01012015_6"
+intraday = 0
+intraweek = 1
 
-exch = [1]  # 0=bitstamp, 1=coincheck
+exch = [0]  # 0=bitstamp, 1=coincheck
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 

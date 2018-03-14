@@ -789,7 +789,7 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
 
     if exc == 0:
         #cutoff_hour = 8784  # 2012
-        cutoff_date = "01.01.2013 00:00"
+        cutoff_date = "01.01.2015 00:00"
         cutoff_min_date = cutoff_date
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
@@ -870,14 +870,13 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
     if exc == 0:
         days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
         days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
-        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.006)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.003)
+        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.05)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 1000)
     elif exc == 1:
         days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
         days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
-        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.003)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.1)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 0.002)
+        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.03)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 6)
 
     for d in days_to_remove:
         time_list_removed = np.append(time_list_removed, time_list_days[d])
@@ -1046,13 +1045,13 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         if exc == 0:
             hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.1, threshold_lower=-0.1)
             hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.02)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 0.01)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.05)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 1000)
         elif exc == 1:
             hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
             hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.03)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 15)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 1)
 
     time_list_hours = np.delete(time_list_hours, hours_to_remove)
     returns_hours = np.delete(returns_hours, hours_to_remove)

@@ -802,18 +802,37 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
 
     n_entries = len(data)
     lagged_list = np.zeros(n_entries)
+    index_list = np.zeros(n_entries)
+    found = 0
 
-    # Jacob: Make nice
-    # Starter med siste entry
-    # Let etter forrige
-    d, mo, y, h, mi = fix_time_list(time_list[n_entries - 1], single_time_stamp=1, move_n_hours=-1)
+    y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-24)
+    time_stamp = make_time_list(y, mo, d, h, mi)
 
-    return lagged_list
+    for i in range(len(time_stamp) - 1, -1, -1):
+        for j in range(i, i - lag - 1, -1):
+            if time_stamp[i] == time_list[j]:
+                lagged_list[i] = data[j]
+                index_list[i] = j
+                found = 1
+        if found == 0:
+            lagged_list[i] = -1
+            index_list[i] = -1
+        found = 0
+
+    return lagged_list, index_list
 
 
-def get_last_day_average(data, time_list):
+def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24):
+    partsum = 0
+    n_avg = 0
+
     last_day_average = []
-    # Jacob make nice
+
+    for i in range(0, len(data)):
+        if index_list_prev_lag[i] == -1:
+            last_day_average = np.append(last_day_average,)
+        for j in range(index_list_prev_lag[i],i):
+            if
 
     return last_day_average
 
@@ -840,6 +859,10 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
         X_HAR = lagged_list
         last_day_average = get_last_day_average(Y, time_listH)
         print("  supp.%i: Row %i is the average for the previous 24 hours" % (getframeinfo(currentframe()).lineno , n_dummies + 2))
+        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
+
+        X_HAR = lagged_list
+        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         X_HAR = np.append(X_HAR, last_day_average, axis=0)
 
         print("  These lengths should be the same:")

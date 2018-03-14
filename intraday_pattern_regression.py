@@ -293,7 +293,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
         first_period = [0, 1, 2, 3]
         second_period = [4, 5, 6, 7]
-        third_period = [8, 9, 4, 11]
+        third_period = [8, 9, 10, 11]
         fourth_period = [12, 13, 14, 15]
         fifth_period = [16, 17, 18, 19]
         sixth_period = [20, 21, 22, 23]

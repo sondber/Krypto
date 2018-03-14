@@ -9,6 +9,7 @@ from Jacob import jacob_support as jake_supp
 log_illiqs = 1 # Should log-illiq be used rather than plain illiq?
 hours_in_period = 4 # 1, 2, 3, or 4 hours in dummies
 benchmark_only = 1 # For testing
+standardized_coeffs = 0 # Should be 1
 
 spread_determinants = 1  # perform analysis on determinants of spread
 illiq_determinants = 0  # perform analysis on determinants of illiq    IKKE LAGET ENDA
@@ -49,13 +50,14 @@ for exc in exchanges:
         illiqH = log_illiqH
 
     # 5 standardisere
-    print(" Standardizing all series")
-    print()
-    log_volumesH = supp.standardize(log_volumesH)
-    spreadH = supp.standardize(spreadH)
-    illiqH = supp.standardize(illiqH)
-    returnsH = supp.standardize(returnsH)
-    log_rvolH = supp.standardize(log_rvolH)
+    if standardized_coeffs == 1:
+        print(" Standardizing all series")
+        print()
+        log_volumesH = supp.standardize(log_volumesH)
+        spreadH = supp.standardize(spreadH)
+        illiqH = supp.standardize(illiqH)
+        returnsH = supp.standardize(returnsH)
+        log_rvolH = supp.standardize(log_rvolH)
 
     if spread_determinants == 1:
         print(" DETERMINANTS OF INTRADAY BAS-------------------")
@@ -84,7 +86,12 @@ for exc in exchanges:
         print(" %i: Length of Y is %i and  X_benchmark is (%i,%i)" % (getframeinfo(currentframe()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=benchmark_only)
 
-        if benchmark_only == 0:
+        if benchmark_only == 1:
+            for i in range(np.size(X_benchmark,0)):
+                for j in range(np.size(X_benchmark,1)):
+                    print(X_benchmark[i, j], end=" ")
+                print()
+        else:
             # Return
             X_temp = returnsH[max_lag:end_index]
             X_temp = np.transpose(np.matrix(X_temp))

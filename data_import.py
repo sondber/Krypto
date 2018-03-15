@@ -6,7 +6,7 @@ import currency_converter as curr
 
 
 def get_lists(data="all", opening_hours="y", make_totals="y"):
-    exchanges = ["bitstampusd", "coincheckjpy"]
+    exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
     n_exc = len(exchanges)
     print("Fetching minute data..." )
 

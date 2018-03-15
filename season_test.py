@@ -22,7 +22,7 @@ for exc in exch:
 
         time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, \
         illiq_hours_time, log_illiq_hours, rvol_hours, log_rvol_hours = \
-            dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
+            dis.clean_series_hour(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
         # Finding average for every hour of the day
         hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, log_volumes_hours, frequency="h")
@@ -41,7 +41,7 @@ for exc in exch:
         # Converting to daily data
         returns_minutes = jake_supp.logreturn(prices_minutes[exc, :])
         time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, \
-        illiq_days, log_illiq_days, rvol_days, log_rvol_days = dis.clean_trans_days(
+        illiq_days, log_illiq_days, rvol_days, log_rvol_days = dis.clean_series_days(
             time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
 
         day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_list_days, spread_days, frequency="d")

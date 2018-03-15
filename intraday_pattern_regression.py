@@ -5,7 +5,7 @@ import data_import_support as dis
 import plot
 
 
-exc = 1
+exc = 2
 hours_in_window = [4]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1    # Convert coeffs and std.errs. of returnsH and spreadH to percentage
 convert_logs = 0                    # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
@@ -14,19 +14,10 @@ log_illiqs = True
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
-time_list_hours, returns_hours, spread_hours_clean, log_volumes_hours_clean, illiq_hours_clean, log_illiq_hours_clean, rvol_hours_clean, log_rvol_hours_clean = \
-    dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
+time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = \
+    dis.clean_series_hour(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
-print()
-print()
-
-print("TESTING HERE!")
-print(len(illiq_hours_clean))
-print(len(spread_hours_clean))
-print(len(log_volumes_hours_clean))
-
-hour = supp.fix_time_list(time_list_hours)[3]
-
+hour = supp.fix_time_list(time_listH)[3]
 
 print()
 print("Intraday regression for", exchanges[exc].upper())
@@ -334,23 +325,26 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
     m_col = 0
 
-    Y = returns_hours
+    Y = returnsH
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
-    Y = log_volumes_hours_clean
+    Y = log_volumesH
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
-    Y = log_rvol_hours_clean
+    Y = log_rvolH
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
-    Y = spread_hours_clean
+    Y = spreadH
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0, prints=0)
 
     if log_illiqs == True:
-        Y = log_illiq_hours_clean # LOG / LINEAR !
+        Y = log_illiqH # LOG / LINEAR !
     else:
-        Y = illiq_hours_clean  # LOG / LINEAR !
+        Y = illiqH  # LOG / LINEAR !
+
+    for y in Y:
+        print("{0:.4f}".format(y))
 
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
@@ -358,15 +352,15 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
     if subtract_means == 1:  # Turns analysis into
         # Now we need to subtract the means from the coefficient matrix
-        returns_hours -= np.mean(coeff_matrix[:, 0])
-        log_volumes_hours_clean -= np.mean(coeff_matrix[:, 1])
-        log_rvol_hours_clean -= np.mean(coeff_matrix[:, 2])
-        spread_hours_clean -= np.mean(coeff_matrix[:, 3])
+        returnsH -= np.mean(coeff_matrix[:, 0])
+        log_volumesH -= np.mean(coeff_matrix[:, 1])
+        log_rvolH -= np.mean(coeff_matrix[:, 2])
+        spreadH -= np.mean(coeff_matrix[:, 3])
 
         if log_illiqs == True:
-            log_illiq_hours_clean -= np.mean(coeff_matrix[:, 4])
+            log_illiqH -= np.mean(coeff_matrix[:, 4])
         else:
-            illiq_hours_clean -= np.mean(coeff_matrix[:, 4])
+            illiqH -= np.mean(coeff_matrix[:, 4])
 
         m_col = 0
         coeff_matrix = np.zeros([n_entries, n_cols])
@@ -376,31 +370,31 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         p_values_matrix = np.zeros([n_entries, n_cols])
         std_errs_matrix = np.zeros([n_entries, n_cols])
 
-        Y = returns_hours
+        Y = returnsH
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
-        Y = log_volumes_hours_clean
+        Y = log_volumesH
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
-        Y = log_rvol_hours_clean
+        Y = log_rvolH
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0)
-        Y = spread_hours_clean
+        Y = spreadH
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0, prints=0)
+            intercept=0, prints=1)
 
         if log_illiqs == True:
-            Y = log_illiq_hours_clean  # LOG / LINEAR !
+            Y = log_illiqH  # LOG / LINEAR !
         else:
-            Y = illiq_hours_clean  # LOG / LINEAR !
+            Y = illiqH  # LOG / LINEAR !
 
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0, prints=0)
+            intercept=0, prints=1)
 
     if convert_coeffs_to_percentage == 1:
         print()

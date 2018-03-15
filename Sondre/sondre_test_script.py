@@ -15,14 +15,15 @@ import ILLIQ
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 #os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
-exc = 1
+exc = 2
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
-#time_listH, returnsH, spreadH, log_volumesH, illiq_hours, illiq_timeH, log_illiq_hours, rvol_hours, log_rvol_hours = dis.clean_trans_hours(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
+exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
+#di.fetch_long_and_write(exchanges)
+#dis.fuse_files(exchanges)
+
+exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
 
 
-time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, \
-illiq_days, log_illiq_days, rvol_days, log_rvol_days = dis.clean_trans_days(
-    time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0,
-    convert_time_zones=1)
+time_listH, returnsH, spreadH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
+time_listH, returnsH, spreadH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
 

@@ -11,10 +11,10 @@ from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exch = [1]  # 0=bitstamp, 1=coincheck
+exch = [2]  # 0=bitstamp, 1=coincheck
 
-intraweek_pattern_regression = 0
-subtract_means = 0  # from day-of-week regression
+intraweek_pattern_regression = 1
+subtract_means = 1  # from day-of-week regression
 convert_coeffs_to_percentage = 1
 convert_logs = 0
 log_illiqs = True
@@ -23,14 +23,14 @@ determinants_regression = 1
 autoreg = 0
 
 rolls_multi = 1
-illiq_multi = 0
-return_multi = 0
+illiq_multi = 1
+return_multi = 1
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
 for exc in exch:
     time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, illiq_days, log_illiq_days, rvol_days, log_rvol_days = \
-        dis.clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
+        dis.clean_series_days(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
 
     if log_illiqs:
         illiq = log_illiq_days
@@ -407,7 +407,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             # Contemporaneous
-            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_contemporary, prints=0)
+            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_contemporary, prints=1)
 
             m_col += 1
             coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \

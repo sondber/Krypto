@@ -14,14 +14,17 @@ import ILLIQ
 
 file_name = "data/test_set.csv"
 n_exc = 1
-intraday = 1
-intraweek = 1
-plots = 1
+intraday = 0
+intraweek = 0
+plots = 0
 print_table = 0
 
 time_list_minutes, prices, volumes = dis.fetch_aggregate_csv(file_name, n_exc)
-y, mo, d, h, mi = supp.fix_time_list(time_list_minutes, 9)
+y, mo, d, h, mi = supp.fix_time_list(time_list_minutes, move_n_hours=0)
 time_list_minutes = supp.make_time_list(y, mo, d, h, mi )
+
+time_listH, returnsH, spreadH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_list_minutes, prices, volumes)
+
 
 prices_minutes = prices[0, :]
 volumes_minutes = volumes[0, :]

@@ -12,6 +12,7 @@ import rolls
 import ILLIQ
 from Jacob import jacob_support as jake_supp
 from Sondre.sondre_support_formulas import count_rows
+from inspect import currentframe as cf, getframeinfo as gf
 
 
 def fuse_files(exchanges):
@@ -21,6 +22,8 @@ def fuse_files(exchanges):
     volume_old1 = []
     price_old2 = []
     volume_old2 = []
+    price_old3 = []
+    volume_old3 = []
 
     filename_old = "data/export_csv/minute_data_full_day.csv"
     with open(filename_old, newline='') as csvfile:
@@ -35,10 +38,14 @@ def fuse_files(exchanges):
             volume_old1.append(float(row[2]))
             price_old2.append(float(row[3]))
             volume_old2.append(float(row[4]))
+            price_old3.append(float(row[5]))
+            volume_old3.append(float(row[6]))
 
     print("Her 1")
     print("Time old", len(time_old))
     print("Price old1", len(price_old1))
+    print("Price old2", len(price_old2))
+    print("Price old3", len(price_old3))
 
     location = "data/bitcoincharts/"
     year = "2017"
@@ -51,10 +58,12 @@ def fuse_files(exchanges):
         filename_new = location + exc + "/" + year + month + ".csv"
         time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1,
                                                                 unix=0)
+
     price_new1 = remove_nan(price_new)
     price_new1 = supp.fill_blanks(price_new1)
     volume_new1 = remove_nan(volume_new)
 
+    time_new_saved = time_new  # Denne brukes videre
     time_new = []
     price_new = []
     volume_new = []
@@ -69,13 +78,31 @@ def fuse_files(exchanges):
     price_new2 = supp.fill_blanks(price_new2)
     volume_new2 = remove_nan(volume_new)
 
-    print("Her 2")
-    print("time old:", len(time_old))
-    print("price old1:", len(price_old1))
-    print("price old2:", len(price_old2))
-    print("time new2: ", len(time_new))
-    print("price new1:", len(price_new1))
-    print("price new2:", len(price_new2))
+    time_new = []
+    price_new = []
+    volume_new = []
+
+    exc = "btcncny"
+    for month in ["06", "07", "08", "09"]:  # iterate through the new files
+        filename_new = location + exc + "/" + year + month + ".csv"
+        time_new, price_new, volume_new = price_volume_from_raw(filename_new, time_new, price_new, volume_new, semi=1,
+                                                                unix=0)
+    price_new3 = remove_nan(price_new)
+    price_new3 = supp.fill_blanks(price_new3)
+    volume_new3 = remove_nan(volume_new)
+
+    time_new = time_new_saved  # Saved from Bitstamp
+
+    print("Length of old series: ")
+    print("  time old:", len(time_old))
+    print("  price old1:", len(price_old1))
+    print("  price old2:", len(price_old2))
+
+    print("Length of new series: ")
+    print("  time new: ", len(time_new))
+    print("  price new1:", len(price_new1))
+    print("  price new2:", len(price_new2))
+    print("  price new3:", len(price_new3))
 
     time_list = time_old
     for i in range(0, len(time_new)):
@@ -84,14 +111,19 @@ def fuse_files(exchanges):
     print("Her 3")
     print("Time list:", len(time_list))
 
-    prices = np.zeros([2, len(time_list)])
-    volumes = np.zeros([2, len(time_list)])
+    prices = np.zeros([n_exc, len(time_list)])
+    volumes = np.zeros([n_exc, len(time_list)])
 
     for i in range(0, len(price_old1)):
         prices[0, i] = price_old1[i]
         volumes[0, i] = volume_old1[i]
         prices[1, i] = price_old2[i]
         volumes[1, i] = volume_old2[i]
+        try:
+            prices[2, i] = price_old3[i]
+            volumes[2, i] = volume_old3[i]
+        except IndexError:
+            pass
 
     k = 0  # Counts the entries in the new lists
     for i in range(len(price_old1), len(time_list)):
@@ -106,6 +138,11 @@ def fuse_files(exchanges):
         volumes[0, i] = volume_new1[k]
         prices[1, i] = price_new2[k]
         volumes[1, i] = volume_new2[k]
+        try:
+            prices[2, i] = price_new3[k]
+            volumes[2, i] = volume_new3[k]
+        except IndexError:
+            pass
         k += 1
 
     with open(filename_old, 'w', newline='') as csvfile:
@@ -536,15 +573,15 @@ def convert_to_hour(time_stamps, prices, volumes):
             for t in range(60, n_mins, 60):
                 volumes_out[exc, k] = sum(volumes[exc, t - 60:t])
                 prices_out[exc, k] = prices[exc, t]
-                time_stamps_out.append(time_stamps[t-60])
+                time_stamps_out.append(time_stamps[t - 60])
                 k += 1
     else:
         volumes_out = []
         prices_out = []
         for t in range(0, n_mins, 60):
-            volumes_out.append(sum(volumes[t:t+60]))
+            volumes_out.append(sum(volumes[t:t + 60]))
             time_stamps_out.append(time_stamps[t])
-            prices_out.append(prices[t+59])
+            prices_out.append(prices[t + 59])
 
     return time_stamps_out, prices_out, volumes_out
 
@@ -563,7 +600,7 @@ def convert_to_day(time_stamps, prices, volumes):
     start_minute = hour[0] * 60 + minute[0]
     minutes_first_day = 1440 - start_minute
 
-    n_days = int((n_mins) / 1440)  #THIS IS A POSSIBLE BUG WITHOUT +1
+    n_days = int((n_mins) / 1440)  # THIS IS A POSSIBLE BUG WITHOUT +1
 
     time_stamps_out = []
     time_stamps_out.append(time_stamps[0])
@@ -577,7 +614,7 @@ def convert_to_day(time_stamps, prices, volumes):
             prices_out[exc, 0] = prices[exc, minutes_first_day - 1]
 
             k = 1
-            for t in range(minutes_first_day, min(n_mins, n_mins-start_minute), 1440):
+            for t in range(minutes_first_day, min(n_mins, n_mins - start_minute), 1440):
                 volumes_out[exc, k] = sum(volumes[exc, t - 1440:t])
                 prices_out[exc, k] = prices[exc, t]
                 time_stamps_out.append(time_stamps[t])
@@ -589,9 +626,9 @@ def convert_to_day(time_stamps, prices, volumes):
             volumes_out[0] += volumes[t]
         prices_out[0] = prices[minutes_first_day - 1]
 
-        for t in range(minutes_first_day, min(n_mins, n_mins-start_minute), 1440):
-            volumes_out.append(sum(volumes[t:t+1440]))
-            prices_out.append(prices[t+1439])
+        for t in range(minutes_first_day, min(n_mins, n_mins - start_minute), 1440):
+            volumes_out.append(sum(volumes[t:t + 1440]))
+            prices_out.append(prices[t + 1439])
             time_stamps_out.append(time_stamps[t])
 
     return time_stamps_out, prices_out, volumes_out
@@ -683,7 +720,6 @@ def get_month(month_string):
 
 
 def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, time_zone_conversion=0):
-
     year, month, day, hour, minute = supp.fix_time_list(time_list, move_n_hours=time_zone_conversion)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -753,7 +789,7 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
     out_volume = np.zeros(n_entries)
     for i in range(0, n_entries_in_window):
         floating_mean = (initial_mean_volume * (n_entries_in_window - i) + i * np.mean(
-        volume[0: i])) / n_entries_in_window
+            volume[0: i])) / n_entries_in_window
         out_volume[i] = np.log(volume[i]) - np.log(floating_mean)
     for i in range(n_entries_in_window, n_entries):
         if volume[i] == 0 or np.mean(volume[i - n_entries_in_window:i]) == 0:
@@ -764,174 +800,184 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
     return out_volume
 
 
-def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, print_days_excluded=0,
-                     convert_time_zones=1):
-    prices_minutes = prices_minutes[exc, :]
-    volumes_minutes = volumes_minutes[exc, :]
+def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=0, convert_time_zones=1):
+    pricesM = pricesM[exc, :]
+    volumesM = volumesM[exc, :]
 
     if convert_time_zones:
         if exc == 0:
             n_hours = 0
         elif exc == 1:
             n_hours = 9
+        elif exc == 2:
+            n_hours = 8
         else:
             n_hours = 0
+        print("Converting time zones: moving series %i hours" % n_hours)
     else:
         n_hours = 0
 
     print("Transforming data series...")
 
-    year, month, day, hour, minute = supp.fix_time_list(time_list_minutes, move_n_hours=n_hours)
+    year, month, day, hour, minute = supp.fix_time_list(time_listM, move_n_hours=n_hours)
     if n_hours != 0:
-        time_list_minutes = supp.make_time_list(year, month, day, hour, minute)
+        time_listM = supp.make_time_list(year, month, day, hour, minute)
 
-    time_list_days, prices_days, volumes_days = convert_to_day(time_list_minutes, prices_minutes, volumes_minutes)
+    time_listD, pricesD, volumesD = convert_to_day(time_listM, pricesM, volumesM)
 
+    end_time_D = ""
     if exc == 0:
-        #cutoff_hour = 8784  # 2012
-        cutoff_date = "01.01.2015 00:00"
+        cutoff_date = "01.01.2013 00:00"
         cutoff_min_date = cutoff_date
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
-        # cutoff_hour = 35064  # 2012-2015
-        #cutoff_hour = 26304  # 2012-2014
         cutoff_date = "01.01.2016 00:00"
         cutoff_min_date = "01.01.2016 09:00"
-        #start_averaging_date = "30.10.2014 00:00"
         start_averaging_date = "30.10.2014 00:00"
+    elif exc == 2:
+        cutoff_date = "01.01.2014 00:00"
+        cutoff_min_date = "01.01.2013 08:00"
+        end_time_D = "01.01.2017 00:00"
+        end_time_M = "01.01.2017 08:00"
+        start_averaging_date = "01.01.2012 00:00"
     else:
         print("Choose an exchange!")
 
-    cutoff_day = supp.find_date_index(cutoff_date, time_list_days)
-    cutoff_min = supp.find_date_index(cutoff_min_date, time_list_minutes)
-    start_averaging_day = supp.find_date_index(start_averaging_date, time_list_days)
+    cutoff_day = supp.find_date_index(cutoff_date, time_listD)
+    cutoff_min = supp.find_date_index(cutoff_min_date, time_listM)
+    start_averaging_day = supp.find_date_index(start_averaging_date, time_listD)
+    mean_volume_prev_year = np.average(volumesD[start_averaging_day:cutoff_day])
+    if len(end_time_D) > 1:
+        cutoff_endD = supp.find_date_index(end_time_D, time_listD)
+        cutoff_endM = supp.find_date_index(end_time_M, time_listM)
+    else:
+        cutoff_endD = len(time_listD)
+        cutoff_endM = len(time_listM)
 
-    mean_volume_prev_year = np.average(volumes_days[start_averaging_day:cutoff_day])
+    n_total = len(time_listD)
+    n_0 = cutoff_endD
 
-    n_days = len(time_list_days)
-    n_mins = len(time_list_minutes)
-    print("Only including days after", time_list_days[cutoff_day])
-    print("Only including days after", time_list_minutes[cutoff_min])
+    time_listM = time_listM[cutoff_min:cutoff_endM]
+    print("Only including days after", time_listM[0], "to", time_listM[len(time_listM) - 1])
+    pricesM = pricesM[cutoff_min:cutoff_endM]
+    volumesM = volumesM[cutoff_min:cutoff_endM]
+    pricesD = pricesD[cutoff_day:cutoff_endD]
+    volumesD = volumesD[cutoff_day:cutoff_endD]
+    time_listD = time_listD[cutoff_day:cutoff_endD]
 
-    n_total = len(time_list_days)
-    n_0 = n_days
-
-    time_list_minutes = time_list_minutes[cutoff_min:n_mins]
-    print("Only including days after", time_list_minutes[0], "to", time_list_minutes[len(time_list_minutes)-1])
-    prices_minutes = prices_minutes[cutoff_min:n_mins]
-    volumes_minutes = volumes_minutes[cutoff_min:n_mins]
-    prices_days = prices_days[cutoff_day:n_days]
-    volumes_days = volumes_days[cutoff_day:n_days]
-    time_list_days = time_list_days[cutoff_day:n_days]
-
-    n_1 = len(time_list_days)  # After removing 2012
+    n_1 = len(time_listD)  # After removing 2012
 
     # Rolls
-    spread_abs, spread_days, time_list_rolls, count_value_error = rolls.rolls(prices_minutes, time_list_minutes,
-                                                                              calc_basis="d", kill_output=1)
-
+    spread_abs, spreadD, time_list_rolls, count_value_error = rolls.rolls(pricesM, time_listM,
+                                                                          calc_basis="d", kill_output=1)
 
     # Realized volatility
-    volatility_days, RVol_time = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=1, annualize=1)
+    rvolD, RVol_time = realized_volatility.RVol(time_listM, pricesM, daily=1, annualize=1)
 
     # Returns
-    returns_minutes = jake_supp.logreturn(prices_minutes)
-    returns_days = jake_supp.logreturn(prices_days)
+    returns_minutes = jake_supp.logreturn(pricesM)
+    returnsD = jake_supp.logreturn(pricesD)
     # Amihud's ILLIQ
-    illiq_time, illiq_days = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, threshold=0)  # Already clean
+    illiq_time, illiqD = ILLIQ.illiq(time_listM, returns_minutes, volumesM, threshold=0)  # Already clean
 
     plot_raw = 0
     if plot_raw == 1:
-        plt.plot(volatility_days)
+        plt.plot(rvolD)
         plt.title("Raw rvol")
         plt.figure()
-        plt.plot(spread_days)
+        plt.plot(spreadD)
         plt.title("Raw spreadH")
         plt.figure()
-        plt.plot(volumes_days)
+        plt.plot(volumesD)
         plt.title("Raw volume")
         plt.figure()
-        plt.plot(illiq_days)
+        plt.plot(illiqD)
         plt.title("Raw illiq")
         plt.figure()
-        plt.plot(returns_days)
+        plt.plot(returnsD)
         plt.title("Raw returnsH")
         plt.figure()
 
-    n_2 = len(time_list_days)  # After removing zero-volume
+    n_2 = len(time_listD)  # After removing zero-volume
     time_list_removed = []
     # Removing all days where Volume is zero
-    time_list_days, time_list_removed, volumes_days, spread_days, returns_days, volatility_days \
-        = supp.remove_list1_zeros_from_all_lists(time_list_days, time_list_removed, volumes_days, spread_days,
-                                                 returns_days, volatility_days)
+    time_listD, time_list_removed, volumesD, spreadD, returnsD, rvolD \
+        = supp.remove_list1_zeros_from_all_lists(time_listD, time_list_removed, volumesD, spreadD,
+                                                 returnsD, rvolD)
+    print("Line nr.", gf(cf()).lineno)
 
     # --------------------------------------------
     days_to_remove = []
     if exc == 0:
-        days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
-        days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
-        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.05)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 1000)
+        days_to_remove = supp.remove_extremes(days_to_remove, returnsD, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, rvolD, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.1)
     elif exc == 1:
-        days_to_remove = supp.remove_extremes(days_to_remove, returns_days, 0.1, threshold_lower=-0.1)
-        days_to_remove = supp.remove_extremes(days_to_remove, volatility_days, 2)
-        days_to_remove = supp.remove_extremes(days_to_remove, spread_days, 0.03)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiq_days, 6)
+        days_to_remove = supp.remove_extremes(days_to_remove, returnsD, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, rvolD, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.1)
+    elif exc == 2:
+        days_to_remove = supp.remove_extremes(days_to_remove, returnsD, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, rvolD, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.1)
 
     for d in days_to_remove:
-        time_list_removed = np.append(time_list_removed, time_list_days[d])
-    time_list_days = np.delete(time_list_days, days_to_remove)
-    returns_days = np.delete(returns_days, days_to_remove)
-    volumes_days = np.delete(volumes_days, days_to_remove)
-    spread_days = np.delete(spread_days, days_to_remove)
-    volatility_days = np.delete(volatility_days, days_to_remove)
-    illiq_days = np.delete(illiq_days, days_to_remove)
+        time_list_removed = np.append(time_list_removed, time_listD[d])
+    time_listD = np.delete(time_listD, days_to_remove)
+    returnsD = np.delete(returnsD, days_to_remove)
+    volumesD = np.delete(volumesD, days_to_remove)
+    spreadD = np.delete(spreadD, days_to_remove)
+    rvolD = np.delete(rvolD, days_to_remove)
+    illiqD = np.delete(illiqD, days_to_remove)
     illiq_time = np.delete(illiq_time, days_to_remove)
 
     plot_after_removal = 0
     if plot_after_removal == 1:
-        plt.plot(volatility_days)
+        plt.plot(rvolD)
         plt.title("rvol")
         plt.figure()
-        plt.plot(spread_days)
+        plt.plot(spreadD)
         plt.title("spreadH")
         plt.figure()
-        plt.plot(volumes_days)
+        plt.plot(volumesD)
         plt.title("volume")
         plt.figure()
-        plt.plot(illiq_days)
+        plt.plot(illiqD)
         plt.title("illiq")
         plt.figure()
-        plt.plot(returns_days)
+        plt.plot(returnsD)
         plt.title("returnsH")
         plt.show()
 
-    n_3 = len(time_list_days)  # After removing the extremes
+    n_3 = len(time_listD)  # After removing the extremes
 
     # Removing all days where Roll is zero
-    time_list_days_clean, time_list_removed, spread_days_clean, volumes_days_clean, returns_days_clean, \
-    volatility_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days,
-                                                                                     time_list_removed,
-                                                                                     spread_days,
-                                                                                     volumes_days,
-                                                                                     returns_days,
-                                                                                     volatility_days,
-                                                                                     illiq_days)
+    time_listD, time_list_removed, spreadD, volumesD, returnsD, \
+    rvolD, illiqD = supp.remove_list1_zeros_from_all_lists(time_listD,
+                                                           time_list_removed,
+                                                           spreadD,
+                                                           volumesD,
+                                                           returnsD,
+                                                           rvolD,
+                                                           illiqD)
+    print("Line nr.", gf(cf()).lineno)
 
-
-    n_4 = len(time_list_days_clean)  # After removing the zero-roll
+    n_4 = len(time_listD)  # After removing the zero-roll
 
     # Removing all days where Volatility is zero
-    time_list_days_clean, time_list_removed, volatility_days_clean, volumes_days_clean, returns_days_clean, \
-    spread_days_clean, illiq_days_clean = supp.remove_list1_zeros_from_all_lists(time_list_days_clean,
-                                                                                 time_list_removed,
-                                                                                 volatility_days_clean,
-                                                                                 volumes_days_clean,
-                                                                                 returns_days_clean,
-                                                                                 spread_days_clean, illiq_days_clean)
+    time_listD, time_list_removed, rvolD, volumesD, returnsD, \
+    spreadD, illiqD = supp.remove_list1_zeros_from_all_lists(time_listD,
+                                                             time_list_removed,
+                                                             rvolD,
+                                                             volumesD,
+                                                             returnsD,
+                                                             spreadD, illiqD)
 
-
-    n_5 = len(time_list_days_clean)  # After removing the zero-volatility
+    n_5 = len(time_listD)  # After removing the zero-volatility
+    print("Line nr.", gf(cf()).lineno)
 
     show_days_table = print_days_excluded
     if show_days_table == 1:
@@ -946,16 +992,14 @@ def clean_trans_days(time_list_minutes, prices_minutes, volumes_minutes, exc=0, 
         print("Removing zero-volatility:", n_5)
 
     # Turning ILLIQ, Volume and RVol into log
-    log_illiq_days_clean = np.log(illiq_days_clean)
-    log_volatility_days_clean = np.log(volatility_days_clean)
-    log_volumes_days_clean = volume_transformation(volumes_days_clean, mean_volume_prev_year)
+    log_illiqD = np.log(illiqD)
+    log_rvolD = np.log(rvolD)
+    log_volumesD = volume_transformation(volumesD, mean_volume_prev_year)
 
-    return time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
-           illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean
+    return time_listD, time_list_removed, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD
 
 
-def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0, convert_time_zones=1):
-
+def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1):
     remove_extremes = 1
 
     if convert_time_zones:  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
@@ -963,154 +1007,167 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
             n_hours = 0
         elif exc == 1:
             n_hours = 9
-            print("Converting time zones: moving series %i hours" % n_hours)
+        elif exc == 2:
+            n_hours = 8
         else:
             n_hours = 0
+        print("Converting time zones: moving series %i hours" % n_hours)
     else:
         n_hours = 0
 
-    year, month, day, hour, minute = supp.fix_time_list(time_list_minutes, move_n_hours=n_hours) # Flytter nå Coincheck ni timer, men lar Bitstamp stå
+    year, month, day, hour, minute = supp.fix_time_list(time_listM,
+                                                        move_n_hours=n_hours)  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
     if n_hours != 0:
-        time_list_minutes = supp.make_time_list(year, month, day, hour, minute)  # Lager en ny tidsliste fra de flyttede listene
+        time_listM = supp.make_time_list(year, month, day, hour,
+                                         minute)  # Lager en ny tidsliste fra de flyttede listene
 
-    prices_minutes = prices_minutes[exc, :]
-    volumes_minutes = volumes_minutes[exc, :]
-    returns_minutes = jake_supp.logreturn(prices_minutes)
+    pricesM = pricesM[exc, :]
+    volumesM = volumesM[exc, :]
+    returns_minutes = jake_supp.logreturn(pricesM)
 
-    time_list_hours, prices_hours, volumes_hours = convert_to_hour(time_list_minutes, prices_minutes, volumes_minutes)
-    returns_hours = jake_supp.logreturn(prices_hours)
+    time_listH, prices_hours, volumesH = convert_to_hour(time_listM, pricesM, volumesM)
+    returnsH = jake_supp.logreturn(prices_hours)
 
-    spread_abs, spread_hours, time_list_spread, count_value_error = rolls.rolls(prices_minutes, time_list_minutes, calc_basis="h", kill_output=1)
-    illiq_hours_time, illiq_hours = ILLIQ.illiq(time_list_minutes, returns_minutes, volumes_minutes, hourly_or_daily="h", threshold=0)
-    rvol_hours, time_list_rvol = realized_volatility.RVol(time_list_minutes, prices_minutes, daily=0, annualize=1)
+    spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h",
+                                                                           kill_output=1)
+    illiq_hours_time, illiqH = ILLIQ.illiq(time_listM, returns_minutes, volumesM, hourly_or_daily="h", threshold=0)
+    rvolH, time_list_rvol = realized_volatility.RVol(time_listM, pricesM, daily=0, annualize=1)
 
-    n_0 = len(time_list_hours) # initial number of hours
+    n_0 = len(time_listH)  # initial number of hours
 
     time_list_removed = []
     # Removing all hours where Volume is zero
-    time_list_hours, time_list_removed, volumes_hours, spread_hours, returns_hours, rvol_hours \
-        = supp.remove_list1_zeros_from_all_lists(time_list_hours, time_list_removed, volumes_hours, spread_hours,
-                                                 returns_hours, rvol_hours)
+    time_listH, time_list_removed, volumesH, spreadH, returnsH, rvolH \
+        = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, volumesH, spreadH,
+                                                 returnsH, rvolH)
 
-    n_1 = len(time_list_hours)  # After removing the zero-volume
+    n_1 = len(time_listH)  # After removing the zero-volume
+    end_time = ""
 
-    if exc == 0:
-        #cutoff_hour = 8784  # 2012
+    if exc == 0 or exc ==2:
         cutoff_date = "01.01.2013 00:00"
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
-        # cutoff_hour = 35064  # 2012-2015
-        #cutoff_hour = 26304  # 2012-2014
         cutoff_date = "01.06.2016 00:00"
         start_averaging_date = "30.10.2014 00:00"
+    elif exc == 2:
+        cutoff_date = "01.01.2013 00:00"
+        start_averaging_date = "01.01.2012 00:00"
+        end_time = "30.09.2017 00:00"
     else:
         print("Choose an exchange!")
 
-    cutoff_hour = supp.find_date_index(cutoff_date, time_list_hours)
-    start_averaging_hour = supp.find_date_index(start_averaging_date, time_list_hours)
+    cutoff_hour = supp.find_date_index(cutoff_date, time_listH)
+    start_averaging_hour = supp.find_date_index(start_averaging_date, time_listH)
+    if len(end_time) > 1:
+        end_hour = supp.find_date_index(end_time, time_listH)
+    else:
+        end_hour = len(time_listH) - 1
 
-    mean_volume_prev_year = np.average(volumes_hours[start_averaging_hour:cutoff_hour])
+    mean_volume_prev_year = np.average(volumesH[start_averaging_hour:cutoff_hour])
 
-    total_hours = len(time_list_hours) - 1
-    time_list_hours = time_list_hours[cutoff_hour:total_hours]
-    returns_hours = returns_hours[cutoff_hour:total_hours]
-    volumes_hours = volumes_hours[cutoff_hour:total_hours]
-    spread_hours = spread_hours[cutoff_hour:total_hours]
-    illiq_hours = illiq_hours[cutoff_hour:len(illiq_hours) - 1]
-    rvol_hours = rvol_hours[cutoff_hour:total_hours]
+    time_listH = time_listH[cutoff_hour:end_hour]
+    print("Only including days after", time_listH[0], "to", time_listH[len(time_listH) - 1])
+    returnsH = returnsH[cutoff_hour:end_hour]
+    volumesH = volumesH[cutoff_hour:end_hour]
+    spreadH = spreadH[cutoff_hour:end_hour]
+    illiqH = illiqH[cutoff_hour:end_hour]
+    rvolH = rvolH[cutoff_hour:end_hour]
 
     plot_raw = 0
     if plot_raw == 1:
-        #lt.plot(rvol_hours)
-        #plt.title("Raw rvol")
-        #plt.figure()
-        plt.plot(spread_hours)
+        # lt.plot(rvolH)
+        # plt.title("Raw rvol")
+        # plt.figure()
+        plt.plot(spreadH)
         plt.title("Raw spreadH")
         plt.figure()
-        plt.plot(volumes_hours)
+        plt.plot(volumesH)
         plt.title("Raw volume")
         plt.figure()
-        plt.plot(illiq_hours)
+        plt.plot(illiqH)
         plt.title("Raw illiq")
         plt.figure()
-        #plt.plot(returnsH)
-        #plt.title("Raw returnsH")
-        #plt.figure()
+        # plt.plot(returnsH)
+        # plt.title("Raw returnsH")
+        # plt.figure()
 
-    n_1 = len(time_list_hours)
+    n_1 = len(time_listH)
 
     hours_to_remove = []
 
     if remove_extremes == 1:
         if exc == 0:
-            hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.1, threshold_lower=-0.1)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.05)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 1000)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returnsH, 0.1, threshold_lower=-0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvolH, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.01)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.1)
         elif exc == 1:
-            hours_to_remove = supp.remove_extremes(hours_to_remove, returns_hours, 0.075, threshold_lower=-0.075)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, rvol_hours, 2)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, spread_hours, 0.1)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiq_hours, 1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returnsH, 0.075, threshold_lower=-0.075)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvolH, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.1)
+        elif exc == 2:
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returnsH, 0.075, threshold_lower=-0.075)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvolH, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.1)
 
-    time_list_hours = np.delete(time_list_hours, hours_to_remove)
-    returns_hours = np.delete(returns_hours, hours_to_remove)
-    volumes_hours = np.delete(volumes_hours, hours_to_remove)
-    spread_hours = np.delete(spread_hours, hours_to_remove)
-    illiq_hours = np.delete(illiq_hours, hours_to_remove)
-    rvol_hours = np.delete(rvol_hours, hours_to_remove)
+    time_listH = np.delete(time_listH, hours_to_remove)
+    returnsH = np.delete(returnsH, hours_to_remove)
+    volumesH = np.delete(volumesH, hours_to_remove)
+    spreadH = np.delete(spreadH, hours_to_remove)
+    illiqH = np.delete(illiqH, hours_to_remove)
+    rvolH = np.delete(rvolH, hours_to_remove)
+
+    print(" %i: time %i, spread %i, rvol %i, illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH)))
+
 
     plot_after_removal = 0
     if plot_after_removal == 1:
-        #plt.plot(rvol_hours)
-        #plt.title("rvol")
-        #plt.figure()
-        plt.plot(spread_hours)
+        # plt.plot(rvolH)
+        # plt.title("rvol")
+        # plt.figure()
+        plt.plot(spreadH)
         plt.title("spreadH")
         plt.figure()
-        plt.plot(volumes_hours)
+        plt.plot(volumesH)
         plt.title("volume")
         plt.figure()
-        plt.plot(illiq_hours)
+        plt.plot(illiqH)
         plt.title("illiq")
-        #plt.figure()
-        #plt.plot(returnsH)
-        #plt.title("returnsH")
-
-
+        # plt.figure()
+        # plt.plot(returnsH)
+        # plt.title("returnsH")
 
     # Removing all days where Roll is zero
-    time_list_hours, time_list_removed, spread_hours, volumes_hours, returns_hours, \
-    illiq_hours, rvol_hours = supp.remove_list1_zeros_from_all_lists(time_list_hours,
-                                                                     time_list_removed,
-                                                                     spread_hours,
-                                                                     volumes_hours,
-                                                                     returns_hours,
-                                                                     illiq_hours, rvol_hours)
+    time_listH, time_list_removed, spreadH, volumesH, returnsH, \
+    illiqH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH,
+                                                           time_list_removed,
+                                                           spreadH,
+                                                           volumesH,
+                                                           returnsH,
+                                                           illiqH, rvolH)
 
-
-    n_4 = len(time_list_hours)  # After removing the zero-roll
+    n_4 = len(time_listH)  # After removing the zero-roll
 
     # Removing all hours where Rvol is zero
-    time_list_hours, time_list_removed, rvol_hours, spread_hours, volumes_hours, returns_hours, \
-    illiq_hours = supp.remove_list1_zeros_from_all_lists(time_list_hours,
-                                                         time_list_removed,
-                                                         rvol_hours,
-                                                         spread_hours,
-                                                         volumes_hours,
-                                                         returns_hours,
-                                                         illiq_hours)
+    time_listH, time_list_removed, rvolH, spreadH, volumesH, returnsH, \
+    illiqH = supp.remove_list1_zeros_from_all_lists(time_listH,
+                                                    time_list_removed,
+                                                    rvolH,
+                                                    spreadH,
+                                                    volumesH,
+                                                    returnsH,
+                                                    illiqH)
 
+    n_5 = len(time_listH)  # After removing the zero-volatility
 
-    n_5 = len(time_list_hours)  # After removing the zero-volatility
+    illiq_hours_time = time_listH
 
+    print(" %i: time %i, spread %i, rvol %i, illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH)))
+    #illiq_hours_time, time_list_removed, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, illiqH)
 
-    illiq_hours_time = time_list_hours
-
-    illiq_hours_time, time_list_removed, illiq_hours = supp.remove_list1_zeros_from_all_lists(
-        time_list_hours,
-        time_list_removed,
-        illiq_hours)
 
     show_hours_table = 0
     if show_hours_table == 1:
@@ -1124,14 +1181,16 @@ def clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=0,
         print("Removing zero-vol:", n_5)
 
     # Turning ILLIQ, Volume and rvol into log
-    log_illiq_hours = np.log(illiq_hours)
-    log_volumes_hours = volume_transformation(volumes_hours, mean_volume_prev_year)
-    log_rvol_hours = np.log(rvol_hours)
+    log_illiqH = np.log(illiqH)
+    log_volumesH = volume_transformation(volumesH, mean_volume_prev_year)
+    log_rvolH = np.log(rvolH)
 
     if plot_raw + plot_after_removal > 0:
         plt.show()
 
-    return time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, log_illiq_hours, rvol_hours, log_rvol_hours
+    print(" %i: time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
+
+    return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
 
 
 def fetch_aggregate_csv_hilo(file_name, n_exc):

@@ -69,7 +69,7 @@ if raw == 1:
 if clean == 1:
     # CLEAN
     time_list_days_clean, time_list_removed, returns_days_clean, volumes_days_clean, log_volumes_days_clean, spread_days_clean, \
-    illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_trans_days(
+    illiq_days_clean, log_illiq_days_clean, volatility_days_clean, log_volatility_days_clean = dis.clean_series_days(
         time_list_minutes, prices_minutes,
         volumes_minutes, full_week=1, exc=exc)
 

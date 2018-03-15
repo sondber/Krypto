@@ -15,29 +15,31 @@ import math
 intraday = 1
 intraweek = 1
 
-exch = [1]  # 0=bitstamp, 1=coincheck
+exch = [2]  # 0=bitstamp, 1=coincheck
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
 
 for exc in exch:
     exc_name = "_" + exchanges[exc]
     print()
-    print("SEASONALITY FOR", exchanges[exc].upper())
+    print("-----------------------SEASONALITY FOR", exchanges[exc].upper()+"------------------------")
 
     if intraday == 1:
         # HOURS ----------------------------------------------------------------------------------------------------
         print("------ INTRADAY  ------")
 
-        time_list_hours, returns_hours, spread_hours, log_volumes_hours, illiq_hours, log_illiq_hours, rvol_hours, log_rvol_hours = \
-            dis.clean_trans_hours(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
+        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH= \
+            dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
+
+        print(len(time_listH), len(spreadH), len(rvolH), len(log_rvolH), len(log_illiqH))
 
         # Finding average for every hour of the day
-        hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_list_hours, returns_hours, frequency="h")
-        hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours, log_volumes_hours, frequency="h")
-        hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours, spread_hours, frequency="h")
-        hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_list_hours, rvol_hours, frequency="h")
+        hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_listH, returnsH, frequency="h")
+        hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_listH, log_volumesH, frequency="h")
+        hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_listH, spreadH, frequency="h")
+        hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_listH, rvolH, frequency="h")
         #hour_of_day, avg_log_rvol_hour, low_log_rvol_hour, upper_log_rvol_hour = dis.cyclical_average(time_listH, log_rvol_hours, frequency="h")
-        hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_list_hours, illiq_hours, frequency="h")
+        hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_listH, illiqH, frequency="h")
         #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_timeH, log_illiq_hours, frequency="h")
 
         plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return" + exc_name, perc=1, ndigits=2, yzero=1)
@@ -52,24 +54,23 @@ for exc in exch:
         print("------ INTRAWEEK ------")
         # DAYS ----------------------------------------------------------------------------------------------------
         # Converting to daily data
-        returns_minutes = jake_supp.logreturn(prices_minutes[exc, :])
-        time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, \
-        illiq_days, log_illiq_days, rvol_days, log_rvol_days = dis.clean_trans_days(
-            time_list_minutes, prices_minutes, volumes_minutes, exc=exc, print_days_excluded=0, convert_time_zones=1)
+        returns_minutes = jake_supp.logreturn(pricesM[exc, :])
+        time_listD, time_list_removed, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = \
+            dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, print_days_excluded=0, convert_time_zones=1)
 
-        day_of_week, avg_returns_day, low_returns_day, upper_returns_day = dis.cyclical_average(time_list_days, returns_days, frequency="d")
-        day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_list_days, spread_days, frequency="d")
-        day_of_week, avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average(time_list_days, illiq_days, frequency="d")
-        day_of_week, avg_rvol_day, low_rvol_day, upper_rvol_day = dis.cyclical_average(time_list_days, rvol_days, frequency="d")
+        day_of_week, avg_returns_day, low_returns_day, upper_returns_day = dis.cyclical_average(time_listD, returnsD, frequency="d")
+        day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_listD, spreadD, frequency="d")
+        day_of_week, avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average(time_listD, illiqD, frequency="d")
+        day_of_week, avg_rvol_day, low_rvol_day, upper_rvol_day = dis.cyclical_average(time_listD, rvolD, frequency="d")
         plot.intraweek(avg_returns_day, low_returns_day, upper_returns_day, title="Return" + exc_name, perc=1, ndigits=1)
         plot.intraweek(avg_spread_day, low_spread_day, upper_spread_day, title="Spread" + exc_name, perc=1, ndigits=3)
         plot.intraweek(avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean, title="ILLIQ" + exc_name, perc=1,   logy=0, ndigits=3)
         plot.intraweek(avg_rvol_day, low_rvol_day, upper_rvol_day, title="RVol" + exc_name, perc=1,   logy=0, ndigits=3)
 
         # Finding average for transformed
-        day_of_week, avg_log_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(time_list_days, log_volumes_days, frequency="d")
-        #day_of_week, avg_log_rvol_day, low_log_rvol_day, upper_log_rvol_day = dis.cyclical_average(time_list_days, log_rvol_days, frequency="d")
-        #day_of_week, avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day = dis.cyclical_average(time_list_days, log_illiq_days, frequency="d")
+        day_of_week, avg_log_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(time_listD, log_volumesD, frequency="d")
+        #day_of_week, avg_log_rvol_day, low_log_rvol_day, upper_log_rvol_day = dis.cyclical_average(time_listD, log_rvolD, frequency="d")
+        #day_of_week, avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day = dis.cyclical_average(time_listD, log_illiqD, frequency="d")
 
         #plot.intraweek(avg_log_rvol_day, low_log_rvol_day, upper_log_rvol_day, title="Log_RVol" + exc_name, perc=0,   logy=0, ndigits=0)
         #plot.intraweek(avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day, title="Log_ILLIQ" + exc_name, perc=0,   logy=0, ndigits=3)

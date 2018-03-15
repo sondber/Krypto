@@ -1,6 +1,7 @@
 import numpy as np
 import data_import as di
 import matplotlib.pyplot as plt
+import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
@@ -14,7 +15,6 @@ import math
 exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
 
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
-
 
 # For alle tre exchanges: lag BAS_lister
 bitstamp_pricesM = pricesM[0, :]
@@ -46,7 +46,8 @@ btcn_bas_clean = []
 time_listH_clean = []
 
 for i in range(len(time_listH)):
-    if bitstamp_volumesH[i] != 0 and coincheck_volumesH[i] != 0 and btcn_volumesH[i] != 0 and bitstamp_bas[i] != 0 and coincheck_bas[i] != 0 and btcn_bas[i] != 0:
+    if bitstamp_volumesH[i] != 0 and coincheck_volumesH[i] != 0 and btcn_volumesH[i] != 0 and bitstamp_bas[i] != 0 and \
+                    coincheck_bas[i] != 0 and btcn_bas[i] != 0:
         time_listH_clean.append(time_listH[i])
 
         bitstamp_volumeH_clean.append(bitstamp_volumesH[i])
@@ -57,15 +58,14 @@ for i in range(len(time_listH)):
         coincheck_bas_clean.append(coincheck_bas[i])
         btcn_bas_clean.append(btcn_bas[i])
 
+print(len(time_listH_clean), len(bitstamp_volumeH_clean), len(coincheck_volumeH_clean), len(btcn_volumeH_clean),
+      len(bitstamp_bas_clean), len(coincheck_bas_clean), len(btcn_bas_clean))
 
-
-print(len(time_listH_clean), len(bitstamp_volumeH_clean), len(coincheck_volumeH_clean), len(btcn_volumeH_clean), len(bitstamp_bas_clean), len(coincheck_bas_clean), len(btcn_bas_clean))
-
-
-dis.cyclical_average()
-plt.plot(bitstamp_volumeH_clean)
-plt.plot(coincheck_volumeH_clean)
-plt.plot(btcn_volumeH_clean)
-plt.show()
+day_time, bitstampV_average, bitstampV_lower, bitstampV_upper = dis.cyclical_average(time_listH_clean, bitstamp_volumeH_clean)
+day_time, coincheckV_average, coincheckV_lower, coincheckV_upper = dis.cyclical_average(time_listH_clean, coincheck_volumeH_clean)
+day_time, btcnV_average, btcnV_lower, btcnV_upper = dis.cyclical_average(time_listH_clean, btcn_volumeH_clean)
+plot.intraday(bitstampV_average,bitstampV_lower,bitstampV_upper,title="bitstamp")
+plot.intraday(coincheckV_average,coincheckV_lower,coincheckV_upper,title="coincheck")
+plot.intraday(btcnV_average,btcnV_lower,btcnV_upper,title="btcn")
 
 

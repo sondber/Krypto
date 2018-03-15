@@ -7,12 +7,12 @@ from Jacob import jacob_support as jake_supp
 
 # 1 kontrollpanel
 log_illiqs = 1 # Should log-illiq be used rather than plain illiq?
-hours_in_period = -1 # 1, 2, 3, or 4 hours in dummies
+hours_in_period = 4 # 2, 3 or 4 hours in dummies
 standardized_coeffs = 0 # Should be 1
 
-benchmark_only = 0 # For testing
-bullshit = 0
-bench_type = 1
+benchmark_only = 1  # For testing
+bullshit = 1
+bench_type = 2
 
 spread_determinants = 1  # perform analysis on determinants of spread
 illiq_determinants = 0  # perform analysis on determinants of illiq    IKKE LAGET ENDA
@@ -56,6 +56,7 @@ for exc in exchanges:
 
     if spread_determinants == 1:
         print(" DETERMINANTS OF INTRADAY BAS-------------------")
+        print()
         Y = spreadH
         end_index = len(spreadH) # Final index for all series
         n_cols = 10  # 10 for BAS og for ILLIQ
@@ -74,16 +75,18 @@ for exc in exchanges:
         X_contemp = X_benchmark
         X_lagged = X_benchmark
 
+        """
+        for i in range(np.size(X_benchmark,0)):
+            for j in range(np.size(X_benchmark,1)-1):
+                print(int(X_benchmark[i, j]), end="  ")
+            print(np.sum(X_benchmark[i, 0:6]))
+        """
+
         m_col = 0
         # Benchmark
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=benchmark_only, intercept=0)
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=benchmark_only, intercept=1)
 
-        if benchmark_only == 1 and bullshit == 1:
-            for i in range(np.size(X_benchmark,0)):
-                for j in range(np.size(X_benchmark,1)):
-                    print(X_benchmark[i, j], end=" ")
-                print()
-        elif benchmark_only == 0:
+        if benchmark_only == 0:
             # Return
             X_temp = returnsH[max_lag:end_index]
             X_temp = np.transpose(np.matrix(X_temp))

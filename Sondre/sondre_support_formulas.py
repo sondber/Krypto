@@ -839,6 +839,9 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
     y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-lag)
     time_stamp = make_time_list(y, mo, d, h, mi)
 
+    for i in range(len(time_stamp)):
+        print(time_stamp[i])
+
     for i in range(len(time_stamp) - 1, -1, -1):
         for j in range(i, i - lag - 1, -1):
             if time_stamp[i] == time_list[j]:
@@ -858,26 +861,23 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
     n_avg = 0
     last_day_average = np.zeros(len(data))
 
-
-    last_day_average = []
-    """
     for i in range(0, len(data)):
         # determine starting point of averaging. If none is found, average is set to -1
         y_i, mo_i, d_i, h_i, mi_i = fix_time_list(time_list[i], single_time_stamp=1)
-        timeindex_i = y_i*(365*31*24*60)+mo_i*(31*24*60)+d_i*(24*60)+h_i*60+mi_i
+        timeindex_i = y_i * (365 * 31 * 24 * 60) + mo_i * (31 * 24 * 60) + d_i * (24 * 60) + h_i * 60 + mi_i
         start_point_avg = -1
         if index_list_prev_lag[i] == -1:
-            for k in range(max(0, i-lag), i):
+            for k in range(max(0, i - lag), i):
                 y_k, mo_k, d_k, h_k, mi_k = fix_time_list(time_list[k], single_time_stamp=1)
-                timeindex_k = y_k*(365*31*24*60)+mo_k*(31*24*60)+d_k*(24*60)+h_k*60+mi_i
-                if timeindex_i - timeindex_k < lag*60:
+                timeindex_k = y_k * (365 * 31 * 24 * 60) + mo_k * (31 * 24 * 60) + d_k * (24 * 60) + h_k * 60 + mi_k
+                if timeindex_i - timeindex_k < lag * 60:
                     start_point_avg = k
                     break
         else:
             start_point_avg = int(index_list_prev_lag[i])
 
         if start_point_avg == -1:
-            last_day_average[i] = -1
+                last_day_average[i] = -1
         else:
             for j in range(start_point_avg, i):
                 partsum += data[j]
@@ -885,10 +885,6 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
             last_day_average[i] = partsum / n_avg
             partsum = 0
             n_avg = 0
-            last_day_average = np.append(last_day_average,)
-        for j in range(index_list_prev_lag[i],i):
-            if
-    """
 
     return last_day_average
 

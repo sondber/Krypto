@@ -837,7 +837,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         cutoff_min_date = "01.01.2016 09:00"
         start_averaging_date = "30.10.2014 00:00"
     elif exc == 2:
-        cutoff_date = "01.01.2014 00:00"
+        cutoff_date = "01.01.2013 00:00"
         cutoff_min_date = "01.01.2013 08:00"
         end_time_D = "01.01.2017 00:00"
         end_time_M = "01.01.2017 08:00"
@@ -870,18 +870,30 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     n_1 = len(time_listD)  # After removing 2012
 
     # Rolls
-    spread_abs, spreadD, time_list_rolls, count_value_error = rolls.rolls(pricesM, time_listM,
-                                                                          calc_basis="d", kill_output=1)
+    spread_abs, spreadD, time_list_rolls, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="d", kill_output=1)
 
     # Realized volatility
     rvolD, RVol_time = realized_volatility.RVol(time_listM, pricesM, daily=1, annualize=1)
 
     # Returns
-    returns_minutes = jake_supp.logreturn(pricesM)
+    returnsM = jake_supp.logreturn(pricesM)
     returnsD = jake_supp.logreturn(pricesD)
     # Amihud's ILLIQ
-    illiq_time, illiqD = ILLIQ.illiq(time_listM, returns_minutes, volumesM, threshold=0)  # Already clean
+    illiq_timeD, illiqD = ILLIQ.illiq(time_listM, returnsM, volumesM, threshold=0)  # Already clean
 
+    print()
+    print("TABLE OF TIME STARTS AND ENDS")
+    print("Minutes", len(time_listM))
+    print(" ", time_listM[0], time_listM[len(time_listM)-1])
+    print("Days", len(time_listD))
+    print(" ", time_listD[0], time_listD[len(time_listD)-1])
+    print("Spread", len(time_list_rolls))
+    print(" ", time_list_rolls[0], time_list_rolls[len(time_list_rolls)-1])
+    print("RVOL", len(RVol_time))
+    print(" ", RVol_time[0], RVol_time[len(RVol_time)-1])
+    print("illiq", len(illiq_timeD))
+    print(" ", illiq_timeD[0], illiq_timeD[len(illiq_timeD)-1])
+    print()
     plot_raw = 0
     if plot_raw == 1:
         plt.plot(rvolD)
@@ -903,9 +915,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     n_2 = len(time_listD)  # After removing zero-volume
     time_list_removed = []
     # Removing all days where Volume is zero
-    time_listD, time_list_removed, volumesD, spreadD, returnsD, rvolD \
-        = supp.remove_list1_zeros_from_all_lists(time_listD, time_list_removed, volumesD, spreadD,
-                                                 returnsD, rvolD)
+    time_listD, time_list_removed, volumesD, spreadD, returnsD, rvolD = supp.remove_list1_zeros_from_all_lists(time_listD, time_list_removed, volumesD, spreadD, returnsD, rvolD)
     print("Line nr.", gf(cf()).lineno)
 
     # --------------------------------------------
@@ -934,7 +944,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     spreadD = np.delete(spreadD, days_to_remove)
     rvolD = np.delete(rvolD, days_to_remove)
     illiqD = np.delete(illiqD, days_to_remove)
-    illiq_time = np.delete(illiq_time, days_to_remove)
+    illiq_timeD = np.delete(illiq_timeD, days_to_remove)
 
     plot_after_removal = 0
     if plot_after_removal == 1:
@@ -980,18 +990,6 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
 
     n_5 = len(time_listD)  # After removing the zero-volatility
     print("Line nr.", gf(cf()).lineno)
-
-    show_days_table = print_days_excluded
-    if show_days_table == 1:
-        print()
-        print()
-        print("Total days:", n_total)
-        print("Week only:", n_0)
-        print("Removing 2012:", n_1)
-        print("Removing zero-volume:", n_2)
-        print("Removing extreme days:", n_3)
-        print("Removing zero-roll:", n_4)
-        print("Removing zero-volatility:", n_5)
 
     # Turning ILLIQ, Volume and RVol into log
     log_illiqD = np.log(illiqD)
@@ -1139,28 +1137,12 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     # Removing all days where Roll is zero
     time_listH, time_list_removed, spreadH, volumesH, returnsH, illiqH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH,time_list_removed,spreadH,volumesH,returnsH,illiqH, rvolH)
 
-    n_4 = len(time_listH)  # After removing the zero-roll
 
     # Removing all hours where Rvol is zero
     time_listH, time_list_removed, rvolH, spreadH, volumesH, returnsH, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed,rvolH,spreadH,volumesH,returnsH,illiqH)
 
-    n_5 = len(time_listH)  # After removing the zero-volatility
-
-    illiq_hours_time = time_listH
-
-    illiq_hours_time, time_list_removed, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, illiqH)
-
-
-    show_hours_table = 0
-    if show_hours_table == 1:
-        print()
-        print()
-        print("Total:", n_0)
-        print("Removing beginning:", n_1)
-        print("Removing crazy :", n_2)
-        print("Removing zero-volume:", n_3)
-        print("Removing zero-roll:", n_4)
-        print("Removing zero-vol:", n_5)
+    # Removing all hours where ILLIQ is zero
+    time_listH, time_list_removed, illiqH , rvolH, spreadH, volumesH, returnsH= supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed,illiqH,rvolH,spreadH,volumesH,returnsH)
 
     # Turning ILLIQ, Volume and rvol into log
     log_illiqH = np.log(illiqH)
@@ -1170,7 +1152,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     if plot_raw + plot_after_removal > 0:
         plt.show()
 
-    print(" %i: time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
+    print("dis.%i: Length of time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
 
     return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
 

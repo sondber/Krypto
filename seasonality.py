@@ -12,7 +12,7 @@ import realized_volatility
 import math
 
 
-intraday = 1
+intraday = 0
 intraweek = 1
 
 exch = [2]  # 0=bitstamp, 1=coincheck

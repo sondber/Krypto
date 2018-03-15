@@ -22,9 +22,9 @@ bitstamp_pricesM = pricesM[0, :]
 bitstamp_pricesM = pricesM[0, :]
 
 #
-bitstamp_bas = rolls.rolls(.....)
-bitstamp_bas = rolls.rolls(.....)
-bitstamp_bas = rolls.rolls(.....)
+#bitstamp_bas = rolls.rolls(.....)
+#bitstamp_bas = rolls.rolls(.....)
+#bitstamp_bas = rolls.rolls(.....)
 
 #
 for i in range(len(time_listH)):

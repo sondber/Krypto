@@ -1028,8 +1028,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     time_listH, prices_hours, volumesH = convert_to_hour(time_listM, pricesM, volumesM)
     returnsH = jake_supp.logreturn(prices_hours)
 
-    spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h",
-                                                                           kill_output=1)
+    spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
     illiq_hours_time, illiqH = ILLIQ.illiq(time_listM, returns_minutes, volumesM, hourly_or_daily="h", threshold=0)
     rvolH, time_list_rvol = realized_volatility.RVol(time_listM, pricesM, daily=0, annualize=1)
 
@@ -1037,9 +1036,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
 
     time_list_removed = []
     # Removing all hours where Volume is zero
-    time_listH, time_list_removed, volumesH, spreadH, returnsH, rvolH \
-        = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, volumesH, spreadH,
-                                                 returnsH, rvolH)
+    time_listH, time_list_removed, volumesH, spreadH, returnsH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, volumesH, spreadH, returnsH, rvolH)
 
     n_1 = len(time_listH)  # After removing the zero-volume
     end_time = ""
@@ -1120,9 +1117,6 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     illiqH = np.delete(illiqH, hours_to_remove)
     rvolH = np.delete(rvolH, hours_to_remove)
 
-    print(" %i: time %i, spread %i, rvol %i, illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH)))
-
-
     plot_after_removal = 0
     if plot_after_removal == 1:
         # plt.plot(rvolH)
@@ -1141,32 +1135,18 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         # plt.title("returnsH")
 
     # Removing all days where Roll is zero
-    time_listH, time_list_removed, spreadH, volumesH, returnsH, \
-    illiqH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH,
-                                                           time_list_removed,
-                                                           spreadH,
-                                                           volumesH,
-                                                           returnsH,
-                                                           illiqH, rvolH)
+    time_listH, time_list_removed, spreadH, volumesH, returnsH, illiqH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH,time_list_removed,spreadH,volumesH,returnsH,illiqH, rvolH)
 
     n_4 = len(time_listH)  # After removing the zero-roll
 
     # Removing all hours where Rvol is zero
-    time_listH, time_list_removed, rvolH, spreadH, volumesH, returnsH, \
-    illiqH = supp.remove_list1_zeros_from_all_lists(time_listH,
-                                                    time_list_removed,
-                                                    rvolH,
-                                                    spreadH,
-                                                    volumesH,
-                                                    returnsH,
-                                                    illiqH)
+    time_listH, time_list_removed, rvolH, spreadH, volumesH, returnsH, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed,rvolH,spreadH,volumesH,returnsH,illiqH)
 
     n_5 = len(time_listH)  # After removing the zero-volatility
 
     illiq_hours_time = time_listH
 
-    print(" %i: time %i, spread %i, rvol %i, illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH)))
-    #illiq_hours_time, time_list_removed, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, illiqH)
+    illiq_hours_time, time_list_removed, illiqH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, illiqH)
 
 
     show_hours_table = 0

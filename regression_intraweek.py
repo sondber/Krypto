@@ -13,7 +13,7 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exch = [2]  # 0=bitstamp, 1=coincheck
 
-intraweek_pattern_regression = 1
+intraweek_pattern_regression = 0
 subtract_means = 1  # from day-of-week regression
 convert_coeffs_to_percentage = 1
 convert_logs = 0
@@ -23,8 +23,8 @@ determinants_regression = 1
 autoreg = 0
 
 rolls_multi = 1
-illiq_multi = 1
-return_multi = 1
+illiq_multi = 0
+return_multi = 0
 
 exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
 
@@ -310,6 +310,7 @@ for exc in exch:
             X_benchmark = np.append(X_benchmark, fri, axis=1)
             X_benchmark = np.append(X_benchmark, sat, axis=1)
             X_benchmark = np.append(X_benchmark, sun, axis=1)
+
 
             X_contemporary = X_benchmark
             X_lagged = X_benchmark

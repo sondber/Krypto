@@ -839,9 +839,6 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
     y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-lag)
     time_stamp = make_time_list(y, mo, d, h, mi)
 
-    for i in range(len(time_stamp)):
-        print(time_stamp[i])
-
     for i in range(len(time_stamp) - 1, -1, -1):
         for j in range(i, i - lag - 1, -1):
             if time_stamp[i] == time_list[j]:
@@ -923,29 +920,29 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.matrix(last_day_average)
         print("  supp.%i: Row %i is the average for the previous 24 hours" % (getframeinfo(currentframe()).lineno, n_dummies + 2))
-        X_HAR = np.transpose(X_HAR)
         print(np.size(X_HAR, 0), np.size(X_HAR, 1))
         print(np.size(last_day_average, 0), np.size(last_day_average, 1))
-        X_HAR = np.append(X_HAR, last_day_average, axis=1)
+        X_HAR = np.append(X_HAR, last_day_average, axis=0)
+        print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
+        X_HAR = np.transpose(X_HAR)
 
         max_lag = 24
-        X_HAR = X_HAR[:, max_lag:np.size(X_HAR, 1)]
+        X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
+        print("  supp.%i: X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 3: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = 48
     elif HAR_config == 4: # Denne skal inkludere AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = 48
 
-    # 6.4 Returnere en X_benchmark
     print("   Number of indeces that should be removed due to lag:", max_lag)
     Y = Y[max_lag:len(Y)]  # Passer på at disse har samme lengde
-    X_dummies = X_dummies[max_lag:len(X_dummies)]  # Passer på at disse har samme lengde
-    print("  supp.%i: Length of Y is %i and  X_dummies is (%i,%i)" % (
-    getframeinfo(currentframe()).lineno, len(Y), np.size(X_dummies, 0), np.size(X_dummies, 1)))
+    print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
+    X_dummies = X_dummies[max_lag:len(X_dummies),:]  # Passer på at disse har samme lengde
+    print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
     X_benchmark = np.append(X_dummies, X_HAR, axis=1)
-    print("  supp.%i: Length of Y is %i and  X_dummies is (%i,%i)" % (
-    getframeinfo(currentframe()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
-    Y = Y[max_lag:len(Y)]                   # Passer på at disse har samme lengde
+    print("  supp.%i: Length of Y is %i and  X_benchmark is (%i,%i)" % (getframeinfo(currentframe()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
+
     if hours_in_period != -1:
         X_dummies = X_dummies[max_lag:len(X_dummies)]   # Passer på at disse har samme lengde
         X_benchmark = X_dummies
@@ -953,6 +950,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
     if HAR_config > 0:
         X_HAR = np.transpose(X_HAR)
         if hours_in_period != -1:
+            print("  supp.%i: X_benchmark is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_benchmark, 0), np.size(X_benchmark, 1), np.size(X_HAR, 0),np.size(X_HAR, 1)))
             X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
         else:
             X_benchmark = X_HAR

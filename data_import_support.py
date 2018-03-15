@@ -570,11 +570,13 @@ def convert_to_hour(time_stamps, prices, volumes):
         prices_out = np.zeros([n_exc, n_hours])
         for exc in range(n_exc):
             k = 0
-            for t in range(60, n_mins, 60):
-                volumes_out[exc, k] = sum(volumes[exc, t - 60:t])
-                prices_out[exc, k] = prices[exc, t]
-                time_stamps_out.append(time_stamps[t - 60])
+            for t in range(0, n_mins, 60):
+                volumes_out[exc, k] = sum(volumes[exc, t:t+60])
+                prices_out[exc, k] = prices[exc, t+59]
                 k += 1
+                if exc == 0:
+                    time_stamps_out.append(time_stamps[t + 59])
+
     else:
         volumes_out = []
         prices_out = []

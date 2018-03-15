@@ -148,20 +148,28 @@ def move_time_list(year, month, day, hour, minute, move_n_hours=0, single_time_s
         n_entries = len(year)
         if move_n_hours < 0:  # Funker ikke for single_time_stamp
             n = -move_n_hours
+            extra_day = 0
+            while n > 24:
+                n -= 24
+                extra_day += 1
+
             for i in range(0, n_entries):
+                n_days = day[i]
+                mo = month[i]
+                y = year[i]
                 if hour[i] >= n:
                     hour[i] -= n
                 else:
-                    hour[i] = 24 - n + hour[i]
-                    if day[i] >= 2:
-                        day[i] -= 1
+                    hour[i] = 24 + hour[i] - n
+                    if n_days >= 2:
+                        n_days -= 1
                     else:  # I use "mo" and "y" for brevity, and let the long version be assigned at the end
-                        if month[i] == 1:
+                        if mo == 1:
                             mo = 12
-                            y = year[i] - 1
+                            y -= 1
                         else:
-                            mo = month[i] - 1
-                            y = year[i]
+                            mo -= 1
+                            y = y
                         if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
                             n_days = 31
                         elif mo == 2:
@@ -171,9 +179,32 @@ def move_time_list(year, month, day, hour, minute, move_n_hours=0, single_time_s
                                 n_days = 28
                         else:
                             n_days = 30
-                        day[i] = n_days
-                        month[i] = mo
-                        year[i] = y
+                    #FIRST ITERATION DONE BASED ON HOUR ONLY
+                    #NOW REMOWING EXTRA DAYS
+                for k in range(0, extra_day):
+                    if n_days >= 2:
+                        n_days -= 1
+                    else:  # I use "mo" and "y" for brevity, and let the long version be assigned at the end
+                        if mo == 1:
+                            mo = 12
+                            y -= 1
+                        else:
+                            mo -= 1
+                            y = y
+                        if mo == 1 or mo == 3 or mo == 5 or mo == 7 or mo == 8 or mo == 10 or mo == 12:
+                            n_days = 31
+                        elif mo == 2:
+                            if y % 4 == 0:
+                                n_days = 29
+                            else:
+                                n_days = 28
+                        else:
+                            n_days = 30
+
+                day[i] = n_days
+                month[i] = mo
+                year[i] = y
+
         elif move_n_hours > 0:
             n = move_n_hours
             for i in range(0, n_entries):
@@ -805,7 +836,7 @@ def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
     index_list = np.zeros(n_entries)
     found = 0
 
-    y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-24)
+    y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-lag)
     time_stamp = make_time_list(y, mo, d, h, mi)
 
     for i in range(len(time_stamp) - 1, -1, -1):
@@ -836,7 +867,7 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
             for k in range(max(0, i-lag), i):
                 y_k, mo_k, d_k, h_k, mi_k = fix_time_list(time_list[k], single_time_stamp=1)
                 timeindex_k = y_k*(365*31*24*60)+mo_k*(31*24*60)+d_k*(24*60)+h_k*60+mi_i
-                if timeindex_i - timeindex_k < 24*60:
+                if timeindex_i - timeindex_k < lag*60:
                     start_point_avg = k
                     break
         else:

@@ -4,8 +4,6 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-for i in range(0,1):
+for i in range(0,0):
     print("Test")
 
-
-print(int(7/4))

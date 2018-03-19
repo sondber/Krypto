@@ -17,7 +17,7 @@ intraweek = 1
 
 exch = [2]  # 0=bitstamp, 1=coincheck
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
 for exc in exch:
     exc_name = "_" + exchanges[exc]

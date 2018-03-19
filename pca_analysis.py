@@ -8,7 +8,7 @@ from Jacob import jacob_support as js
 from Sondre import sondre_support_formulas as supp
 
 # Load data set
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists("h")
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists_legacy("h")
 returns = js.logreturn(total_price)
 year, month, day, hour, minute = supp.fix_time_list(time_list)
 data = [returns, total_price, total_volume, year, month, day, hour, minute]

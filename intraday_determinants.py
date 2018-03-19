@@ -21,7 +21,7 @@ return_determinants = 0  # perform analysis on determinants of return  IKKE LAGE
 
 # 2 importere prices, volumes
 if bullshit == 0:
-    exchange_list, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
+    exchange_list, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
     exchanges = [0, 1, 2]
     exchanges = [1]  # just for testing
 else:

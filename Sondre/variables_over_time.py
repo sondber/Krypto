@@ -10,7 +10,7 @@ from Jacob import jacob_support as jake_supp
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
 exc = 2  #  0=bitstamp, 1=coincheck
 exc_name = "_" + exchanges[exc]
 

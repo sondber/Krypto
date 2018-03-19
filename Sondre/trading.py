@@ -8,7 +8,7 @@ start_wallet_BTC = 0
 
 
 print("Loading data...")
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists(2, 1)
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists_legacy(2, 1)
 print("Data loaded")
 
 price = prices[0,:]

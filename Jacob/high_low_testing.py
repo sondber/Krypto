@@ -1,14 +1,17 @@
-import high_low_spread as hilo
+import os
+
+import matplotlib.pyplot as plt
+
 import data_import as di
 import data_import_support as dis
-import matplotlib.pyplot as plt
-import os
+import high_low_spread as hilo
+import legacy
 
 os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
-exchanges, time_list, hi, lo = di.get_hilo(opening_hours="y")
+exchanges, time_list, hi, lo = legacy.get_hilo(opening_hours="y")
 
-exchanges1, time_list1, prices, volumes = di.get_lists(data="all", opening_hours="y", make_totals="n")
+exchanges1, time_list1, prices, volumes = di.get_lists_legacy(data="all", opening_hours="y", make_totals="n")
 
 
 # Index for 2013 minute: 101790

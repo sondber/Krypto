@@ -7,8 +7,8 @@ import data_import as di
 import os
 
 os.chdir("C:/Users/Marky/Documents/GitHub/krypto")
-volumes = di.get_lists("h", data="volume")
-prices = di.get_lists("h", data="prices")
+volumes = di.get_lists_legacy("h", data="volume")
+prices = di.get_lists_legacy("h", data="prices")
 #print(prices[1:100])
 #print(volumes[1:100])
 def abs_returns(prices):

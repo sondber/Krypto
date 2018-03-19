@@ -12,7 +12,7 @@ convert_logs = 0                    # Convert coeffs and std.errs. of rvol and i
 subtract_means = 1
 log_illiqs = True
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
 time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = \
     dis.clean_series_hour(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)

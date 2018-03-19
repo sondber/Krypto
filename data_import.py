@@ -1,11 +1,10 @@
 import data_import_support
-from Sondre import sondre_support_formulas as supp, user_interface as ui
 import data_import_support as dis
-import numpy as np
-import currency_converter as curr
+import csv
+from Sondre import sondre_support_formulas as supp
 
 
-def get_lists(data="all", opening_hours="y", make_totals="y"):
+def get_lists_legacy(data="all", opening_hours="y", make_totals="y"):
     exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
     n_exc = len(exchanges)
     print("Fetching minute data..." )
@@ -31,20 +30,40 @@ def get_lists(data="all", opening_hours="y", make_totals="y"):
         return exchanges, time_list, prices, volumes
 
 
-def get_hilo(opening_hours="n"):
-    exchanges = ["bitstampusd"]
-    n_exc = len(exchanges)
-    print("Fetching minute data...")
-
-    if opening_hours == "y":
-        oh = ""
-        print(" \033[32;0;0mOnly fetching data for NYSE opening hours...\033[0;0;0m")
+def get_list(exc=0):
+    if exc == 1:
+        name = "coincheckjpy"
+    elif exc == 2:
+        name = "btcncny"
+    elif exc == 3:
+        name = "coinbaseusd"
     else:
-        oh = "_full_day"
+        name = "bitstampusd"
 
-    file_name = "data/export_csv/hilo_minute_data" + oh + ".csv"
-    time_list, high, low = dis.fetch_aggregate_csv_hilo(file_name, n_exc)
-    return exchanges, time_list, high, low
+    file_name = "data/export_csv/" + name + "_edit.csv"
+    time_listM = []
+    priceM = []
+    volumeM = []
+
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            try:
+                time_listM.append(str(row[0]))
+                priceM.append(float(row[1]))
+                volumeM.append(float(row[2]))
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+
+    return time_listM, priceM, volumeM
+
+
 
 
 def fetch_long_and_write(exchanges, opening_hours_only="n"):
@@ -60,68 +79,3 @@ def fetch_long_and_write(exchanges, opening_hours_only="n"):
     dis.write_full_lists_to_csv(volumes, prices, excel_stamps, exchanges, filename)
 
 
-def fetch_long_and_write_hilo(exchanges, opening_hours_only="y"):
-    n_exc = len(exchanges)
-    excel_stamps, unix_stamps, high, low = dis.get_hilo_from_fulls(exchanges)
-
-    if opening_hours_only == "y":
-        excel_stamps, high, low = dis.opening_hours(excel_stamps, high, low)
-        filename = "data/export_csv/hilo_minute_data.csv"
-    else:
-        filename = "data/export_csv/hilo_minute_data_full_day.csv"
-
-    dis.write_hilo_to_csv(high, low, excel_stamps, exchanges, filename)#####
-
-
-
-def import_gold_lists(s_year=2012, s_month=1, e_year=2017, e_month=9):
-    date = []
-    time_NYC = []
-    volume = []
-    price = []
-    bid = []
-    ask = []
-    if e_year == s_year:
-        y = e_year  # =s_year
-        for m in range(s_month, e_month):
-            if m < 10:
-                ms = "0" + str(m)
-            else:
-                ms = str(m)
-            file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
-            date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
-    else:
-        for y in range(s_year, e_year + 1):
-            if y == s_year:
-                for m in range(s_month, 12 + 1):
-                    if m < 10:
-                        ms = "0" + str(m)
-                    else:
-                        ms = str(m)
-                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
-                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
-            elif y == e_year:
-                for m in range(1, e_month + 1):
-                    if m < 10:
-                        ms = "0" + str(m)
-                    else:
-                        ms = str(m)
-                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
-                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
-            else:
-                for m in range(1, 12 + 1):
-                    if m < 10:
-                        ms = "0" + str(m)
-                    else:
-                        ms = str(m)
-                    file_name = "data/gold_raw/-" + str(y) + "-" + ms + "-SPY.P.csv"
-                    date, time_NYC, volume, price, bid, ask = dis.read_raw_gold(file_name, date, time_NYC, volume, price, bid, ask)
-    date = np.transpose(date)
-    time_NYC = np.transpose(time_NYC)
-    volume = np.transpose(volume)
-    price = np.transpose(price)
-    bid = np.transpose(bid)
-    ask = np.transpose(ask)
-    excel_stamps = dis.fix_gold_stamps(date, time_NYC)
-    file_name = "data/export_csv/gold_data.csv"
-    dis.write_to_gold_csvs(excel_stamps, volume, price, bid, ask, file_name)

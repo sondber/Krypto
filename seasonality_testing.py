@@ -12,7 +12,7 @@ import ILLIQ
 import realized_volatility
 import math
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 

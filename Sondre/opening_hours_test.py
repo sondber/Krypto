@@ -9,7 +9,7 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")  # Blir ikke likt på deres pc
 exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"]
 
 # Importing data for all minutes of the day
-exchanges, time_list, prices, volumes = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_list, prices, volumes = di.get_lists_legacy(opening_hours="n", make_totals="n")
 # Converting to hourly data
 time_list, prices, volumes = dis.convert_to_hour(time_list, prices, volumes)
 full_returns = jake_supp.logreturn(prices[0, :])

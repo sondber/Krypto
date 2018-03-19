@@ -26,7 +26,7 @@ rolls_multi = 1
 illiq_multi = 0
 return_multi = 0
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
 for exc in exch:
     time_list_days, time_list_removed, returns_days, volumes_days, log_volumes_days, spread_days, illiq_days, log_illiq_days, rvol_days, log_rvol_days = \

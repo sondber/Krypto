@@ -36,7 +36,7 @@ exc=0  # Bitstamp
 raw = 1
 combined = 1
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists(opening_hours="n", make_totals="n")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
 print()
 raw = 0

@@ -12,60 +12,31 @@ import ILLIQ
 import realized_volatility
 import math
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
 
-time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+for i in range(0,2):
+    exchange, time_listM, pricesM, volumesM = di.get_list(i)
+    print("Calculating for", exchange)
+    adjust = len(time_listM)-math.floor((len(time_listM)/60))*60
+    #accounting for faulty data
+    time_listM = time_listM[0:len(time_listM)-adjust]
+    pricesM = pricesM[0:len(pricesM)-adjust]
+    volumesM = volumesM[0:len(volumesM)-adjust]
 
-# For alle tre exchanges: lag BAS_lister
-bitstamp_pricesM = pricesM[0, :]
-coincheck_pricesM = pricesM[1, :]
-btcn_pricesM = pricesM[2, :]
+    time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
-bitstamp_pricesH = pricesH[0, :]
-coincheck_pricesH = pricesH[1, :]
-btcn_pricesH = pricesH[2, :]
+    bas = rolls.rolls(pricesM, time_listM, kill_output=1)[1]
 
-bitstamp_volumesH = volumesH[0, :]
-coincheck_volumesH = volumesH[1, :]
-btcn_volumesH = volumesH[2, :]
+    volumesH_clean = []
+    bas_clean = []
+    time_listH_clean = []
 
-bitstamp_bas = rolls.rolls(bitstamp_pricesM, time_listM, kill_output=1)[1]
-coincheck_bas = rolls.rolls(coincheck_pricesM, time_listM, kill_output=1)[1]
-btcn_bas = rolls.rolls(btcn_pricesM, time_listM, kill_output=1)[1]
+    for j in range(len(time_listH)):
+        if volumesH[j] != 0 and bas[j] != 0:
+            time_listH_clean.append(time_listH[j])
+            volumesH_clean.append(volumesH[j])
+            bas_clean.append(bas[j])
 
-print(len(time_listH), len(bitstamp_volumesH), len(coincheck_volumesH), len(btcn_volumesH))
-
-bitstamp_volumeH_clean = []
-coincheck_volumeH_clean = []
-btcn_volumeH_clean = []
-
-bitstamp_bas_clean = []
-coincheck_bas_clean = []
-btcn_bas_clean = []
-
-time_listH_clean = []
-
-for i in range(len(time_listH)):
-    if bitstamp_volumesH[i] != 0 and coincheck_volumesH[i] != 0 and btcn_volumesH[i] != 0 and bitstamp_bas[i] != 0 and \
-                    coincheck_bas[i] != 0 and btcn_bas[i] != 0:
-        time_listH_clean.append(time_listH[i])
-
-        bitstamp_volumeH_clean.append(bitstamp_volumesH[i])
-        coincheck_volumeH_clean.append(coincheck_volumesH[i])
-        btcn_volumeH_clean.append(btcn_volumesH[i])
-
-        bitstamp_bas_clean.append(bitstamp_bas[i])
-        coincheck_bas_clean.append(coincheck_bas[i])
-        btcn_bas_clean.append(btcn_bas[i])
-
-print(len(time_listH_clean), len(bitstamp_volumeH_clean), len(coincheck_volumeH_clean), len(btcn_volumeH_clean),
-      len(bitstamp_bas_clean), len(coincheck_bas_clean), len(btcn_bas_clean))
-
-day_time, bitstampV_average, bitstampV_lower, bitstampV_upper = dis.cyclical_average(time_listH_clean, bitstamp_volumeH_clean)
-day_time, coincheckV_average, coincheckV_lower, coincheckV_upper = dis.cyclical_average(time_listH_clean, coincheck_volumeH_clean)
-day_time, btcnV_average, btcnV_lower, btcnV_upper = dis.cyclical_average(time_listH_clean, btcn_volumeH_clean)
-plot.intraday(bitstampV_average,bitstampV_lower,bitstampV_upper,title="bitstamp")
-plot.intraday(coincheckV_average,coincheckV_lower,coincheckV_upper,title="coincheck")
-plot.intraday(btcnV_average,btcnV_lower,btcnV_upper,title="btcn")
+    day_time, V_average, V_lower, V_upper = dis.cyclical_average(time_listH_clean, volumesH_clean)
+    plot.intraday(V_average, V_lower, V_upper, title=exchange)
 
 

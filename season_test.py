@@ -9,7 +9,10 @@ intraweek = 1
 
 exch = [0]  # 0=bitstamp, 1=coincheck
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
+#exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
+exchanges, time_list, prices, volume = di.get_list(0)
+
+"""
 
 for exc in exch:
     exc_name = "_" + exchanges[exc] + "_TEST_" + spec
@@ -55,3 +58,5 @@ for exc in exch:
 
         #plot.intraweek(avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day, title="Log_ILLIQ" + exc_name, perc=0,   logy=0, ndigits=3)
         plot.intraweek(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume" + exc_name, perc=0,weekends=1)  # Hva faen gjør vi med y-aksen på denne?
+
+"""

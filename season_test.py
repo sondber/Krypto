@@ -51,7 +51,7 @@ for exc in exch:
 
         # Finding average for transformed
         day_of_week, avg_log_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(time_list_days, log_volumes_days, frequency="d")
-        #day_of_week, avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day = dis.cyclical_average(time_list_days, log_illiq_days, frequency="d")
+        #day_of_week, avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day = dis.cyclical_average(time_listD, log_illiqD, frequency="d")
 
         #plot.intraweek(avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day, title="Log_ILLIQ" + exc_name, perc=0,   logy=0, ndigits=3)
         plot.intraweek(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume" + exc_name, perc=0,weekends=1)  # Hva faen gjør vi med y-aksen på denne?

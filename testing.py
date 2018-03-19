@@ -1,5 +1,8 @@
 import numpy as np
+
+import data_import
 import data_import as di
+import legacy
 import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
@@ -19,7 +22,7 @@ intraweek = 0
 plots = 0
 print_table = 0
 
-time_list_minutes, prices, volumes = dis.fetch_aggregate_csv(file_name, n_exc)
+time_list_minutes, prices, volumes = data_import.fetch_aggregate_csv(file_name, n_exc)
 y, mo, d, h, mi = supp.fix_time_list(time_list_minutes, move_n_hours=0)
 time_list_minutes = supp.make_time_list(y, mo, d, h, mi )
 

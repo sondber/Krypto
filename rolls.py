@@ -49,7 +49,10 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
         sum_inside = 0
         for i in range(0, len(price_differences), minutes_in_window):
             for y in range(i + 1, i + minutes_in_window):
-                sum_inside += (price_differences[y] * price_differences[y - 1])
+                try:
+                    sum_inside += (price_differences[y] * price_differences[y - 1])
+                except IndexError:
+                    print("There is an error when i = %i and y = %i" %(i, y))
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 2))
             except ValueError:

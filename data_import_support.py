@@ -612,8 +612,6 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
 
 
 def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=0, convert_time_zones=1):
-    pricesM = pricesM[exc, :]
-    volumesM = volumesM[exc, :]
 
     if convert_time_zones:
         if exc == 0:
@@ -651,6 +649,10 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         end_time_D = "01.01.2017 00:00"
         end_time_M = "01.01.2017 08:00"
         start_averaging_date = "01.01.2012 00:00"
+    elif exc == 3:
+        cutoff_date = "01.02.2014 00:00"
+        cutoff_min_date = "01.02.2014 08:00"
+        start_averaging_date = "01.02.2014 00:00"
     else:
         print("Choose an exchange!")
 
@@ -830,8 +832,6 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         time_listM = supp.make_time_list(year, month, day, hour,
                                          minute)  # Lager en ny tidsliste fra de flyttede listene
 
-    pricesM = pricesM[exc, :]
-    volumesM = volumesM[exc, :]
     returns_minutes = jake_supp.logreturn(pricesM)
 
     time_listH, prices_hours, volumesH = convert_to_hour(time_listM, pricesM, volumesM)
@@ -860,6 +860,9 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         cutoff_date = "01.01.2013 00:00"
         start_averaging_date = "01.01.2012 00:00"
         end_time = "30.09.2017 00:00"
+    elif exc ==3:
+        cutoff_date = "01.03.2015 00:00"
+        start_averaging_date = "01.02.2012 00:00"
     else:
         print("Choose an exchange!")
 

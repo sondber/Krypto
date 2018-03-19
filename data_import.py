@@ -32,15 +32,15 @@ def get_lists_legacy(data="all", opening_hours="y", make_totals="y"):
 
 def get_list(exc=0):
     if exc == 1:
-        name = "coincheckjpy"
+        exc_name = "coincheckjpy"
     elif exc == 2:
-        name = "btcncny"
+        exc_name = "btcncny"
     elif exc == 3:
-        name = "coinbaseusd"
+        exc_name = "coinbaseusd"
     else:
-        name = "bitstampusd"
+        exc_name = "bitstampusd"
 
-    file_name = "data/export_csv/" + name + "_edit.csv"
+    file_name = "data/export_csv/" + exc_name + "_edit.csv"
     time_listM = []
     priceM = []
     volumeM = []
@@ -61,7 +61,7 @@ def get_list(exc=0):
                 print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
             i = i + 1
 
-    return time_listM, priceM, volumeM
+    return exc_name, time_listM, priceM, volumeM
 
 
 

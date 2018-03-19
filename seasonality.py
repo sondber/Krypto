@@ -15,18 +15,16 @@ import math
 intraday = 0
 intraweek = 1
 
-exch = [2]  # 0=bitstamp, 1=coincheck
+exch = [1]  # 0=bitstamp, 1=coincheck
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
+
 
 for exc in exch:
-    exc_name = "_" + exchanges[exc]
-    print()
-    print("-----------------------SEASONALITY FOR", exchanges[exc].upper()+"------------------------")
-
+    exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
+    exc_name = exc_name[0:-3]
     if intraday == 1:
         # HOURS ----------------------------------------------------------------------------------------------------
-        print("------ INTRADAY  ------")
+        print("------ INTRADAY FOR", exc_name.upper(), "------")
 
         time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH= \
             dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
@@ -51,10 +49,10 @@ for exc in exch:
         #plot.intraday(avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour, title="Log_ILLIQ" + exc_name, perc=0, ndigits=3, logy=0)  # Skulle helst brukt vanlig illiq med log-skala i stedet
 
     if intraweek == 1:
-        print("------ INTRAWEEK ------")
+        print("------ INTRAWEEK", exc_name.upper(), "------")
         # DAYS ----------------------------------------------------------------------------------------------------
         # Converting to daily data
-        returns_minutes = jake_supp.logreturn(pricesM[exc, :])
+        returns_minutes = jake_supp.logreturn(pricesM)
         time_listD, time_list_removed, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = \
             dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, print_days_excluded=0, convert_time_zones=1)
 

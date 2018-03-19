@@ -1,5 +1,6 @@
 import numpy as np
 import data_import as di
+import legacy
 from Jacob import jacob_support as jake_supp
 import data_import_support as dis
 from matplotlib import pyplot as plt
@@ -15,7 +16,7 @@ time_list, prices, volumes = dis.convert_to_hour(time_list, prices, volumes)
 full_returns = jake_supp.logreturn(prices[0, :])
 
 # Only extracting opening hours
-time_list_open, prices_open, volumes_opeen = dis.opening_hours_w_weekends(time_list,prices, volumes)
+time_list_open, prices_open, volumes_opeen = legacy.opening_hours_w_weekends(time_list, prices, volumes)
 bitstamp_price_open = np.transpose(prices_open[0, :])
 open_returns = jake_supp.logreturn(bitstamp_price_open)
 

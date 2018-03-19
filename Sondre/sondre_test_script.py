@@ -18,20 +18,16 @@ import ILLIQ
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 #os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
-dis.add_new_to_old_csv(0)
+exc = -1
 
-#di.get_list(1)
+if exc != -1:
+    dis.add_new_to_old_csv(exc)
+exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
 
-
-
-#exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
-#di.fetch_long_and_write(exchanges)
-#dis.fuse_files(exchanges)
+time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
 
-#time, price, volume = data_import_support.quick_import(3)
-#exchanges, time_listM, pricesM, volumesM = di.get_lists(opening_hours="n", make_totals="n")
+#time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
+time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 
-
-#time_listH, returnsH, spreadH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0)
 

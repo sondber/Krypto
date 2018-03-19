@@ -5,30 +5,26 @@ import data_import_support as dis
 import plot
 
 
-exc = 2
-hours_in_window = [4]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
+exc = 1
+hours_in_window = [4, 3, 2, 1]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1    # Convert coeffs and std.errs. of returnsH and spreadH to percentage
 convert_logs = 0                    # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
 subtract_means = 1
 log_illiqs = True
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
+exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
+time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 
-time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = \
-    dis.clean_series_hour(time_list_minutes, prices_minutes, volumes_minutes, exc=exc, convert_time_zones=1)
 
 hour = supp.fix_time_list(time_listH)[3]
 
 print()
-print("Intraday regression for", exchanges[exc].upper())
+print("------------------------ INTRADAY REGRESSION FOR", exc_name.upper()[0:-3], "-------------------------")
 print()
 
 
 print()
-print(
-    "     ------------------------------------------------Regression table for Intraday seasonality-----------------------------------------")
-print()
-print()
+print("     ------------------------------------------------Regression table for Intraday seasonality-----------------------------------------")
 
 
 n = len(hour)
@@ -343,8 +339,6 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
     else:
         Y = illiqH  # LOG / LINEAR !
 
-    for y in Y:
-        print("{0:.4f}".format(y))
 
     m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
         m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
@@ -385,7 +379,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
         Y = spreadH
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0, prints=1)
+            intercept=0, prints=0)
 
         if log_illiqs == True:
             Y = log_illiqH  # LOG / LINEAR !
@@ -394,7 +388,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
         m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
-            intercept=0, prints=1)
+            intercept=0, prints=0)
 
     if convert_coeffs_to_percentage == 1:
         print()
@@ -469,7 +463,7 @@ for h in hours_in_window:   # Itererer over de forskjellige vinduene
 
 
     print()
-    print("     ------------------------------------------------", str(exchanges[exc]),
+    print("     ------------------------------------------------", str(exc_name),
           "-----------------------------------------")
 
     supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben

@@ -1,7 +1,7 @@
 import csv
 import math
 from datetime import date
-from inspect import currentframe, getframeinfo
+from inspect import currentframe as cf, getframeinfo as gf
 import numpy as np
 
 import linreg
@@ -71,7 +71,7 @@ def final_print_regressions_latex(print_rows):
 def fill_blanks(in_list):
     out_list = in_list
     n = len(in_list)
-    startlim = 60  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
+    startlim = 1000  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
     for i in range(0, n):
         try:
             if in_list[i] == 0:
@@ -887,7 +887,7 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
 
 
 # Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
-def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
+def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1):
 
     X_HAR = []
     if HAR_config == 0:  # AR(1)
@@ -895,7 +895,8 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
         X_HAR = np.matrix(X_HAR)
     if hours_in_period != -1:  # Dette er for
         X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
-        print("  supp.%i: The first %i rows in the benchmark are time-based dummy variables" % (getframeinfo(currentframe()).lineno , n_dummies))
+        if prints == 1:
+            print("  \033[0;31;0m supp.%i: The first %i rows in the benchmark are time-based dummy variables \033[0;0;0m" % (gf(cf()).lineno , n_dummies))
     else:
         n_dummies = 0
 
@@ -908,51 +909,55 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4):
         X_HAR = Y[0:len(Y)-max_lag]
         X_HAR = np.matrix(X_HAR)
         X_HAR = np.transpose(X_HAR)
-
-        print("  supp.%i: Row %i is the AR(1) model " % (getframeinfo(currentframe()).lineno, n_dummies + max_lag))
+        if prints == 1:
+            print("  \033[0;31;0m supp.%i: Row %i is the AR(1) model \033[0;0;0m" % (gf(cf()).lineno, n_dummies + max_lag))
 
     elif HAR_config == 2:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
 
         lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-        print("  supp.%i: Row %i is the value 24 hours prior " % (getframeinfo(currentframe()).lineno, n_dummies + 1))
+        print("  supp.%i: Row %i is the value 24 hours prior " % (gf(cf()).lineno, n_dummies + 1))
 
         X_HAR = np.matrix(lagged_list)
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.matrix(last_day_average)
-        print("  supp.%i: Row %i is the average for the previous 24 hours" % (getframeinfo(currentframe()).lineno, n_dummies + 2))
-        print(np.size(X_HAR, 0), np.size(X_HAR, 1))
-        print(np.size(last_day_average, 0), np.size(last_day_average, 1))
+        print("  supp.%i: Row %i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
         X_HAR = np.append(X_HAR, last_day_average, axis=0)
-        print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
+        print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
         X_HAR = np.transpose(X_HAR)
 
         max_lag = 24
         X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
-        print("  supp.%i: X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
+        print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 3: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = 48
     elif HAR_config == 4: # Denne skal inkludere AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = 48
 
-    print("   Number of indeces that should be removed due to lag:", max_lag)
+    if prints == 1:
+        print("   Number of indeces that should be removed due to lag:", max_lag)
     Y = Y[max_lag:len(Y)]  # Passer på at disse har samme lengde
-    print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
-    X_dummies = X_dummies[max_lag:len(X_dummies),:]  # Passer på at disse har samme lengde
-    print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
-    X_benchmark = np.append(X_dummies, X_HAR, axis=1)
-    print("  supp.%i: Length of Y is %i and  X_benchmark is (%i,%i)" % (getframeinfo(currentframe()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
 
     if hours_in_period != -1:
         X_dummies = X_dummies[max_lag:len(X_dummies)]   # Passer på at disse har samme lengde
         X_benchmark = X_dummies
 
     if HAR_config > 0:
-        X_HAR = np.transpose(X_HAR)
+        if prints == 1:
+            print("  supp.%i: X_dummies is (%i,%i) and X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_dummies, 0), np.size(X_dummies, 1), np.size(X_HAR, 0), np.size(X_HAR, 1)))
+        #X_dummies = X_dummies[max_lag:len(X_dummies), :]  # Passer på at disse har samme lengde
+        X_benchmark = np.append(X_dummies, X_HAR, axis=1)
+        if prints == 1:
+            print("  supp.%i: Length of Y is %i and  X_benchmark is (%i,%i)" % ( gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
+
         if hours_in_period != -1:
-            print("  supp.%i: X_benchmark is (%i,%i) and X_HAR is (%i,%i)" % (getframeinfo(currentframe()).lineno, np.size(X_benchmark, 0), np.size(X_benchmark, 1), np.size(X_HAR, 0),np.size(X_HAR, 1)))
+            if prints == 1:
+                print("  supp.%i: X_benchmark is (%i,%i) and X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_benchmark, 0), np.size(X_benchmark, 1), np.size(X_HAR, 0),np.size(X_HAR, 1)))
             X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
         else:
             X_benchmark = X_HAR
+
+    if prints == 1:
+        print("  supp.%i (END): Y is: %i, X_benchmark is (%i,%i)" % (gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
 
     return Y, X_benchmark, max_lag

@@ -13,11 +13,9 @@ import math
 
 
 intraday = 1
-intraweek = 1
+intraweek = 0
 
-exch = [0, 1]  # 0=bitstamp, 1=coincheck
-
-
+exch = [2]  # 0=bitstamp, 1=coincheck
 
 for exc in exch:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)

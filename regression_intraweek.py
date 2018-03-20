@@ -11,7 +11,7 @@ from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exch = [1]  # 0=bitstamp, 1=coincheck
+exch = [3]  # 0=bitstamp, 1=coincheck
 
 intraweek_pattern_regression = 1
 subtract_means = 1  # from day-of-week regression

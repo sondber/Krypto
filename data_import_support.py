@@ -32,7 +32,7 @@ def add_new_to_old_csv(exc=0):
         exc_name = "btcncny"
         month_list = ["06", "07", "08", "09"]
         end_date = "30.09.2017 23:59"
-        end_unix = 1506815940
+        #end_unix = 1506815880
     elif exc == 3:
         exc_name = "coinbaseusd"
         month_list = []
@@ -51,7 +51,7 @@ def add_new_to_old_csv(exc=0):
         price_old = price_old[start_index:]
         volume_old = volume_old[start_index:]
     else:
-        end_index = time_old.index(end_unix)
+        end_index = time_old.index(end_unix) + 1
         time_old = time_old[start_index:end_index]
         price_old = price_old[start_index:end_index]
         volume_old = volume_old[start_index:end_index]
@@ -95,8 +95,6 @@ def add_new_to_old_csv(exc=0):
         time_list = time_old
 
     print("Len of combined:", len(volumes))
-    write_filename = "data/export_csv/" + exc_name + "_edit.csv"
-
     time_list = make_excel_stamp_list(startstamp=start_date, endstamp=end_date)
 
     print()
@@ -105,6 +103,7 @@ def add_new_to_old_csv(exc=0):
     print("Prices:", len(prices))
     print("Volumes:", len(volumes))
     print()
+    write_filename = "data/export_csv/" + exc_name + "_edit.csv"
 
     with open(write_filename, 'w', newline='') as csvfile:
         writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -132,7 +131,8 @@ def add_new_to_old_csv(exc=0):
             writ.writerow(rowdata)
 
 
-def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1):
+def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1, price_col=4):
+
     with open(file_name, newline='') as csvfile:
         if semi == 0:
             reader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -148,8 +148,8 @@ def price_volume_from_raw(file_name, time_list, price, volume, semi=0, unix=1):
                             time_list.append(int(row[0]))
                         else:
                             time_list.append(str(row[0]))
-                        price.append(float(row[4]))
-                        volume.append(float(row[5]))
+                        price.append(float(row[price_col]))
+                        volume.append(float(row[price_col + 1]))
                     except ValueError:
                         print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
                     i = i + 1
@@ -476,9 +476,9 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         end_time_M = "01.01.2017 08:00"
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 3:
-        cutoff_date = "01.02.2014 00:00"
-        cutoff_min_date = "01.02.2014 08:00"
-        start_averaging_date = "01.02.2014 00:00"
+        cutoff_date = "01.01.2015 00:00"
+        cutoff_min_date = "01.01.2015 16:00"
+        start_averaging_date = "02.12.2014 00:00"
     else:
         print("  TEST SET")
         cutoff_date = "01.01.2017 00:00"
@@ -578,7 +578,8 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         days_to_remove = supp.remove_extremes(days_to_remove, returnsD, 0.1, threshold_lower=-0.1)
         days_to_remove = supp.remove_extremes(days_to_remove, rvolD, 2)
         days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
-        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, volumesD, 50000)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.01)
 
     for d in days_to_remove:
         time_list_removed = np.append(time_list_removed, time_listD[d])
@@ -697,8 +698,8 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         start_averaging_date = "01.01.2012 00:00"
         end_time = "30.09.2017 00:00"
     elif exc ==3:
-        cutoff_date = "01.03.2015 00:00"
-        start_averaging_date = "01.02.2015 00:00"
+        cutoff_date = "01.01.2015 00:00"
+        start_averaging_date = "02.12.2014 00:00"
     else:
         print("  TEST SET")
         cutoff_date = "01.01.2017 00:00"
@@ -763,8 +764,9 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         elif exc == 3:
             hours_to_remove = supp.remove_extremes(hours_to_remove, returnsH, 0.075, threshold_lower=-0.075)
             hours_to_remove = supp.remove_extremes(hours_to_remove, rvolH, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, volumesH, 15000)
             hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.1)
-            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.02)
 
     time_listH = np.delete(time_listH, hours_to_remove)
     returnsH = np.delete(returnsH, hours_to_remove)
@@ -775,9 +777,9 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
 
     plot_after_removal = 0
     if plot_after_removal == 1:
-        # plt.plot(rvolH)
-        # plt.title("rvol")
-        # plt.figure()
+        plt.plot(rvolH)
+        plt.title("rvol")
+        plt.figure()
         plt.plot(spreadH)
         plt.title("spreadH")
         plt.figure()
@@ -786,9 +788,9 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         plt.figure()
         plt.plot(illiqH)
         plt.title("illiq")
-        # plt.figure()
-        # plt.plot(returnsH)
-        # plt.title("returnsH")
+        plt.figure()
+        plt.plot(returnsH)
+        plt.title("returnsH")
 
     # Removing all days where Roll is zero
     time_listH, time_list_removed, spreadH, volumesH, returnsH, illiqH, rvolH = supp.remove_list1_zeros_from_all_lists(time_listH,time_list_removed,spreadH,volumesH,returnsH,illiqH, rvolH)
@@ -832,12 +834,17 @@ def read_single_exc_csvs(file_name, time_list, price, volume):
 
 
 def quick_import(exc=0):
+
+    price_col = 4  # Column number in the raw file
     if exc == 1:
         name = "coincheckjpy"
     elif exc == 2:
         name = "btcncny"
     elif exc == 3:
         name = "coinbaseusd"
+    elif exc == 4:
+        name = "korbitkrw"
+        price_col = 1 # Column number in the raw file
     else:
         name = "bitstampusd"
 
@@ -845,7 +852,7 @@ def quick_import(exc=0):
     time_listM = []
     priceM = []
     volumeM = []
-    time_listM, priceM, volumeM = price_volume_from_raw(file_name, time_listM, priceM, volumeM, semi=0, unix=1)
+    time_listM, priceM, volumeM = price_volume_from_raw(file_name, time_listM, priceM, volumeM, semi=0, unix=1, price_col=price_col)
 
     return time_listM, priceM, volumeM
 

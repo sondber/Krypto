@@ -10,11 +10,11 @@ from Jacob import jacob_support as jake_supp
 
 # 1 kontrollpanel
 log_illiqs = 1 # Should log-illiq be used rather than plain illiq?
-hours_in_period = 3 # 2, 3 or 4 hours in dummies
+hours_in_period = -1 # 2, 3 or 4 hours in dummies
 standardized_coeffs = 0 # Should be 1
 
 benchmark_only = 1  # For testing
-bench_type = 2
+bench_type = 3
 benchmark_prints = 1
 
 spread_determinants = 1  # perform analysis on determinants of spread
@@ -31,6 +31,7 @@ for exc in exchanges:
 
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")
+    print("--------------------------------- Configuration %i ------------------------------------" % bench_type)
     print()
     # 4 importere clean_trans_hours
 
@@ -70,11 +71,16 @@ for exc in exchanges:
         X_contemp = X_benchmark
         X_lagged = X_benchmark
 
+        ######################
+        #X_benchmark = X_benchmark[:,8]
+        #####################
 
-        for i in range(np.size(X_benchmark,0)):
-            for j in range(np.size(X_benchmark,1)-1):
-                print(int(X_benchmark[i, j]), end="  ")
-            print(np.sum(X_benchmark[i, 0:6]))
+        #print("The determinant of the benchmark is: ",np.linalg.det(X_benchmark))
+        #
+        # for i in range(20):
+        #     for j in range(int(23/hours_in_period)):
+        #         print(int(X_benchmark[i, j]), end="  ")
+        #     print(int(np.sum(X_benchmark[i, 0:7])))
 
         m_col = 0
         # Benchmark

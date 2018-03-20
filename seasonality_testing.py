@@ -1,6 +1,8 @@
 import numpy as np
 import data_import as di
 import matplotlib.pyplot as plt
+
+import legacy
 import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
@@ -12,7 +14,7 @@ import ILLIQ
 import realized_volatility
 import math
 
-exchanges, time_listM, pricesM, volumesM = di.get_lists_legacy(opening_hours="n", make_totals="n")
+exchanges, time_listM, pricesM, volumesM = legacy.get_lists_legacy(opening_hours="n", make_totals="n")
 
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 

@@ -1,5 +1,6 @@
 import ILLIQ as ilq
 import data_import as di
+import legacy
 from Jacob import jacob_support as jacsup
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +10,7 @@ import os
 os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 
-exchanges, time_list, prices, volumes = di.get_lists_legacy(data="all", opening_hours="y", make_totals="n")
+exchanges, time_list, prices, volumes = legacy.get_lists_legacy(data="all", opening_hours="y", make_totals="n")
 
 prices = prices[0][101790:] # exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"
 volumes = volumes[0][101790:]

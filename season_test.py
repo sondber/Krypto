@@ -1,4 +1,5 @@
 import data_import as di
+import legacy
 import plot
 from Jacob import jacob_support as jake_supp
 import data_import_support as dis
@@ -9,7 +10,7 @@ intraweek = 1
 
 exch = [0]  # 0=bitstamp, 1=coincheck
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = legacy.get_lists_legacy(opening_hours="n", make_totals="n")
 
 for exc in exch:
     exc_name = "_" + exchanges[exc] + "_TEST_" + spec

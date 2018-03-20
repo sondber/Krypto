@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import date, datetime
 from inspect import currentframe as cf, getframeinfo as gf
 
 import numpy as np
@@ -856,3 +856,22 @@ def quick_import(exc=0):
 
     return time_listM, priceM, volumeM
 
+
+def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med unix-integers. returnerer én-til-én
+    single = 1
+    try:
+        list_length = len(unix_stamp)
+    except TypeError:
+        list_length = 1
+
+    if list_length > 1:
+        single = 0
+
+    if single == 1:
+        timestamp = datetime.utcfromtimestamp(unix_stamp).strftime('%d.%m.%Y %H:%M')
+    else:
+        timestamp = []
+        for i in range(list_length):
+            timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
+
+    return timestamp

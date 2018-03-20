@@ -875,3 +875,30 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
             timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
 
     return timestamp
+def write_to_csv(exc_name, time_list, price, volume):
+    location = "data/export_csv/"
+    file_name = location + exc_name + "_edit.csv"
+    with open(file_name, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % file_name)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        currency = exc_name[-3:]
+        header1.append(exc_name[0:-2])
+        header1.append("")
+        header2.append("Closing price")
+        header2.append("Volume")
+        header3.append(currency.upper())
+        header3.append("BTC")
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+
+        for i in range(len(price)):
+            rowdata = [time_list[i]]
+            rowdata.append(price[i])
+            rowdata.append(volume[i])
+            writ.writerow(rowdata)

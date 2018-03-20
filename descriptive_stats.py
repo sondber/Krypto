@@ -1,11 +1,12 @@
 import numpy as np
 from scipy import stats as sp
 import data_import as di
+import legacy
 from Jacob import jacob_support as jake_supp
 
 
 def compare_exchanges():
-    exchanges, time_list, prices, volumes, total_price, total_volume = di.get_lists_legacy()
+    exchanges, time_list, prices, volumes, total_price, total_volume = legacy.get_lists_legacy()
 
     bitstamp_price = prices[0, :]
     bitstamp_volume = volumes[0, :]

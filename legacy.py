@@ -1,10 +1,13 @@
 import csv
+import math
 from datetime import date
 
 import numpy as np
 
 from Jacob import jacob_csv_handling as csv_handling
 from Sondre import sondre_support_formulas as supp
+from Sondre.sondre_support_formulas import fix_time_list
+from data_import import fetch_aggregate_csv
 from data_import_support import remove_nan, get_month, price_volume_from_raw, make_single_excel_stamp
 
 
@@ -754,3 +757,155 @@ def convert_to_usd(timestamp_price, price_in_foreign_currency, currency): # pric
 
 ##testing
 #prices_time, prices_converted = convert_to_USD(TESTLIST(TWODIM_teimstamp_price), "EUR")
+
+
+def get_lists_legacy(data="all", opening_hours="y", make_totals="y"):
+    exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
+    n_exc = len(exchanges)
+    print("Fetching minute data..." )
+
+    if opening_hours == "y":
+        oh = ""
+        print(" \033[32;0;0mOnly fetching data for NYSE opening hours...\033[0;0;0m")
+    else:
+        oh = "_full_day"
+
+    file_name = "data/export_csv/minute_data" + oh + ".csv"
+    time_list, prices, volumes = fetch_aggregate_csv(file_name, n_exc)
+
+    if make_totals == "y":
+        total_volume, total_price = make_totals(volumes, prices)
+        if data == "price" or data == "p" or data == "prices":
+            return total_price
+        elif data == "volume" or data == "v" or data == "volumes":
+            return total_volume
+        else:
+            return exchanges, time_list, prices, volumes, total_price, total_volume
+    else:
+        return exchanges, time_list, prices, volumes
+
+
+def moving_variance(price, mins_rolling):
+    returns = logreturn(price)
+    var = np.zeros(len(price))
+    rolling_list = np.zeros(mins_rolling)  # rolling list
+    for k in range(mins_rolling):
+        rolling_list[k] = returns[k]
+    var[mins_rolling - 1] = np.var(rolling_list)
+    for i in range(len(returns) - mins_rolling + 1):
+        j = mins_rolling + i - 1
+        rolling_list[j % mins_rolling] = returns[j]
+        var[j] = np.var(rolling_list)
+        if i % 100000 == 0 and i != 0:
+            perc = str(round(100 * i / len(price), 2)) + "%"
+            print("%s" % perc)
+    print("100%")
+    return var
+
+
+def logreturn(price):
+    returnlist = np.zeros(len(price))
+    for i in range(1, len(price)):
+        try:
+            returnlist[i] = math.log(price[i]) - math.log(price[i - 1])
+        except ValueError:
+            returnlist[i] = 0
+    return returnlist
+
+
+def make_totals(volumes, prices):  # Has to be all in USD
+    print("Generating totals..")
+    num_exchanges = np.size(volumes, 0)
+    entries = np.size(volumes, 1)
+    total_volume = np.zeros(entries)
+    total_price = np.zeros(entries)
+    for i in range(0, entries):
+        total_volume[i] = sum(volumes[:, i])
+        if total_volume[i] == 0:
+            total_price[i] = total_price[i - 1]
+        else:
+            for j in range(0, num_exchanges):
+                total_price[i] = (prices[j, i] * volumes[j, i]) + total_price[i]
+            total_price[i] = float(total_price[i]) / float(total_volume[i])
+    if total_price[0] == 0:
+        r = 0
+        while total_price[r] == 0:
+            r = r + 1
+        while r > 0:
+            total_price[r - 1] = total_price[r]
+            r = r - 1
+    return total_volume, total_price
+
+
+def convert_currencies(exchanges, prices):
+    print("Converting currencies...")
+    currency_handle = []
+    for i in range(0, len(exchanges)):
+        exc_name = exchanges[i]
+        currency_handle.append(exc_name[len(exc_name) - 3: len(exc_name)])
+
+    # her må vi legge inn valutakurser per dag/time/minutt og konvertere ordentlig. Dette er jalla som faen
+    for i in range(0, len(exchanges)):
+        if currency_handle[i] == "jpy":
+            prices[i, :] = prices[i, :] / 112
+        elif currency_handle[i] == "cny":
+            prices[i, :] = prices[i, :] / 6.62
+        elif currency_handle[i] == "eur":
+            prices[i, :] = prices[i, :] * 1.19
+
+    print("All prices converted to USD")
+    prices_in_usd = prices
+    return prices_in_usd
+
+
+def get_rolls():
+    file_name = "data/export_csv/relative_spreads_hourly.csv"
+    rolls = []
+    time_list = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            try:
+                time_list.append(row[0])
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            try:
+                rolls.append(float(row[1]))
+            except ValueError:
+                rolls.append(0)
+            i = i + 1
+        return time_list, rolls
+
+
+def week_vars(time_list, move_n_hours=0):
+    year, month, day, hour, minute = fix_time_list(time_list, move_n_hours=move_n_hours)
+    n_entries = len(time_list)
+
+    mon = np.zeros(n_entries)
+    tue = np.zeros(n_entries)
+    wed = np.zeros(n_entries)
+    thu = np.zeros(n_entries)
+    fri = np.zeros(n_entries)
+    sat = np.zeros(n_entries)
+    sun = np.zeros(n_entries)
+    day_string = []
+    for i in range(0, n_entries):
+        daynum = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+        if daynum == 0:
+            mon[i] = 1
+        elif daynum == 1:
+            tue[i] = 1
+        elif daynum == 2:
+            wed[i] = 1
+        elif daynum == 3:
+            thu[i] = 1
+        elif daynum == 4:
+            fri[i] = 1
+        elif daynum == 5:
+            sat[i] = 1
+        elif daynum == 6:
+            sun[i] = 1
+    return mon, tue, wed, thu, fri, sat, sun

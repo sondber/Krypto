@@ -1,5 +1,6 @@
 import numpy as np
 import data_import as di
+import legacy
 import plot
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
@@ -36,7 +37,7 @@ exc=0  # Bitstamp
 raw = 1
 combined = 1
 
-exchanges, time_list_minutes, prices_minutes, volumes_minutes = di.get_lists_legacy(opening_hours="n", make_totals="n")
+exchanges, time_list_minutes, prices_minutes, volumes_minutes = legacy.get_lists_legacy(opening_hours="n", make_totals="n")
 
 print()
 raw = 0

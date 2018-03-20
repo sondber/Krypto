@@ -1,4 +1,5 @@
 import data_import as di
+import legacy
 import rolls
 
 import os
@@ -19,7 +20,7 @@ spreadH, spread_rel, time_listH, count_value_error = rolls.rolls(total_price[407
 
 #### SINGLE EXCHANGES ####
 
-exchanges, time_list, prices, volumes = di.get_lists_legacy(data="all", opening_hours="n", make_totals="n")
+exchanges, time_list, prices, volumes = legacy.get_lists_legacy(data="all", opening_hours="n", make_totals="n")
 
 prices = prices[2]  # exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"
 volumes = volumes[2]

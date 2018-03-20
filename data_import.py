@@ -1,38 +1,9 @@
-import numpy as np
-
-import data_import_support
-import data_import_support as dis
 import csv
 
+import numpy as np
+
 import legacy
-from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import count_rows
-
-
-def get_lists_legacy(data="all", opening_hours="y", make_totals="y"):
-    exchanges = ["bitstampusd", "coincheckjpy", "btcncny"]
-    n_exc = len(exchanges)
-    print("Fetching minute data..." )
-
-    if opening_hours == "y":
-        oh = ""
-        print(" \033[32;0;0mOnly fetching data for NYSE opening hours...\033[0;0;0m")
-    else:
-        oh = "_full_day"
-
-    file_name = "data/export_csv/minute_data" + oh + ".csv"
-    time_list, prices, volumes = fetch_aggregate_csv(file_name, n_exc)
-
-    if make_totals == "y":
-        total_volume, total_price = supp.make_totals(volumes, prices)
-        if data == "price" or data == "p" or data == "prices":
-            return total_price
-        elif data == "volume" or data == "v" or data == "volumes":
-            return total_volume
-        else:
-            return exchanges, time_list, prices, volumes, total_price, total_volume
-    else:
-        return exchanges, time_list, prices, volumes
 
 
 def get_list(exc=0):
@@ -45,6 +16,8 @@ def get_list(exc=0):
         exc_name = "btcncny"
     elif exc == 3:
         exc_name = "coinbaseusd"
+    elif exc == 4:
+        exc_name = "korbitkrw"
     elif exc == -1:
         exc_name = "test"
 

@@ -19,13 +19,9 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 #os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 
-time_listM, priceM, volumeM = dis.quick_import(4)
-
-plt.plot(volumeM)
-plt.show()
+#time_listM, priceM, volumeM = dis.quick_import(4)
 
 
-"""
 exc = 3
 imp = 0
 
@@ -39,4 +35,3 @@ exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
 #time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 #time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 
-"""

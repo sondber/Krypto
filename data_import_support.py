@@ -875,3 +875,34 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
             timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
 
     return timestamp
+
+
+def korbit():
+
+    full_list_excel_time = make_excel_stamp_list(startstamp="01.09.2013 00:00", endstamp="20.03.2018 23:59")
+    time_listM,priceM,volumeM=quick_import(4)
+    price=np.zeros(len(full_list_excel_time))
+    volume=np.zeros(len(full_list_excel_time))
+
+    j=0 #j follows the imported dataset timelist. The intention is to save the work of searching through the whole series every time.
+    t=0 #t follows the new generated timelist
+    while (j != len(time_listM)):
+        if t==len(full_list_excel_time):
+            break
+        else:
+            while (unix_to_timestamp(time_listM[j])!=full_list_excel_time[t]): #Increase t in the generated timeseries until it is equal to the j in the imported dataset
+                if t==len(full_list_excel_time):
+                    break
+                else:
+                    t=t+1
+
+            while unix_to_timestamp(time_listM[j]) == full_list_excel_time[t]: #Increase j to capture multiple trades on the same minute
+                price[t]=price[t]+priceM[j]*volumeM[j]
+                volume[t]=volume[t]+volumeM[j]
+                j=j+1
+                if j==len(time_listM):
+                    break
+            if volume[t]!=0:
+                price[t]=price[t]/volume[t]
+
+    return (full_list_excel_time, price, volume)

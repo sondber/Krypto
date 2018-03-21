@@ -117,8 +117,9 @@ print("Finished searching.")
 
 
 print("Results:")
-for i in range(len(time_list_master)):
-    print(time_list_master[i], spread_master[i,:])
+print(time_list_master[0])
+print(time_list_master[-1])
+
 
 
 

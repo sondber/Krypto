@@ -612,7 +612,8 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
 
     if hours_in_period != -1:  # Dette er for
         X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
-        print("  supp.%i: x1 through x%i in the benchmark are time-based dummy variables" % (gf(cf()).lineno , n_dummies))
+        if prints == 1:
+            print("  supp.%i: x1 through x%i in the benchmark are time-based dummy variables" % (gf(cf()).lineno , n_dummies))
     else:
         n_dummies = 0
     x_num = n_dummies

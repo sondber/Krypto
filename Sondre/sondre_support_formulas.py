@@ -1,9 +1,10 @@
 import csv
 import math
+from datetime import datetime
 from inspect import currentframe as cf, getframeinfo as gf
-
+import time
 import numpy as np
-
+import datetime
 import linreg
 
 
@@ -759,3 +760,35 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
             print("  supp.%i (END): Y is: %i, X_benchmark is %i" % (gf(cf()).lineno, len(Y), len(X_benchmark)))
 
     return Y, X_benchmark, max_lag
+
+
+def A_before_B(time_A, time_B):
+    before = False
+    if timestamp_to_unix(time_A) < timestamp_to_unix(time_B):
+        before = True
+    return before
+
+
+def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med unix-integers. returnerer én-til-én
+    single = 1
+    try:
+        list_length = len(unix_stamp)
+    except TypeError:
+        list_length = 1
+
+    if list_length > 1:
+        single = 0
+
+    if single == 1:
+        timestamp = datetime.utcfromtimestamp(unix_stamp).strftime('%d.%m.%Y %H:%M')
+    else:
+        timestamp = []
+        for i in range(list_length):
+            timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
+
+    return timestamp
+
+
+def timestamp_to_unix(time_stamp):
+    unix = time.mktime(datetime.datetime.strptime(time_stamp, '%d.%m.%Y %H:%M').timetuple())
+    return unix

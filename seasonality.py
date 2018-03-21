@@ -12,10 +12,10 @@ import realized_volatility
 import math
 
 
-intraday = 1
+intraday = 0
 intraweek = 1
 
-exch = [3, 4]  # 0=bitstamp, 1=coincheck
+exch = [2]  # 0=bitstamp, 1=coincheck
 
 for exc in exch:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)

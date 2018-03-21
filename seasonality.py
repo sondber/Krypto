@@ -15,7 +15,7 @@ import math
 intraday = 1
 intraweek = 1
 
-exch = [1, 2, 3, 4, 5] 
+exch = [5]
 
 for exc in exch:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)

@@ -47,21 +47,21 @@ x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_vol")
 plot.plt.ylabel("Spread")
 plot.plt.xlabel("Annualized Volatility")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 x_data = returns_days_clean
 x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_returns")
 plot.plt.ylabel("Spread")
 plot.plt.xlabel("Returns")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 x_data = log_volumes_days_clean
 x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=0, x_perc=0, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="spread_volume")
 plot.plt.ylabel("Spread")
 plot.plt.xlabel("Normalized Volumes")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 
 y_data = illiq_days_clean
@@ -72,21 +72,21 @@ x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=1, x_perc=1, y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_vol")
 plot.plt.ylabel("ILLIQ")
 plot.plt.xlabel("Annualized Volatility")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 x_data = returns_days_clean
 x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=0, x_perc=1, y_log=1,  y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_returns")
 plot.plt.ylabel("ILLIQ")
 plot.plt.xlabel("Returns")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 x_data = log_volumes_days_clean
 x_lims = [min(x_data), max(x_data)]
 plot.scatters(x_data, y_data, x_log=0, x_perc=0,  y_log=1, y_perc=1, show_plot=0, xlims=x_lims, ylims=y_lims, title="illiq_volumes")
 plot.plt.ylabel("ILLIQ")
 plot.plt.xlabel("Normalized Volumes")
-linreg.univariate_with_print(y_data, x_data, x_lims=x_lims)
+legacy.univariate_with_print(y_data, x_data, x_lims=x_lims)
 
 if roll_v_return == 1:
     x_mean = returns_mean_day
@@ -96,7 +96,7 @@ if roll_v_return == 1:
                   ylims=y_lims, xlims=x_lims, x_perc=1, y_perc=1)
 
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, spread_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(returns_days_clean, spread_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     reg_text = "R^2: " + str(r_value ** 2) + "  P-value: " + str(p_value)
     print("Roll - Return:")
@@ -112,7 +112,7 @@ if roll_v_volumes == 1:
                   ylims=y_lims, xlims=x_lims, x_log=0, y_perc=1)
 
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, spread_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(log_volumes_days_clean, spread_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("Roll - Volume (transformed):")
     linreg.stats(slope, intercept, r_value, p_value)
@@ -124,7 +124,7 @@ if roll_v_volatility == 1:
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, spread_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(log_volatility_days_clean, spread_days_clean)
     #plot.regression_line(intercept, slope, xlims=x_lims)
     print("Roll - Log volatility:")
     linreg.stats(slope, intercept, r_value, p_value)
@@ -140,7 +140,7 @@ if roll_v_illiq == 1:
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_perc=1)
 
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_illiq_days_clean, spread_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(log_illiq_days_clean, spread_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("Spread - log ILLIQ:")
     linreg.stats(slope, intercept, r_value, p_value)
@@ -153,7 +153,7 @@ if illiq_v_return == 1:
     plot.scatters(returns_days_clean, illiq_days_clean, show_plot=0, xtitle="Returns daily", ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_perc=1, y_log=1, y_perc=1)
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(returns_days_clean, log_illiq_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(returns_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("log ILLIQ - Return:")
     linreg.stats(slope, intercept, r_value, p_value)
@@ -166,7 +166,7 @@ if illiq_v_volume == 1:
     plot.scatters(log_volumes_days_clean, illiq_days_clean, show_plot=0, xtitle="Log volumes", ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_log=0, y_log=1, y_perc=1)
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volumes_days_clean, log_illiq_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(log_volumes_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("Log ILLIQ - Log Volume:")
     linreg.stats(slope, intercept, r_value, p_value)
@@ -178,7 +178,7 @@ if illiq_v_volatility == 1:
                   ytitle="Log ILLIQ",
                   ylims=y_lims, xlims=x_lims, x_log=1, x_perc=1, y_log=1, y_perc=1)
     # Regression lines
-    slope, intercept, r_value, p_value, stderr = linreg.linreg_coeffs(log_volatility_days_clean, log_illiq_days_clean)
+    slope, intercept, r_value, p_value, stderr = legacy.linreg_coeffs(log_volatility_days_clean, log_illiq_days_clean)
     plot.regression_line(intercept, slope, xlims=x_lims)
     print("Log ILLIQ - Log volatility:")
     linreg.stats(slope, intercept, r_value, p_value)

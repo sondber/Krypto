@@ -12,13 +12,16 @@ import ILLIQ
 import realized_volatility
 import math
 
-exc = 2
-conv = 1
+spread_row = [1, 2]
+spread_row = np.matrix(spread_row)
+print(spread_row)
+spread_master = spread_row
+print(spread_master)
 
-exch, time_listM, pricesM, volumesM = di.get_list(exc)
+spread_row = [3, 4]
+spread_row = np.matrix(spread_row)
 
-#time_stamps_out, prices_out, volumes_out = dis.convert_to_hour(time_listM, pricesM, volumesM)
-time_stampsD, pricesD, volumesD = dis.convert_to_day(time_listM, pricesM, volumesM)
+print(spread_row)
+spread_master = np.append(spread_master, spread_row, axis=0)
 
-#time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(
-#    time_listM, pricesM, volumesM, exc=exc, print_days_excluded=0, convert_time_zones=conv)
+print(spread_master)

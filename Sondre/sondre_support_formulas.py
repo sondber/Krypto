@@ -774,6 +774,8 @@ def AR_matrix(Y, order=1):
         for i in range(0, order):
             X_AR[:,i] = Y[order - i - 1:n - (i + 1)]
     return X_AR
+
+
 def A_before_B(time_A, time_B):
     before = False
     if timestamp_to_unix(time_A) < timestamp_to_unix(time_B):

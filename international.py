@@ -15,60 +15,112 @@ import realized_volatility
 import rolls
 import ILLIQ
 
-
-
 # Hente inn alle 5
 
+exchanges = [0, 3]
 
-exc_name, time_list_bitstampM, prices_bitstampM, volumes_bitstampM = di.get_list(0)
-#exc_name, time_list_coincheckM, prices_coincheckM, volumes_coincheckM = di.get_list(1)
-#exc_name, time_list_btcnM, prices_btcnM, volumes_btcnM = di.get_list(2)
-#exc_name, time_list_coinbaseM, prices_coinbaseM, volumes_coinbaseM = di.get_list(3)
-exc_name, time_list_korbitM, prices_korbitM, volumes_korbitM = di.get_list(4)
+exchange_names = []
 
-s_abs, spread_bitstampH, spread_time_bitstamp, errs = rolls.rolls(prices_bitstampM, time_list_bitstampM, kill_output=1)
-s_abs, spread_korbitH, spread_time_korbit, errs  = rolls.rolls(prices_korbitM, time_list_korbitM, kill_output=1)
+exc1 = exchanges[0]
+exc_name1, time_list1M, prices1M, volumes_1M = di.get_list(exc1)
+s_abs, spread_1H, spread_time_1, errs = rolls.rolls(prices1M, time_list1M, kill_output=1)
+exchange_names.append(exc_name1)
+exc2 = exchanges[1]
+exc_name2, time_list2M, prices2M, volumes_2M = di.get_list(exc2)
+s_abs, spread_2H, spread_time_2, errs = rolls.rolls(prices2M, time_list2M, kill_output=1)
+exchange_names.append(exc_name2)
+if len(exchanges)>2:
+    exc3 = exchanges[2]
+    exc_name3, time_list3M, prices3M, volumes_3M = di.get_list(exc3)
+    s_abs, spread_3H, spread_time_3, errs = rolls.rolls(prices3M, time_list3M, kill_output=1)
+    exchange_names.append(exc_name3)
+if len(exchanges)>3:
+    exc4 = exchanges[3]
+    exc_name4, time_list4M, prices4M, volumes_4M = di.get_list(exc4)
+    s_abs, spread_4H, spread_time_4, errs = rolls.rolls(prices4M, time_list4M, kill_output=1)
+    exchange_names.append(exc_name4)
+if len(exchanges)>4:
+    exc5 = exchanges[4]
+    exc_name5, time_list5M, prices5M, volumes_5M = di.get_list(exc5)
+    s_abs, spread_5H, spread_time_5, errs = rolls.rolls(prices5M, time_list5M, kill_output=1)
+    exchange_names.append(exc_name5)
+if len(exchanges)>5:
+    exc6 = exchanges[5]
+    exc_name6, time_list6M, prices6M, volumes_6M = di.get_list(exc6)
+    s_abs, spread_6H, spread_time_6, errs = rolls.rolls(prices6M, time_list6M, kill_output=1)
+    exchange_names.append(exc_name6)
 
+
+print("The following exchanges are included:")
+for i in range(len(exchange_names)):
+    print(exchange_names[i])
 
 print()
 print("Lengths:")
 print()
-print("Bitstamp time minutes:", len(time_list_bitstampM))
-print(time_list_bitstampM[0],time_list_bitstampM[-1])
-print("Bitstamp time hours:", len(spread_bitstampH))
-print(spread_time_bitstamp[0],spread_time_bitstamp[-1])
-print("Korbit time minutes:", len(time_list_korbitM))
-print(time_list_korbitM[0], time_list_korbitM[-1])
-print("Korbit time hours:", len(spread_korbitH))
-print(spread_time_korbit[0],spread_time_korbit[-1])
-
+print(exc_name1, "time minutes:", len(time_list1M))
+print(time_list1M[0], time_list1M[-1])
+print(exc_name1, "time hours:", len(spread_1H))
+print(spread_time_1[0], spread_time_1[-1])
+print(exc_name2, "time minutes:", len(time_list2M))
+print(time_list2M[0], time_list2M[-1])
+print(exc_name2,"time hours:", len(spread_2H))
+print(spread_time_2[0], spread_time_2[-1])
 
 
 time_list_master = []
 spread_master = []
-n1 = len(spread_time_bitstamp)
-n2 = len(spread_time_korbit)
+
+n1 = len(spread_time_1)
+n2 = len(spread_time_2)
+
+if n1>n2:
+    spread_time_longest = spread_time_1
+    spread_time_shortest = spread_time_2
+    n = n1
+    n_shortest = n2
+    spread_longestH = spread_1H
+    spread_shortestH = spread_2H
+    longest_name = exc_name1
+    shortest_name = exc_name2
+else:
+    spread_time_longest = spread_time_2
+    spread_time_shortest = spread_time_1
+    n = n2
+    n_shortest = n1
+    spread_longestH = spread_2H
+    spread_shortestH = spread_1H
+    longest_name = exc_name2
+    shortest_name = exc_name1
+
+print("The longest set is", longest_name, ", while the shortest set is", shortest_name)
 
 prev_j = 0
 print()
-print("searching......")
-for i in range(0, n1):
-    time_stamp = spread_time_bitstamp[i]
+print("Searching......")
+for i in range(0, n):
+    time_stamp = spread_time_longest[i]
     j = max(0, prev_j)
-    if not supp.A_before_B(time_stamp, spread_time_korbit[0]):
-        while spread_time_korbit[j] != time_stamp and j < n2:
+    if not supp.A_before_B(time_stamp, spread_time_shortest[0]):
+        while spread_time_shortest[j] != time_stamp and j < n_shortest:
             j += 1
-        spread_row = [spread_bitstampH[i], spread_korbitH[j]]
+        spread_row = [spread_longestH[i], spread_shortestH[j]]
         spread_row = np.matrix(spread_row)
         if len(spread_master) == 0:
             spread_master = spread_row
         else:
-            spread_master = np.append(spread_master,spread_row, axis=1)
+            spread_master = np.append(spread_master, spread_row, axis=0)
         time_list_master.append(time_stamp)
         prev_j = j
 
-print("finished searching.")
-print(spread_master)
-print(np.size(spread_master,0), np.size(spread_master,1))
+print("Finished searching.")
+
+
+print("Results:")
 for i in range(len(time_list_master)):
-    print(time_list_master[i])
+    print(time_list_master[i], spread_master[:,i])
+
+
+
+
+

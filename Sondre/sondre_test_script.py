@@ -23,14 +23,15 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 
 #dis.korbit()
-exc = 4
-#imp = 0
+exc = 5
+#imp = 5
 
 #if exc != -1 and imp == 1:
 #    dis.add_new_to_old_csv(exc)
 
 exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
 
+print(exc_name, time_listM[0], time_listM[-1])
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
 

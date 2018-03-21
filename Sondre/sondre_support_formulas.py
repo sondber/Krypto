@@ -4,7 +4,6 @@ from datetime import datetime
 from inspect import currentframe as cf, getframeinfo as gf
 import time
 import numpy as np
-import datetime
 import linreg
 
 

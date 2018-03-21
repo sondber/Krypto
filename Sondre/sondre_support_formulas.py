@@ -759,3 +759,17 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
             print("  supp.%i (END): Y is: %i, X_benchmark is %i" % (gf(cf()).lineno, len(Y), len(X_benchmark)))
 
     return Y, X_benchmark, max_lag
+
+
+def AR_matrix(Y, order=1):
+    n = len(Y)
+
+    ar_len = n - order
+
+    if order == 1:
+        X_AR = Y[0:ar_len]
+    else:
+        X_AR = np.zeros([ar_len, order])
+        for i in range(0, order):
+            X_AR[:,i] = Y[order - i - 1:n - (i + 1)]
+    return X_AR

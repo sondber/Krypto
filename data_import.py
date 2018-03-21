@@ -1,8 +1,5 @@
 import csv
-
 import numpy as np
-
-import legacy
 from Sondre.sondre_support_formulas import count_rows
 
 

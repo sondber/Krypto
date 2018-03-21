@@ -71,7 +71,7 @@ def final_print_regressions_latex(print_rows):
 def fill_blanks(in_list):
     out_list = in_list
     n = len(in_list)
-    startlim = 1000  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
+    startlim = 100000  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
     for i in range(0, n):
         try:
             if in_list[i] == 0:

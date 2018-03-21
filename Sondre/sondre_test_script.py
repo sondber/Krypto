@@ -22,15 +22,20 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 #time_listM, priceM, volumeM = dis.quick_import(4)
 
 
-exc = 3
-imp = 0
+#dis.korbit()
+exc = 4
+#imp = 0
 
-if exc != -1 and imp == 1:
-    dis.add_new_to_old_csv(exc)
+#if exc != -1 and imp == 1:
+#    dis.add_new_to_old_csv(exc)
 
 exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
 
-#time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+
+
+for i in range(200):
+    print(time_listH[i], '{0:.2f}'.format(pricesH[i]), '{0:.2}'.format(volumesH[i]))
 
 #time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 #time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)

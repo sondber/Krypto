@@ -895,6 +895,7 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
 
     return timestamp
 
+
 def write_to_csv(exc_name, time_list, price, volume):
     location = "data/export_csv/"
     file_name = location + exc_name + "_edit.csv"
@@ -924,8 +925,8 @@ def write_to_csv(exc_name, time_list, price, volume):
             writ.writerow(rowdata)
 
 
-def korbit():
-    full_list_excel_time = make_excel_stamp_list(startstamp="01.09.2013 00:00", endstamp="20.03.2018 23:59")
+def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp):
+    full_list_excel_time = make_excel_stamp_list(startstamp=start_stamp, endstamp=end_stamp)
     time_listM,priceM,volumeM=quick_import(4)
     price=np.zeros(len(full_list_excel_time))
     volume=np.zeros(len(full_list_excel_time))
@@ -951,5 +952,4 @@ def korbit():
             if volume[t]!=0:
                 price[t]=price[t]/volume[t]
     price = supp.fill_blanks(price)
-    exc_name = "korbitkrw"
     write_to_csv(exc_name, full_list_excel_time, price, volume)

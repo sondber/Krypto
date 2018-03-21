@@ -615,127 +615,114 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         print("  supp.%i: x1 through x%i in the benchmark are time-based dummy variables" % (gf(cf()).lineno , n_dummies))
     else:
         n_dummies = 0
-
+    x_num = n_dummies
     if HAR_config == 0:  # Blank
         max_lag = max(1, force_max_lag)
         X_HAR = []
 
     elif HAR_config == 1:  # X_AR(1)
         max_lag = max(1, force_max_lag)
-        X_HAR = Y[0:len(Y)-max_lag]
-        X_HAR = np.matrix(X_HAR)
-        X_HAR = np.transpose(X_HAR)
-        print("  supp.%i: x%i is the X_AR(1) model " % (gf(cf()).lineno, n_dummies + max_lag))
+        X_AR = AR_matrix(Y, AR_order)
+        X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
+        X_HAR = X_AR
+
+        x_num  += 1
+        if prints == 1:
+            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
 
     elif HAR_config == 2:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
 
         lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-        print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
 
         X_HAR = np.matrix(lagged_list)
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.matrix(last_day_average)
-        print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
         X_HAR = np.append(X_HAR, last_day_average, axis=0)
         X_HAR = np.transpose(X_HAR)
 
+        if prints == 1:
+            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
+            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
         max_lag = max(24, force_max_lag)
         X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
-        if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 3: # Denne skal inkludere X_AR(1) verdi 24 timer før, snitt 24 timer før
         max_lag = max(24, force_max_lag)
-        X_AR = Y[0:len(Y) - max_lag]
-        X_AR = np.matrix(X_AR)
-        X_AR = np.transpose(X_AR)
-
-        print("  supp.%i: x%i is the X_AR(1) model" % (gf(cf()).lineno, n_dummies + 1))
+        X_AR = AR_matrix(Y, AR_order)
+        X_AR = X_AR[max_lag - AR_order:,:]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
 
         lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-        print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 2))
 
         X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
-        if prints == 1:
-            print("  supp.%i: X_lagged is (%i,%i), X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_lagged, 0), np.size(X_lagged, 1), np.size(X_AR, 0), np.size(X_AR, 1)))
         X_HAR = np.append(X_AR, X_lagged, axis=1)
 
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-        print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 3))
 
         if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+            x_num += 1
+            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
+            x_num += AR_order
+            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, x_num))
+            x_num += 1
+            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, x_num))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
-        if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 4: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = max(48, force_max_lag)
 
         lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
-        print(
-            "  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
-
         X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
 
         lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
-        print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 2))
-
         X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
 
-        if prints == 1:
-            print("  supp.%i: X_lagged is (%i,%i), X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_lagged, 0), np.size(X_lagged, 1), np.size(X_AR, 0), np.size(X_AR, 1)))
         X_HAR = X_lagged
 
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-        print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 3))
 
         if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
+            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 2))
+            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 3))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
-        if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 5: # Denne skal inkludere X_AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
         max_lag = max(48, force_max_lag)
-        X_AR = Y[0:len(Y) - max_lag]
-        X_AR = np.matrix(X_AR)
-        X_AR = np.transpose(X_AR)
+        X_AR = AR_matrix(Y, AR_order)
+        X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
 
-        print("  supp.%i: x%i is the X_AR(1) model" % (gf(cf()).lineno, n_dummies + 1))
 
         lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
-        print(
-            "  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 2))
-
         X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
 
         lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
-        print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 3))
-
         X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
 
-        if prints == 1:
-            print("  supp.%i: X_lagged is (%i,%i), X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_lagged, 0), np.size(X_lagged, 1), np.size(X_AR, 0), np.size(X_AR, 1)))
+
+
         X_HAR = np.append(X_AR, X_lagged, axis=1)
 
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-        print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 4))
 
         if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+            x_num += 1
+            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
+            x_num += AR_order
+            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, x_num))
+            x_num += 1
+            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, x_num))
+            x_num += 1
+            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, x_num))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
-        if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     if prints == 1:
-        print("   Number of indeces that should be removed due to lag:", max_lag)
+        print("  supp.%i: Number of indeces that should be removed due to lag: %i" % (gf(cf()).lineno,max_lag))
     Y = Y[max_lag:len(Y)]  # Passer på at disse har samme lengde
 
     if hours_in_period != -1:
@@ -744,14 +731,8 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
     else:
         X_benchmark = X_HAR
 
-    if HAR_config > 0:
-        if prints == 1:
-            print("  supp.%i: Length of Y is %i and  X_benchmark is (%i,%i)" % ( gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
-
-        if hours_in_period != -1:
-            X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
-            if prints == 1:
-                print("  supp.%i: X_benchmark is (%i,%i) and X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_benchmark, 0), np.size(X_benchmark, 1), np.size(X_HAR, 0),np.size(X_HAR, 1)))
+    if HAR_config > 0 and hours_in_period != -1:
+        X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
 
     if prints == 1:
         if HAR_config > 0:
@@ -768,7 +749,7 @@ def AR_matrix(Y, order=1):
     ar_len = n - order
 
     if order == 1:
-        X_AR = Y[0:ar_len]
+        X_AR = np.transpose(np.matrix(Y[0:ar_len]))
     else:
         X_AR = np.zeros([ar_len, order])
         for i in range(0, order):

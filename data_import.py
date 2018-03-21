@@ -15,6 +15,8 @@ def get_list(exc=0):
         exc_name = "coinbaseusd"
     elif exc == 4:
         exc_name = "korbitkrw"
+    elif exc == 5:
+        exc_name = "krakeneur"
     elif exc == -1:
         exc_name = "test"
 

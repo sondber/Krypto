@@ -3,12 +3,14 @@ import math
 from datetime import date
 
 import numpy as np
+from scipy import stats as scistat
 
 from Jacob import jacob_csv_handling as csv_handling
 from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import fix_time_list
 from data_import import fetch_aggregate_csv
 from data_import_support import remove_nan, get_month, price_volume_from_raw, make_single_excel_stamp
+from linreg import stats
 
 
 def remove_list1_outliers_from_all_lists(list1, list2=[], list3=[], list4=[], threshold=2):
@@ -909,3 +911,18 @@ def week_vars(time_list, move_n_hours=0):
         elif daynum == 6:
             sun[i] = 1
     return mon, tue, wed, thu, fri, sat, sun
+
+
+def univariate_with_print(y, x, x_lims=[]):
+    slope, intercept, r_value, p_value, stderr = linreg_coeffs(x, y)
+    stats(slope, intercept, r_value, p_value)
+
+
+def linreg_coeffs(x, y):  # input is equal length one-dim arrays of measurements
+    parameters = scistat.linregress(x, y)
+    slope = parameters[0]  # slope of the regression line
+    intercept = parameters[1]  # intercept of the regression line
+    r_value = parameters[2]  # correlation coefficient, remember to square for R-squared
+    p_value = parameters[3]  # two-sided p-value for a hypothesis test whose null hyp is slope zero
+    stderr = parameters[4]  # standard error of the estimate
+    return slope, intercept, r_value, p_value, stderr

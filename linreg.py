@@ -1,6 +1,6 @@
-import scipy.stats as scistat
 import numpy as np
 import statsmodels.api as sm
+
 
 def print_n(n):
     for i in range(n+1):
@@ -22,17 +22,6 @@ def reg_multiple(Y, X, intercept=1, prints=0):
     std_errs = reg_model.bse
     n_obs = reg_model.nobs
     return coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs
-
-
-
-def linreg_coeffs(x, y):  # input is equal length one-dim arrays of measurements
-    parameters = scistat.linregress(x, y)
-    slope = parameters[0]  # slope of the regression line
-    intercept = parameters[1]  # intercept of the regression line
-    r_value = parameters[2]  # correlation coefficient, remember to square for R-squared
-    p_value = parameters[3]  # two-sided p-value for a hypothesis test whose null hyp is slope zero
-    stderr = parameters[4]  # standard error of the estimate
-    return slope, intercept, r_value, p_value, stderr
 
 
 def stats(slope: float, intercept: float, r_value: float, p_value: float):
@@ -57,6 +46,3 @@ def autocorr_linreg(in_list, n_lags, max_lag=0):
     reg_multiple(Y, X)
 
 
-def univariate_with_print(y, x, x_lims=[]):
-    slope, intercept, r_value, p_value, stderr = linreg_coeffs(x, y)
-    stats(slope, intercept, r_value, p_value)

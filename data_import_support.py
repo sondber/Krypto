@@ -508,7 +508,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     n_0 = cutoff_endD
 
     time_listM = time_listM[cutoff_min:cutoff_endM]
-    print("  Only including days after", time_listM[0], "to", time_listM[len(time_listM) - 1])
+    print("  Time period:", time_listM[0], "to", time_listM[len(time_listM) - 1])
     pricesM = pricesM[cutoff_min:cutoff_endM]
     volumesM = volumesM[cutoff_min:cutoff_endM]
     pricesD = pricesD[cutoff_day:cutoff_endD]
@@ -733,7 +733,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     mean_volume_prev_year = np.average(volumesH[start_averaging_hour:cutoff_hour])
 
     time_listH = time_listH[cutoff_hour:end_hour]
-    print("  Only including days after", time_listH[0], "to", time_listH[-1])
+    print("  Time period:", time_listH[0], "to", time_listH[-1])
     returnsH = returnsH[cutoff_hour:end_hour]
     volumesH = volumesH[cutoff_hour:end_hour]
     spreadH = spreadH[cutoff_hour:end_hour]

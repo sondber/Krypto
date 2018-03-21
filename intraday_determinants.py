@@ -10,13 +10,14 @@ from Jacob import jacob_support as jake_supp
 
 # 1 kontrollpanel
 log_illiqs = 1 # Should log-illiq be used rather than plain illiq?
-hours_in_period = 3 # 2, 3 or 4 hours in dummies
+hours_in_period = -1 # 2, 3 or 4 hours in dummies
 standardized_coeffs = 0 # Should be 1
 
 benchmark_only = 1  # For testing
 bench_types = [1, 2, 3, 4, 5]
-bench_types = [1, 2, 3, 4, 5]
-benchmark_prints = 0  # For kontroll av antall rader og kolonner
+bench_types = [3]
+AR_order = 24
+benchmark_prints = 1  # For kontroll av antall rader og kolonner
 intercept = 0
 force_max_lag = benchmark_only * 48  # Når vi vil sammenlikne benchmarks
 
@@ -69,7 +70,7 @@ for exc in exchanges:
             n_cols = 10  # 10 for BAS og for ILLIQ
 
             # 6 lage benchmark
-            Y, X_benchmark, max_lag = supp.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag)
+            Y, X_benchmark, max_lag = supp.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag, AR_order=AR_order)
 
             n_entries = np.size(X_benchmark, 0)
             coeff_matrix = np.zeros([n_entries, n_cols])

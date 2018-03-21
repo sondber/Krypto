@@ -29,7 +29,6 @@ exc_name, time_list_korbitM, prices_korbitM, volumes_korbitM = di.get_list(4)
 s_abs, spread_bitstampH, spread_time_bitstamp, errs = rolls.rolls(prices_bitstampM, time_list_bitstampM, kill_output=1)
 s_abs, spread_korbitH, spread_time_korbit, errs  = rolls.rolls(prices_korbitM, time_list_korbitM, kill_output=1)
 
-
 print()
 print("Lengths:")
 print()
@@ -41,8 +40,6 @@ print("Korbit time minutes:", len(time_list_korbitM))
 print(time_list_korbitM[0], time_list_korbitM[-1])
 print("Korbit time hours:", len(spread_korbitH))
 print(spread_time_korbit[0],spread_time_korbit[-1])
-
-
 
 time_list_master = []
 spread_master = []

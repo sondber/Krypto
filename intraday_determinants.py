@@ -1,6 +1,6 @@
 import numpy as np
 from inspect import currentframe, getframeinfo
-
+from matplotlib import pyplot as plt
 import data_import
 import data_import as di
 import data_import_support as dis
@@ -36,13 +36,12 @@ for exc in exchanges:
 
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
     time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc)
-    supp.print_n(50)
+    #supp.print_n(50)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")
-    for AR_order in range(500):
-        force_max_lag = max(48, AR_order)
-        best_AR = 0
-        best_AIC = 0
-
+    AR =[]
+    AIC = []
+    for AR_order in range(0, 500, 2):
+        force_max_lag = max(1000, AR_order)
         for bench_type in bench_types:
             #print("     ---------------------------- Configuration %i ----------------------------" % bench_type)
             #if hours_in_period != -1:
@@ -101,9 +100,8 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=0, intercept=intercept)
                 #supp.print_n(max(0, 35 - np.size(coeff_matrix, 1)-bench_type))
 
-                if aic_array[0] < best_AIC:
-                    best_AIC = aic_array[0]
-                    best_AR = AR_order
+                AR.append(AR_order)
+                AIC.append(aic_array[0])
 
                 if benchmark_only != 1:
                     # Return
@@ -178,5 +176,9 @@ for exc in exchanges:
         if AR_order % 10 == 0:
             print("AR_order:",AR_order)
 
-print(best_AR)
-print(best_AIC)
+
+plt.plot(AR, AIC)
+plt.title("AR_Test")
+plt.show()
+
+

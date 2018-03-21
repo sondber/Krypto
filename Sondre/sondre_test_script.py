@@ -29,14 +29,16 @@ exc = 5
 #if exc != -1 and imp == 1:
 #    dis.add_new_to_old_csv(exc)
 
-exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
+#exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
 
-print(exc_name, time_listM[0], time_listM[-1])
-time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+#print(exc_name, time_listM[0], time_listM[-1])
+#time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
 
-for i in range(200):
-    print(time_listH[i], '{0:.2f}'.format(pricesH[i]), '{0:.2}'.format(volumesH[i]))
+print(supp.unix_to_timestamp(1000000))
+
+#for i in range(200):
+#    print(time_listH[i], '{0:.2f}'.format(pricesH[i]), '{0:.2}'.format(volumesH[i]))
 
 #time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
 #time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)

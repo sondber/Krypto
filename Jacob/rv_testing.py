@@ -1,4 +1,5 @@
 import data_import as di
+import legacy
 import realized_volatility as rv
 from matplotlib import pyplot as plt
 import numpy as np
@@ -9,7 +10,7 @@ os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 #### SINGLE EXCHANGES ####
 
-exchanges, time_list, prices, volumes = di.get_lists_legacy(data="all", opening_hours="n", make_totals="n")
+exchanges, time_list, prices, volumes = legacy.get_lists_legacy(data="all", opening_hours="n", make_totals="n")
 
 prices = prices[0]  # exchanges = ["bitstampusd", "btceusd", "coinbaseusd", "krakenusd"
 volumes = volumes[0]

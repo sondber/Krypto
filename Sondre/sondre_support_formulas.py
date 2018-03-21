@@ -1,7 +1,7 @@
 import csv
 import math
-from datetime import date
 from inspect import currentframe as cf, getframeinfo as gf
+
 import numpy as np
 
 import linreg
@@ -71,7 +71,7 @@ def final_print_regressions_latex(print_rows):
 def fill_blanks(in_list):
     out_list = in_list
     n = len(in_list)
-    startlim = 1000  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
+    startlim = 100000  # How many minutes of zero at the beginning of the list do we allow? i.e. if there is more than startlim zeros, we let them stay zero
     for i in range(0, n):
         try:
             if in_list[i] == 0:
@@ -323,79 +323,6 @@ def data_analysis(in_list, number_of_intervals):
     int_count[0] = int_count[0] + (sum(float(num) == 0 for num in in_list))  # include the minutes with no trading
 
 
-def moving_variance(price, mins_rolling):
-    returns = logreturn(price)
-    var = np.zeros(len(price))
-    rolling_list = np.zeros(mins_rolling)  # rolling list
-    for k in range(mins_rolling):
-        rolling_list[k] = returns[k]
-    var[mins_rolling - 1] = np.var(rolling_list)
-    for i in range(len(returns) - mins_rolling + 1):
-        j = mins_rolling + i - 1
-        rolling_list[j % mins_rolling] = returns[j]
-        var[j] = np.var(rolling_list)
-        if i % 100000 == 0 and i != 0:
-            perc = str(round(100 * i / len(price), 2)) + "%"
-            print("%s" % perc)
-    print("100%")
-    return var
-
-
-def logreturn(price):
-    returnlist = np.zeros(len(price))
-    for i in range(1, len(price)):
-        try:
-            returnlist[i] = math.log(price[i]) - math.log(price[i - 1])
-        except ValueError:
-            returnlist[i] = 0
-    return returnlist
-
-
-def make_totals(volumes, prices):  # Has to be all in USD
-    print("Generating totals..")
-    num_exchanges = np.size(volumes, 0)
-    entries = np.size(volumes, 1)
-    total_volume = np.zeros(entries)
-    total_price = np.zeros(entries)
-    for i in range(0, entries):
-        total_volume[i] = sum(volumes[:, i])
-        if total_volume[i] == 0:
-            total_price[i] = total_price[i - 1]
-        else:
-            for j in range(0, num_exchanges):
-                total_price[i] = (prices[j, i] * volumes[j, i]) + total_price[i]
-            total_price[i] = float(total_price[i]) / float(total_volume[i])
-    if total_price[0] == 0:
-        r = 0
-        while total_price[r] == 0:
-            r = r + 1
-        while r > 0:
-            total_price[r - 1] = total_price[r]
-            r = r - 1
-    return total_volume, total_price
-
-
-def convert_currencies(exchanges, prices):
-    print("Converting currencies...")
-    currency_handle = []
-    for i in range(0, len(exchanges)):
-        exc_name = exchanges[i]
-        currency_handle.append(exc_name[len(exc_name) - 3: len(exc_name)])
-
-    # her må vi legge inn valutakurser per dag/time/minutt og konvertere ordentlig. Dette er jalla som faen
-    for i in range(0, len(exchanges)):
-        if currency_handle[i] == "jpy":
-            prices[i, :] = prices[i, :] / 112
-        elif currency_handle[i] == "cny":
-            prices[i, :] = prices[i, :] / 6.62
-        elif currency_handle[i] == "eur":
-            prices[i, :] = prices[i, :] * 1.19
-
-    print("All prices converted to USD")
-    prices_in_usd = prices
-    return prices_in_usd
-
-
 def count_rows(file_name):
     with open(file_name, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
@@ -417,28 +344,6 @@ def get_ticks(time_list, number_of_ticks):
         timestamp = timestamp[0:10]
         myticks.append(timestamp)
     return x, myticks
-
-
-def get_rolls():
-    file_name = "data/export_csv/relative_spreads_hourly.csv"
-    rolls = []
-    time_list = []
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        for row in reader:
-            try:
-                time_list.append(row[0])
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            try:
-                rolls.append(float(row[1]))
-            except ValueError:
-                rolls.append(0)
-            i = i + 1
-        return time_list, rolls
 
 
 def remove_list1_zeros_from_all_lists(time_list, time_list_removed_previous, list1, list2=[], list3=[], list4=[],
@@ -544,37 +449,6 @@ def standardize(in_list):
     return out_list
 
 
-def week_vars(time_list, move_n_hours=0):
-    year, month, day, hour, minute = fix_time_list(time_list, move_n_hours=move_n_hours)
-    n_entries = len(time_list)
-
-    mon = np.zeros(n_entries)
-    tue = np.zeros(n_entries)
-    wed = np.zeros(n_entries)
-    thu = np.zeros(n_entries)
-    fri = np.zeros(n_entries)
-    sat = np.zeros(n_entries)
-    sun = np.zeros(n_entries)
-    day_string = []
-    for i in range(0, n_entries):
-        daynum = int(date(year[i], month[i], day[i]).isoweekday()) - 1
-        if daynum == 0:
-            mon[i] = 1
-        elif daynum == 1:
-            tue[i] = 1
-        elif daynum == 2:
-            wed[i] = 1
-        elif daynum == 3:
-            thu[i] = 1
-        elif daynum == 4:
-            fri[i] = 1
-        elif daynum == 5:
-            sat[i] = 1
-        elif daynum == 6:
-            sun[i] = 1
-    return mon, tue, wed, thu, fri, sat, sun
-
-
 def import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                        std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array):
     for j in range(0, len(coeffs)):
@@ -662,167 +536,13 @@ def find_date_index(cutoff_date, time_list_hours):
 
 def time_of_day_dummies(time_list, hours_in_period=4):
     hour = fix_time_list(time_list)[3]
-    n = len(time_list)
+    n_rows = len(time_list)
 
-    if hours_in_period == 2:
-        first = np.zeros(n)
-        second = np.zeros(n)
-        third = np.zeros(n)
-        fourth = np.zeros(n)
-        fifth = np.zeros(n)
-        sixth = np.zeros(n)
-        seventh = np.zeros(n)
-        eigth = np.zeros(n)
-        nineth = np.zeros(n)
-        tenth = np.zeros(n)
-        eleventh = np.zeros(n)
-        twelwth = np.zeros(n)
-
-        first_period = [0, 1]
-        second_period = [2, 3]
-        third_period = [4, 5]
-        fourth_period = [6, 7]
-        fifth_period = [8, 9]
-        sixth_period = [10, 11]
-        seventh_period = [12, 13]
-        eighth_period = [14, 15]
-        nineth_period = [16, 17]
-        tenth_period = [18, 19]
-        eleventh_period = [20, 21]
-        twelwth_period = [22, 23]
-
-        for i in range(0, n):
-            hr = hour[i]
-            if hr in first_period:
-                first[i] = 1
-            elif hr in second_period:
-                second[i] = 1
-            elif hr in third_period:
-                third[i] = 1
-            elif hr in fourth_period:
-                fourth[i] = 1
-            elif hr in fifth_period:
-                fifth[i] = 1
-            elif hr in sixth_period:
-                sixth[i] = 1
-            elif hr in seventh_period:
-                seventh[i] = 1
-            elif hr in eighth_period:
-                eigth[i] = 1
-            elif hr in nineth_period:
-                nineth[i] = 1
-            elif hr in tenth_period:
-                tenth[i] = 1
-            elif hr in eleventh_period:
-                eleventh[i] = 1
-            elif hr in twelwth_period:
-                twelwth[i] = 1
-
-        X_dummies = np.matrix(first)
-        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(seventh), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(eigth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(nineth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(tenth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(eleventh), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(twelwth), axis=0)
-        X_dummies = np.transpose(X_dummies)
-
-        n_dummies = 12  # Antall forklaringsvariable
-
-    elif hours_in_period == 3:
-        first = np.zeros(n)
-        second = np.zeros(n)
-        third = np.zeros(n)
-        fourth = np.zeros(n)
-        fifth = np.zeros(n)
-        sixth = np.zeros(n)
-        seventh = np.zeros(n)
-        eigth = np.zeros(n)
-
-        first_period = [0, 1, 2]
-        second_period = [3, 4, 5]
-        third_period = [6, 7, 8]
-        fourth_period = [9, 10, 11]
-        fifth_period = [12, 13, 14]
-        sixth_period = [15, 16, 17]
-        seventh_period = [18, 19, 20]
-        eighth_period = [21, 22, 23]
-
-        for i in range(0, n):
-            hr = hour[i]
-            if hr in first_period:
-                first[i] = 1
-            elif hr in second_period:
-                second[i] = 1
-            elif hr in third_period:
-                third[i] = 1
-            elif hr in fourth_period:
-                fourth[i] = 1
-            elif hr in fifth_period:
-                fifth[i] = 1
-            elif hr in sixth_period:
-                sixth[i] = 1
-            elif hr in seventh_period:
-                seventh[i] = 1
-            elif hr in eighth_period:
-                eigth[i] = 1
-
-        X_dummies = np.matrix(first)
-        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(seventh), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(eigth), axis=0)
-        X_dummies = np.transpose(X_dummies)
-
-        n_dummies = 8  # Må bare være minst like stor som antall forklaringsvariable
-
-    elif hours_in_period == 4:
-        first = np.zeros(n)
-        second = np.zeros(n)
-        third = np.zeros(n)
-        fourth = np.zeros(n)
-        fifth = np.zeros(n)
-        sixth = np.zeros(n)
-
-        first_period = [0, 1, 2, 3]
-        second_period = [4, 5, 6, 7]
-        third_period = [8, 9, 10, 11]
-        fourth_period = [12, 13, 14, 15]
-        fifth_period = [16, 17, 18, 19]
-        sixth_period = [20, 21, 22, 23]
-
-        for i in range(0, n):
-            hr = hour[i]
-            if hr in first_period:
-                first[i] = 1
-            elif hr in second_period:
-                second[i] = 1
-            elif hr in third_period:
-                third[i] = 1
-            elif hr in fourth_period:
-                fourth[i] = 1
-            elif hr in fifth_period:
-                fifth[i] = 1
-            elif hr in sixth_period:
-                sixth[i] = 1
-
-        X_dummies = np.matrix(first)
-        X_dummies = np.append(X_dummies, np.matrix(second), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(third), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fourth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(fifth), axis=0)
-        X_dummies = np.append(X_dummies, np.matrix(sixth), axis=0)
-        X_dummies = np.transpose(X_dummies)
-
-        n_dummies = 6
+    n_dummies = int(24/hours_in_period)  # Antall forklaringsvariable
+    X_dummies = np.zeros([n_rows, n_dummies])
+    for i in range(n_rows):
+        j = int(math.floor(float(hour[i]/hours_in_period)))
+        X_dummies[i, j] = 1
 
     return X_dummies, n_dummies
 
@@ -887,62 +607,52 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
 
 
 # Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
-def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1):
+def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, force_max_lag=0, AR_order=1):
 
-    if HAR_config == 0:  # X_AR(1)
-        X_HAR = Y[0:len(Y) - 1]
-        X_HAR = np.matrix(X_HAR)
     if hours_in_period != -1:  # Dette er for
         X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
-        if prints == 1:
-            print("  \033[0;32;0m supp.%i: The first %i rows in the benchmark are time-based dummy variables \033[0;0;0m" % (gf(cf()).lineno , n_dummies))
+        print("  supp.%i: x1 through x%i in the benchmark are time-based dummy variables" % (gf(cf()).lineno , n_dummies))
     else:
         n_dummies = 0
 
     if HAR_config == 0:  # Blank
-        max_lag = 1
+        max_lag = max(1, force_max_lag)
         X_HAR = []
 
     elif HAR_config == 1:  # X_AR(1)
-        max_lag = 1
+        max_lag = max(1, force_max_lag)
         X_HAR = Y[0:len(Y)-max_lag]
         X_HAR = np.matrix(X_HAR)
         X_HAR = np.transpose(X_HAR)
-        if prints == 1:
-            print("  \033[0;32;0m supp.%i: Row %i is the X_AR(1) model \033[0;0;0m" % (gf(cf()).lineno, n_dummies + max_lag))
+        print("  supp.%i: x%i is the X_AR(1) model " % (gf(cf()).lineno, n_dummies + max_lag))
 
     elif HAR_config == 2:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
 
         lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-        print("  \033[0;32;0msupp.%i: Row %i is the value 24 hours prior\033[0;0;0m " % (gf(cf()).lineno, n_dummies + 1))
+        print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
 
         X_HAR = np.matrix(lagged_list)
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.matrix(last_day_average)
-        print("  \033[0;32;0msupp.%i: Row %i is the average for the previous 24 hours\033[0;0;0m" % (gf(cf()).lineno, n_dummies + 2))
+        print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
         X_HAR = np.append(X_HAR, last_day_average, axis=0)
         X_HAR = np.transpose(X_HAR)
 
-        max_lag = 24
+        max_lag = max(24, force_max_lag)
         X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
-        print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 3: # Denne skal inkludere X_AR(1) verdi 24 timer før, snitt 24 timer før
-
-        max_lag = 24
-
+        max_lag = max(24, force_max_lag)
         X_AR = Y[0:len(Y) - max_lag]
         X_AR = np.matrix(X_AR)
         X_AR = np.transpose(X_AR)
 
-        if prints == 1:
-            print("  \033[0;32;0m supp.%i: Row %i is the X_AR(1) model \033[0;0;0m" % (
-            gf(cf()).lineno, n_dummies + max_lag))
-
+        print("  supp.%i: x%i is the X_AR(1) model" % (gf(cf()).lineno, n_dummies + 1))
 
         lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-        print(
-            "  \033[0;32;0msupp.%i: Row %i is the value 24 hours prior\033[0;0;0m " % (gf(cf()).lineno, n_dummies + 1))
+        print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 2))
 
         X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
         if prints == 1:
@@ -951,29 +661,84 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1):
 
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-        print("  \033[0;32;0msupp.%i: Row %i is the average for the previous 24 hours\033[0;0;0m" % (gf(cf()).lineno, n_dummies + 2))
+        print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 3))
 
         if prints == 1:
-            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_AR, 0), np.size(X_AR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
-        X_HAR = np.transpose(X_HAR)
-
-        X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
-        print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
-
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     elif HAR_config == 4: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
-        max_lag = 48
+        max_lag = max(48, force_max_lag)
+
+        lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
+        print(
+            "  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
+
+        X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
+
+        lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
+        print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 2))
+
+        X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
+
+        if prints == 1:
+            print("  supp.%i: X_lagged is (%i,%i), X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_lagged, 0), np.size(X_lagged, 1), np.size(X_AR, 0), np.size(X_AR, 1)))
+        X_HAR = X_lagged
+
+        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
+        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
+        print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 3))
+
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+
+        X_HAR = np.append(X_HAR, last_day_average, axis=1)
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
+
     elif HAR_config == 5: # Denne skal inkludere X_AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
-        max_lag = 48
+        max_lag = max(48, force_max_lag)
+        X_AR = Y[0:len(Y) - max_lag]
+        X_AR = np.matrix(X_AR)
+        X_AR = np.transpose(X_AR)
+
+        print("  supp.%i: x%i is the X_AR(1) model" % (gf(cf()).lineno, n_dummies + 1))
+
+        lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
+        print(
+            "  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 2))
+
+        X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
+
+        lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
+        print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 3))
+
+        X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
+
+        if prints == 1:
+            print("  supp.%i: X_lagged is (%i,%i), X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_lagged, 0), np.size(X_lagged, 1), np.size(X_AR, 0), np.size(X_AR, 1)))
+        X_HAR = np.append(X_AR, X_lagged, axis=1)
+
+        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
+        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
+        print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 4))
+
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i), last_day_average is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1), np.size(last_day_average, 0), np.size(last_day_average, 1)))
+
+        X_HAR = np.append(X_HAR, last_day_average, axis=1)
+        if prints == 1:
+            print("  supp.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR, 0), np.size(X_HAR, 1)))
 
     if prints == 1:
         print("   Number of indeces that should be removed due to lag:", max_lag)
     Y = Y[max_lag:len(Y)]  # Passer på at disse har samme lengde
 
     if hours_in_period != -1:
-        X_dummies = X_dummies[max_lag:len(X_dummies)]   # Passer på at disse har samme lengde
+        X_dummies = X_dummies[max_lag:]   # Passer på at disse har samme lengde
         X_benchmark = X_dummies
     else:
         X_benchmark = X_HAR

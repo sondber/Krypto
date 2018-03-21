@@ -11,7 +11,7 @@ os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 exchanges, time_list, hi, lo = legacy.get_hilo(opening_hours="y")
 
-exchanges1, time_list1, prices, volumes = di.get_lists_legacy(data="all", opening_hours="y", make_totals="n")
+exchanges1, time_list1, prices, volumes = legacy.get_lists_legacy(data="all", opening_hours="y", make_totals="n")
 
 
 # Index for 2013 minute: 101790

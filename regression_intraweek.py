@@ -4,6 +4,7 @@ import numpy as np
 
 import data_import as di
 import data_import_support as dis
+import legacy
 import linreg
 from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
@@ -51,7 +52,7 @@ for exc in exch:
           "-----------------------------------------")
     print()
 
-    mon, tue, wed, thu, fri, sat, sun = supp.week_vars(time_listD)
+    mon, tue, wed, thu, fri, sat, sun = legacy.week_vars(time_listD)
     weekend = np.zeros(len(mon))
     for data_r in range(0, len(mon)):
         if sat[data_r] + sun[data_r] > 0:

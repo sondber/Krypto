@@ -437,7 +437,7 @@ def volume_transformation(volume, initial_mean_volume, daily=1):
     return out_volume
 
 
-def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=0, convert_time_zones=1):
+def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=0, convert_time_zones=1, plot_for_extreme=0):
     print(" \033[32;0;0mRunning 'clean_series_days' ...\033[0;0;0m")
     if convert_time_zones:
         if exc == 0:
@@ -448,6 +448,8 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
             n_hours = 8
         elif exc ==3:
             n_hours = -8
+        elif exc == 9:
+            n_hours = 9
         else:
             n_hours = 0
         print("  Converting time zones: moving series %i hours" % n_hours)
@@ -479,6 +481,10 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         cutoff_date = "01.01.2015 00:00"
         cutoff_min_date = "01.01.2015 16:00"
         start_averaging_date = "02.12.2014 00:00"
+    elif exc == 4:
+        cutoff_date = "01.01.2014 00:00"
+        cutoff_min_date = "01.01.2014 09:00"
+        start_averaging_date = "01.10.2013 00:00"
     else:
         print("  TEST SET")
         cutoff_date = "01.01.2017 00:00"
@@ -534,8 +540,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     # print("illiq", len(illiq_timeD))
     # print(" ", illiq_timeD[0], illiq_timeD[len(illiq_timeD)-1])
     # print()
-    plot_raw = 0
-    if plot_raw == 1:
+    if plot_for_extreme == 1:
         plt.plot(rvolD)
         plt.title("Raw rvol")
         plt.figure()
@@ -580,6 +585,12 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
         days_to_remove = supp.remove_extremes(days_to_remove, volumesD, 50000)
         days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.01)
+    elif exc == 4:
+        days_to_remove = supp.remove_extremes(days_to_remove, returnsD, 0.1, threshold_lower=-0.1)
+        days_to_remove = supp.remove_extremes(days_to_remove, rvolD, 2)
+        days_to_remove = supp.remove_extremes(days_to_remove, spreadD, 0.01)
+        days_to_remove = supp.remove_extremes(days_to_remove, volumesD, 50000)
+        days_to_remove = supp.remove_extremes(days_to_remove, illiqD, 0.01)
 
     for d in days_to_remove:
         time_list_removed = np.append(time_list_removed, time_listD[d])
@@ -591,8 +602,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     illiqD = np.delete(illiqD, days_to_remove)
     illiq_timeD = np.delete(illiq_timeD, days_to_remove)
 
-    plot_after_removal = 0
-    if plot_after_removal == 1:
+    if plot_for_extreme == 1:
         plt.plot(rvolD)
         plt.title("rvol")
         plt.figure()
@@ -645,7 +655,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     return time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD
 
 
-def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1):
+def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1, plot_for_extreme=0):
     remove_extremes = 1
     print(" \033[32;0;0mRunning 'clean_series_hour' ...\033[0;0;0m")
     if convert_time_zones:  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
@@ -657,6 +667,8 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
             n_hours = 8
         elif exc ==3:
             n_hours = -8
+        elif exc ==4:
+            n_hours =9
         else:
             n_hours = 0
         print("  Converting time zones: moving series %i hours" % n_hours)
@@ -700,6 +712,9 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     elif exc ==3:
         cutoff_date = "01.01.2015 00:00"
         start_averaging_date = "02.12.2014 00:00"
+    elif exc ==4:
+        cutoff_date = "01.01.2014 00:00"
+        start_averaging_date = "01.10.2013 00:00"
     else:
         print("  TEST SET")
         cutoff_date = "01.01.2017 00:00"
@@ -723,9 +738,8 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     illiqH = illiqH[cutoff_hour:end_hour]
     rvolH = rvolH[cutoff_hour:end_hour]
 
-    plot_raw = 0
-    if plot_raw == 1:
-        # lt.plot(rvolH)
+    if plot_for_extreme == 1:
+        # plt.plot(rvolH)
         # plt.title("Raw rvol")
         # plt.figure()
         plt.plot(spreadH)
@@ -767,6 +781,12 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
             hours_to_remove = supp.remove_extremes(hours_to_remove, volumesH, 15000)
             hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.1)
             hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.02)
+        elif exc == 4:
+            hours_to_remove = supp.remove_extremes(hours_to_remove, returnsH, 0.075, threshold_lower=-0.075)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, rvolH, 2)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, volumesH, 15000)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, spreadH, 0.1)
+            hours_to_remove = supp.remove_extremes(hours_to_remove, illiqH, 0.02)
 
     time_listH = np.delete(time_listH, hours_to_remove)
     returnsH = np.delete(returnsH, hours_to_remove)
@@ -775,8 +795,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     illiqH = np.delete(illiqH, hours_to_remove)
     rvolH = np.delete(rvolH, hours_to_remove)
 
-    plot_after_removal = 0
-    if plot_after_removal == 1:
+    if plot_for_extreme == 1:
         plt.plot(rvolH)
         plt.title("rvol")
         plt.figure()
@@ -807,7 +826,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     log_volumesH = volume_transformation(volumesH, mean_volume_prev_year)
     log_rvolH = np.log(rvolH)
 
-    if plot_raw + plot_after_removal > 0:
+    if plot_for_extreme==1:
         plt.show()
 
     print("  dis.%i: Length of time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
@@ -875,3 +894,62 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
             timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
 
     return timestamp
+
+def write_to_csv(exc_name, time_list, price, volume):
+    location = "data/export_csv/"
+    file_name = location + exc_name + "_edit.csv"
+    with open(file_name, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % file_name)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        currency = exc_name[-3:]
+        header1.append(exc_name[0:-2])
+        header1.append("")
+        header2.append("Closing price")
+        header2.append("Volume")
+        header3.append(currency.upper())
+        header3.append("BTC")
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+
+        for i in range(len(price)):
+            rowdata = [time_list[i]]
+            rowdata.append(price[i])
+            rowdata.append(volume[i])
+            writ.writerow(rowdata)
+
+
+def korbit():
+    full_list_excel_time = make_excel_stamp_list(startstamp="01.09.2013 00:00", endstamp="20.03.2018 23:59")
+    time_listM,priceM,volumeM=quick_import(4)
+    price=np.zeros(len(full_list_excel_time))
+    volume=np.zeros(len(full_list_excel_time))
+
+    j=0 #j follows the imported dataset timelist. The intention is to save the work of searching through the whole series every time.
+    t=0 #t follows the new generated timelist
+    while (j != len(time_listM)):
+        if t==len(full_list_excel_time):
+            break
+        else:
+            while (unix_to_timestamp(time_listM[j])!=full_list_excel_time[t]): #Increase t in the generated timeseries until it is equal to the j in the imported dataset
+                if t==len(full_list_excel_time):
+                    break
+                else:
+                    t=t+1
+
+            while unix_to_timestamp(time_listM[j]) == full_list_excel_time[t]: #Increase j to capture multiple trades on the same minute
+                price[t]=price[t]+priceM[j]*volumeM[j]
+                volume[t]=volume[t]+volumeM[j]
+                j=j+1
+                if j==len(time_listM):
+                    break
+            if volume[t]!=0:
+                price[t]=price[t]/volume[t]
+    price = supp.fill_blanks(price)
+    exc_name = "korbitkrw"
+    write_to_csv(exc_name, full_list_excel_time, price, volume)

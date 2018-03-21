@@ -2,13 +2,14 @@ import numpy as np
 import support_formulas as supp
 
 import data_import as di
+import legacy
 
 start_wallet_USD = 1000
 start_wallet_BTC = 0
 
 
 print("Loading data...")
-exchanges, time_list, prices, volumes, total_price, total_volume, currency = di.get_lists_legacy(2, 1)
+exchanges, time_list, prices, volumes, total_price, total_volume, currency = legacy.get_lists_legacy(2, 1)
 print("Data loaded")
 
 price = prices[0,:]

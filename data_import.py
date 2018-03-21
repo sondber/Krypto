@@ -44,7 +44,7 @@ def get_list(exc=0):
 
 
 
-def fetch_long_and_write(exchanges, opening_hours_only="n"):
+def fetch_long_and_write(exchanges, opening_hours_only="n1"):
     n_exc = len(exchanges)
     excel_stamps, unix_stamps, prices, volumes = legacy.get_price_volume_from_fulls(exchanges)
 

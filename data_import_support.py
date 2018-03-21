@@ -1,5 +1,5 @@
 import csv
-from datetime import date, datetime
+from datetime import date
 from inspect import currentframe as cf, getframeinfo as gf
 
 import numpy as np
@@ -11,6 +11,7 @@ import realized_volatility
 import rolls
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
+from Sondre.sondre_support_formulas import unix_to_timestamp
 
 
 def add_new_to_old_csv(exc=0):
@@ -31,7 +32,7 @@ def add_new_to_old_csv(exc=0):
     elif exc == 2:
         exc_name = "btcncny"
         month_list = ["06", "07", "08", "09"]
-        end_date = "30.09.2017 23:59"
+        end_date = "29.09.2017 23:59"
         #end_unix = 1506815880
     elif exc == 3:
         exc_name = "coinbaseusd"
@@ -875,26 +876,6 @@ def quick_import(exc=0):
     time_listM, priceM, volumeM = price_volume_from_raw(file_name, time_listM, priceM, volumeM, semi=0, unix=1, price_col=price_col)
 
     return time_listM, priceM, volumeM
-
-
-def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med unix-integers. returnerer én-til-én
-    single = 1
-    try:
-        list_length = len(unix_stamp)
-    except TypeError:
-        list_length = 1
-
-    if list_length > 1:
-        single = 0
-
-    if single == 1:
-        timestamp = datetime.utcfromtimestamp(unix_stamp).strftime('%d.%m.%Y %H:%M')
-    else:
-        timestamp = []
-        for i in range(list_length):
-            timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
-
-    return timestamp
 
 
 def write_to_csv(exc_name, time_list, price, volume):

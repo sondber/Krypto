@@ -48,7 +48,7 @@ for exc in exchanges:
             #if hours_in_period != -1:
             #    print("     --------------------------- %i hours per period --------------------------" % hours_in_period)
 
-            print()
+            #print()
             # 4 importere clean_trans_hours
 
 

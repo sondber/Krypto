@@ -312,6 +312,7 @@ def convert_to_day(time_stamps, prices, volumes):
     else:
         volumes_out = [0]
         prices_out = [0]
+
         for t in range(0, minutes_first_day):
             volumes_out[0] += volumes[t]
         prices_out[0] = prices[minutes_first_day - 1]

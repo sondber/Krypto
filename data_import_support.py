@@ -919,4 +919,3 @@ def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp): #note that start_
     price = supp.fill_blanks(price)
     write_to_csv(exc_name, full_list_excel_time, price, volume)
 
-# Her skriver jeg noe

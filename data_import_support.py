@@ -864,6 +864,9 @@ def quick_import(exc=0):
     elif exc == 4:
         name = "korbitkrw"
         price_col = 1 # Column number in the raw file
+    elif exc == 5:
+        name = "krakeneur"
+        price_col = 1  # Column number in the raw file
     else:
         name = "bitstampusd"
 
@@ -925,20 +928,28 @@ def write_to_csv(exc_name, time_list, price, volume):
             writ.writerow(rowdata)
 
 
-def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp):
+def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp): #note that start_stamp need to be before the start of the dataseries from the exchange
     full_list_excel_time = make_excel_stamp_list(startstamp=start_stamp, endstamp=end_stamp)
-    time_listM,priceM,volumeM=quick_import(4)
+    if exc_name == "korbitkrw":
+        quick_exc = 4
+    elif exc_name == "krakeneur":
+        quick_exc =5
+
+    time_listM,priceM,volumeM=quick_import(quick_exc)
+
     price=np.zeros(len(full_list_excel_time))
     volume=np.zeros(len(full_list_excel_time))
 
     j=0 #j follows the imported dataset timelist. The intention is to save the work of searching through the whole series every time.
     t=0 #t follows the new generated timelist
+    end=0
     while (j != len(time_listM)):
         if t==len(full_list_excel_time):
             break
         else:
             while (unix_to_timestamp(time_listM[j])!=full_list_excel_time[t]): #Increase t in the generated timeseries until it is equal to the j in the imported dataset
-                if t==len(full_list_excel_time):
+                if t==len(full_list_excel_time)-1:
+                    end=1 # Want to end the function after testing all j for the last t.
                     break
                 else:
                     t=t+1
@@ -951,5 +962,8 @@ def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp):
                     break
             if volume[t]!=0:
                 price[t]=price[t]/volume[t]
+            if end==1:
+                break
+
     price = supp.fill_blanks(price)
     write_to_csv(exc_name, full_list_excel_time, price, volume)

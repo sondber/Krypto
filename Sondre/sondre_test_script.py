@@ -29,13 +29,22 @@ exc = 5
 #if exc != -1 and imp == 1:
 #    dis.add_new_to_old_csv(exc)
 
-#exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
+exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
+
+r = 0
+while time_listM[r] != '08.01.2014 10:00':
+    r += 1
+
+time_listM = time_listM[r:]
+pricesM = pricesM[r:]
+volumesM = volumesM[r:]
 
 #print(exc_name, time_listM[0], time_listM[-1])
-#time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
+daytime, avg, lo, hi = dis.cyclical_average(time_listH, volumesH)
+plot.intraday(avg,lo, hi,"KRAKENTEST")
 
-print(supp.unix_to_timestamp(1000000))
 
 #for i in range(200):
 #    print(time_listH[i], '{0:.2f}'.format(pricesH[i]), '{0:.2}'.format(volumesH[i]))

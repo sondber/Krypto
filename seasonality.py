@@ -12,10 +12,10 @@ import realized_volatility
 import math
 
 
-intraday = 1
+intraday = 0
 intraweek = 1
 
-exch = [5]
+exch = [0, 1, 2, 3, 4, 5]
 
 for exc in exch:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
@@ -26,8 +26,6 @@ for exc in exch:
 
         time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH= \
             dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1)
-
-        print(len(time_listH), len(spreadH), len(rvolH), len(log_rvolH), len(log_illiqH))
 
         # Finding average for every hour of the day
         hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_listH, returnsH, frequency="h")

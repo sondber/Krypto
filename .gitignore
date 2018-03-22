@@ -33,3 +33,4 @@ data/long_raw_data/krakenusd.csv
 data/long_raw_data/coincheckjpy.csv
 *.csv
 data/long_raw_data/kaggle_data.zip
+data/export_csv/.DS_Store

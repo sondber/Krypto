@@ -651,7 +651,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_AR = AR_matrix(Y, AR_order)
         X_AR = X_AR[max_lag - AR_order:,:]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
 
-        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
+        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=288)
 
         X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
         X_HAR = np.append(X_AR, X_lagged, axis=1)

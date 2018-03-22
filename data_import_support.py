@@ -443,18 +443,18 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     print(" \033[32;0;0mRunning 'clean_series_days' ...\033[0;0;0m")
     if convert_time_zones:
         if exc == 0 or exc == 5:
-            n_hours = 0
+            n_hours = 1
         elif exc == 1:
             n_hours = 9
         elif exc == 2:
             n_hours = 8
-        elif exc ==3:
-            n_hours = -8
+        elif exc == 3:
+            n_hours = -5
         elif exc == 4:
             n_hours = 9
         else:
             n_hours = 0
-        print("  Converting time zones: moving series %i hours" % n_hours)
+        print("  Converting time zones: moving series %i hour(s)" % n_hours)
     else:
         n_hours = 0
 
@@ -467,7 +467,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
     end_time_D = ""
     if exc == 0:
         cutoff_date = "01.01.2013 00:00"
-        cutoff_min_date = cutoff_date
+        cutoff_min_date = "01.01.2013 01:00"
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 1:
         cutoff_date = "01.01.2016 00:00"
@@ -481,7 +481,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         start_averaging_date = "01.01.2012 00:00"
     elif exc == 3:
         cutoff_date = "01.01.2015 00:00"
-        cutoff_min_date = "01.01.2015 16:00"
+        cutoff_min_date = "01.01.2015 19:00"
         start_averaging_date = "02.12.2014 00:00"
     elif exc == 4:
         cutoff_date = "01.01.2014 00:00"
@@ -489,7 +489,7 @@ def clean_series_days(time_listM, pricesM, volumesM, exc=0, print_days_excluded=
         start_averaging_date = "01.10.2013 00:00"
     elif exc == 5:
         cutoff_date = "01.01.2015 00:00"
-        cutoff_min_date = "01.01.2015 00:00"
+        cutoff_min_date = "01.01.2015 01:00"
         start_averaging_date = "01.03.2014 00:00"
     else:
         print("  TEST SET")
@@ -649,7 +649,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
             n_hours = 9
         else:
             n_hours = 0
-        print("  Converting time zones: moving series %i hours" % n_hours)
+        print("  Converting time zones: moving series %i hour(s)" % n_hours)
     else:
         n_hours = 0
 

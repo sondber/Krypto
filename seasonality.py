@@ -12,10 +12,10 @@ import realized_volatility
 import math
 
 
-intraday = 1
-intraweek = 0
+intraday = 0
+intraweek = 1
 
-exch = [3]
+exch = [0, 1, 2, 3, 4, 5]
 
 for exc in exch:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)

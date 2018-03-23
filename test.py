@@ -25,3 +25,12 @@ print(spread_row)
 spread_master = np.append(spread_master, spread_row, axis=0)
 
 print(spread_master)
+
+
+print("testing")
+
+test_arr = [1, 2, 3, 4, 5]
+print(test_arr)
+remove = [1,3]
+test_arr = np.delete(test_arr, remove)
+print(test_arr)

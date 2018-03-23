@@ -1,9 +1,10 @@
 import csv
 import numpy as np
 from Sondre.sondre_support_formulas import count_rows
+import data_import_support as dis
 
 
-def get_list(exc=0):
+def get_list(exc=0, hour=0, local_time=0):
 
     if exc == 0:
         exc_name = "bitstampusd"
@@ -20,30 +21,39 @@ def get_list(exc=0):
     elif exc == -1:
         exc_name = "test"
 
-    file_name = "data/export_csv/" + exc_name + "_edit.csv"
-    time_listM = []
-    priceM = []
-    volumeM = []
+    if hour == 0:
+        file_name = "data/export_csv/" + exc_name + "_edit.csv"
+        time_listM = []
+        priceM = []
+        volumeM = []
 
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        next(reader)
-        next(reader)
-        for row in reader:
-            try:
-                time_listM.append(str(row[0]))
-                priceM.append(float(row[1]))
-                volumeM.append(float(row[2]))
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            i = i + 1
+        with open(file_name, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+            print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+            i = 0
+            next(reader)
+            next(reader)
+            next(reader)
+            for row in reader:
+                try:
+                    time_listM.append(str(row[0]))
+                    priceM.append(float(row[1]))
+                    volumeM.append(float(row[2]))
+                except ValueError:
+                    print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+                i = i + 1
 
-    return exc_name, time_listM, priceM, volumeM
+        return exc_name, time_listM, priceM, volumeM
 
+    else:
+        if local_time == 1:
+            time_s = "_local_time"
+        else:
+            time_s = "_global_time"
+        file_name = "data/export_csv/" + exc_name + time_s + "_hourly.csv"
+        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_hourly_csv(file_name)
 
+    return exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
 
 
 def fetch_long_and_write(exchanges, opening_hours_only="n1"):

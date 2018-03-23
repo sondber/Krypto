@@ -12,7 +12,7 @@ from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
 
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exch = [0, 2, 3, 4]  # 0=bitstamp, 1=coincheck
+exch = [0]  # 0=bitstamp, 1=coincheck
 
 intraweek_pattern_regression = 1
 subtract_means = 1  # from day-of-week regression
@@ -50,7 +50,6 @@ for exc in exch:
     print()
     print("     ------------------------------------------------", str(exc_name).upper(),
           "-----------------------------------------")
-    print()
 
     mon, tue, wed, thu, fri, sat, sun = legacy.week_vars(time_listD)
     weekend = np.zeros(len(mon))
@@ -176,8 +175,6 @@ for exc in exch:
 
         if convert_coeffs_to_percentage == 1:
             print()
-            print()
-            print()
             print("NB!! Converting returnsH and spreadH back into percentage")
             for c in [0, 1, 6, 7]:  # 0-1=returnsH 6-7=spreadH
                 for i in range(0, n_entries):
@@ -253,7 +250,6 @@ for exc in exch:
         print(
             "     ------------------------------------------------Regression table for Intraweek seasonality-----------------------------------------")
         print()
-        print()
         supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
     if determinants_regression == 1:
@@ -328,8 +324,6 @@ for exc in exch:
             std_errs_matrix = np.zeros([n_entries, n_cols])
 
             m_col = 0
-            print("6: Length of Y", len(Y), "; Rows in X_benchmark", np.size(X_benchmark, 0), "; Cols in X_benchmark",
-                  np.size(X_benchmark, 1))
             coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
             coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
@@ -488,11 +482,8 @@ for exc in exch:
             print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
-            print()
-            print()
             print(
-                "           -----------------------------------------Regression table for Bid-ask spreadH----------------------------------------")
-            print()
+                "           -----------------------------------------Regression table for Bid-ask spread----------------------------------------")
             print()
             supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
@@ -697,10 +688,8 @@ for exc in exch:
             print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
-            print()
             print(
                 "           -----------------------------------------Regression table for ILLIQ----------------------------------------")
-            print()
             print()
             supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
@@ -930,10 +919,8 @@ for exc in exch:
             print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
-            print()
             print(
                 "           -----------------------------------------Regression table for Return----------------------------------------")
-            print()
             print()
             supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 

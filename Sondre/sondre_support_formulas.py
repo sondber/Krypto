@@ -512,12 +512,11 @@ def remove_extremes(time_list, data, threshold_upper, threshold_lower=0):
     return time_list
 
 
-def find_date_index(cutoff_date, time_list_hours):
-    c_year, c_month, c_day, c_hour, c_minute = fix_time_list(cutoff_date, single_time_stamp=1)
+def find_date_index(date_to_find, time_list_hours, next_date=0):
+    c_year, c_month, c_day, c_hour, c_minute = fix_time_list(date_to_find, single_time_stamp=1)
     year, month, day, hour, minute = fix_time_list(time_list_hours)
 
-    # print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
-
+    #print("   supp.%i: searching for %s " % (gf(cf()).lineno, date_to_find))
     index = 0
     while year[index] < c_year:
         index += 1
@@ -530,8 +529,15 @@ def find_date_index(cutoff_date, time_list_hours):
     while minute[index] < c_minute and minute[index] < 59:
         index += 1
 
-    # print("The cutoff is", time_listH[index])
-    return index
+    if date_to_find != time_list_hours[index]:
+        if next_date == 0:
+            #print("   supp.%i: Date %s not found in time list. Returning nothing" % (gf(cf()).lineno, date_to_find))
+            return "Error"
+        else:
+            print("   supp.%i: Date %s not found in time list. Returning %s instead" % (gf(cf()).lineno, date_to_find, time_list_hours[index]))
+            return index
+    else:
+        return index
 
 
 def time_of_day_dummies(time_list, hours_in_period=4):

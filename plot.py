@@ -317,10 +317,6 @@ def intraday(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0, l
     hour_of_day_ticks()
     title=title.lower()
 
-    # Plotting NYSE opening hours
-    #plt.plot([9, 9.0001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
-    #plt.plot([15.5, 15.5001], [min(low)*0.99, max(high)*1.01], linewidth=0.5, color='black')
-
     if yzero==1:
         plot_y_zero([0, 24])
     location = "figures/seasonality/day/" + title + ".png"

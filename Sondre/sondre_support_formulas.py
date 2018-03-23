@@ -512,12 +512,11 @@ def remove_extremes(time_list, data, threshold_upper, threshold_lower=0):
     return time_list
 
 
-def find_date_index(cutoff_date, time_list_hours):
-    c_year, c_month, c_day, c_hour, c_minute = fix_time_list(cutoff_date, single_time_stamp=1)
+def find_date_index(date_to_find, time_list_hours, next_date=0):
+    c_year, c_month, c_day, c_hour, c_minute = fix_time_list(date_to_find, single_time_stamp=1)
     year, month, day, hour, minute = fix_time_list(time_list_hours)
 
-    # print("cutoff: ", c_year, c_month, c_day, c_hour, c_minute)
-
+    #print("   supp.%i: searching for %s " % (gf(cf()).lineno, date_to_find))
     index = 0
     while year[index] < c_year:
         index += 1
@@ -530,8 +529,15 @@ def find_date_index(cutoff_date, time_list_hours):
     while minute[index] < c_minute and minute[index] < 59:
         index += 1
 
-    # print("The cutoff is", time_listH[index])
-    return index
+    if date_to_find != time_list_hours[index]:
+        if next_date == 0:
+            #print("   supp.%i: Date %s not found in time list. Returning nothing" % (gf(cf()).lineno, date_to_find))
+            return "Error"
+        else:
+            print("   supp.%i: Date %s not found in time list. Returning %s instead" % (gf(cf()).lineno, date_to_find, time_list_hours[index]))
+            return index
+    else:
+        return index
 
 
 def time_of_day_dummies(time_list, hours_in_period=4):
@@ -609,6 +615,9 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
 # Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
 def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, force_max_lag=0, AR_order=1):
 
+    hours_to_remove = []
+
+
     if hours_in_period != -1:  # Dette er for
         X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
         if prints == 1:
@@ -616,11 +625,8 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
     else:
         n_dummies = 0
     x_num = n_dummies
-    if HAR_config == 0:  # Blank
-        max_lag = max(1, force_max_lag)
-        X_HAR = []
 
-    elif HAR_config == 1:  # X_AR(1)
+    if HAR_config == 1:  # AR(1)
         max_lag = max(1, force_max_lag)
         X_AR = AR_matrix(Y, AR_order)
         X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
@@ -702,10 +708,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
         X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
 
-
-
         X_HAR = np.append(X_AR, X_lagged, axis=1)
-
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
 
@@ -740,7 +743,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         else:
             print("  supp.%i (END): Y is: %i, X_benchmark is %i" % (gf(cf()).lineno, len(Y), len(X_benchmark)))
 
-    return Y, X_benchmark, max_lag
+    return Y, X_benchmark, max_lag, hours_to_remove
 
 
 def AR_matrix(Y, order=1):

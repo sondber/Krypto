@@ -33,9 +33,9 @@ exchanges = [0]  # just for testing
 # 3 iterere over exchanges
 
 for exc in exchanges:
+    exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
+        exc=exc, freq=1, local_time=1)
 
-    exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
-    time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc)
     #supp.print_n(50)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")
     force_max_lag = max(288, AR_order)
@@ -65,11 +65,14 @@ for exc in exchanges:
             #print("              -------------- DETERMINANTS OF INTRADAY BAS --------------")
             #print()
             Y = spreadH
-            end_index = len(spreadH) # Final index for all series
             n_cols = 10  # 10 for BAS og for ILLIQ
 
             # 6 lage benchmark
-            Y, X_benchmark, max_lag = supp.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag, AR_order=AR_order)
+            Y, X_benchmark, max_lag, hours_to_remove = supp.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag, AR_order=AR_order)
+
+            Y = np.delete(Y, hours_to_remove)
+            end_index = len(spreadH) # Final index for all series
+            X_benchmark = np.delete(X_benchmark, hours_to_remove, 0)
 
             n_entries = np.size(X_benchmark, 0)
             coeff_matrix = np.zeros([n_entries, n_cols])
@@ -97,8 +100,6 @@ for exc in exchanges:
             m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=0, intercept=intercept)
             #supp.print_n(max(0, 35 - np.size(coeff_matrix, 1)-bench_type))
 
-            AR.append(AR_order)
-            AIC.append(aic_array[0])
 
             if benchmark_only != 1:
                 # Return

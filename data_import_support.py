@@ -681,7 +681,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     elif exc == 2:
         cutoff_date = "01.01.2013 00:00"
         start_averaging_date = "01.01.2012 00:00"
-        end_time = "30.09.2017 00:00"
+        end_time = "29.09.2017 00:00"
     elif exc ==3:
         cutoff_date = "01.01.2015 00:00"
         start_averaging_date = "02.12.2014 00:00"
@@ -697,8 +697,8 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         start_averaging_date = "01.01.2017 00:00"
 
 
-    cutoff_hour = supp.find_date_index(cutoff_date, time_listH)
-    start_averaging_hour = supp.find_date_index(start_averaging_date, time_listH)
+    cutoff_hour = supp.find_date_index(cutoff_date, time_listH, next_date=1)
+    start_averaging_hour = supp.find_date_index(start_averaging_date, time_listH, next_date=1)
     if len(end_time) > 1:
         end_hour = supp.find_date_index(end_time, time_listH)
     else:
@@ -800,7 +800,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
     log_rvolH = np.log(rvolH)
 
 
-    print("  dis.%i: Length of time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
+    #print("  dis.%i: Length of time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
     print(" \033[32;0;0mFinished running 'clean_series_hour' ...\033[0;0;0m")
     return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
 
@@ -919,3 +919,82 @@ def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp): #note that start_
     price = supp.fill_blanks(price)
     write_to_csv(exc_name, full_list_excel_time, price, volume)
 
+
+def write_hourly_csv(exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH, local_time = 0):
+
+    if local_time == 1:
+        time_s = "_local_time"
+    else:
+        time_s = "_global_time"
+
+    write_filename = "data/export_csv/" + exc_name + time_s + "_hourly.csv"
+    with open(write_filename, 'w', newline='') as csvfile:
+        writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % write_filename)
+
+        header1 = [" "]
+        header2 = [" "]
+        header3 = ["Time"]
+        currency = exc_name[- 3:]
+        header1.append(exc_name)
+        header1.append("")
+        header2.append("Returns")
+        header2.append("Spread")
+        header2.append("Volumes")
+        header2.append("Log_volumes")
+        header2.append("ILLIQ")
+        header2.append("log_ILLIQ")
+        header2.append("RVOL")
+        header2.append("Log_RVOL")
+        header3.append(currency.upper())
+        header3.append("BTC")
+
+        writ.writerow(header1)
+        writ.writerow(header2)
+        writ.writerow(header3)
+
+        for i in range(len(time_listH)):
+            rowdata = [time_listH[i]]
+            rowdata.append(returnsH[i])
+            rowdata.append(spreadH[i])
+            rowdata.append(volumesH[i])
+            rowdata.append(log_volumesH[i])
+            rowdata.append(illiqH[i])
+            rowdata.append(log_illiqH[i])
+            rowdata.append(rvolH[i])
+            rowdata.append(log_rvolH[i])
+            writ.writerow(rowdata)
+
+def read_hourly_csv(file_name):
+    time_listH= []
+    returnsH = []
+    spreadH = []
+    volumesH= []
+    log_volumesH = []
+    illiqH = []
+    log_illiqH = []
+    rvolH = []
+    log_rvolH = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            try:
+                time_listH.append(row[0])
+                returnsH.append(float(row[1]))
+                spreadH.append(float(row[2]))
+                volumesH.append(float(row[3]))
+                log_volumesH.append(float(row[4]))
+                illiqH.append(float(row[5]))
+                log_illiqH.append(float(row[6]))
+                rvolH.append(float(row[7]))
+                log_rvolH.append(float(row[8]))
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+    print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
+    return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH

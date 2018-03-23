@@ -547,7 +547,7 @@ def time_of_day_dummies(time_list, hours_in_period=4):
     return X_dummies, n_dummies
 
 
-def get_lagged_list(data, time_list, freq="h", lag=24):  # TIL JACOB
+def get_lagged_list(data, time_list, freq="h", lag=24):
     if freq != "h":
         print("FUNCTIONALITY ONLY WRITTEN FOR HOURLY FREQUENCY")
 

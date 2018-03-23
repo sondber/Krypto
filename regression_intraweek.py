@@ -10,8 +10,6 @@ from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
     import_regressions, fmt_print
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
-
 exch = [0, 2, 3, 4]  # 0=bitstamp, 1=coincheck
 
 intraweek_pattern_regression = 1

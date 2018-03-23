@@ -654,7 +654,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
         n_hours = 0
 
     if n_hours != 0:
-        year, month, day, hour, minute = supp.fix_time_list(time_listM, move_n_hours=n_hours)  # Flytter nå Coincheck ni timer, men lar Bitstamp stå
+        year, month, day, hour, minute = supp.fix_time_list(time_listM, move_n_hours=n_hours)
         time_listM = supp.make_time_list(year, month, day, hour, minute)  # Lager en ny tidsliste fra de flyttede listene
 
     returnsM = jake_supp.logreturn(pricesM)
@@ -922,10 +922,7 @@ def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp): #note that start_
 
 def write_hourly_csv(exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH, local_time = 0):
 
-    if local_time == 1:
-        time_s = "_local_time"
-    else:
-        time_s = "_global_time"
+    time_s = "_global_time"
 
     write_filename = "data/export_csv/" + exc_name + time_s + "_hourly.csv"
     with open(write_filename, 'w', newline='') as csvfile:
@@ -998,3 +995,5 @@ def read_hourly_csv(file_name):
             i = i + 1
     print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
     return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
+
+

@@ -13,14 +13,14 @@ import realized_volatility
 import math
 
 
-intraday = 1
-intraweek = 0
+intraday = 0
+intraweek = 1
 global_time = 0
 exch = [0, 1, 2, 3, 4, 5]
 
 for exc in exch:
     if intraday == 1:
-        for local_time in [1]:
+        for local_time in [0, 1]:
             # HOURS ----------------------------------------------------------------------------------------------------
 
             if local_time == 1:
@@ -28,7 +28,7 @@ for exc in exch:
             else:
                 time_s = "_global_time"
 
-            exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, hour=1, local_time=local_time)
+            exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, freq="h", local_time=local_time)
             print("------ INTRADAY FOR", exc_name.upper(), "------")
 
             # Finding average for every hour of the day
@@ -50,14 +50,11 @@ for exc in exch:
             plot.intraday(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title=title, perc=1, ndigits=2)
 
     if intraweek == 1:
-        exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
-        exc_name = exc_name[0:-3]
 
-        print("------ INTRAWEEK", exc_name.upper(), "------")
         # DAYS ----------------------------------------------------------------------------------------------------
         # Converting to daily data
-        returns_minutes = jake_supp.logreturn(pricesM)
-        time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, print_days_excluded=0, convert_time_zones=1)
+        exc_name, time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = di.get_list(exc=exc, freq="d")
+        print("------ INTRAWEEK", exc_name.upper(), "------")
 
         day_of_week, avg_returns_day, low_returns_day, upper_returns_day = dis.cyclical_average(time_listD, returnsD, frequency="d")
         day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_listD, spreadD, frequency="d")
@@ -80,7 +77,7 @@ for exc in exch:
 if global_time == 1:
     for exc in exch:
         exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
-            exc=exc, hour=1, local_time=0)
+            exc=exc, freq=1, local_time=0)
 
         hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_listH, volumesH, frequency="h")
         hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_listH, spreadH, frequency="h")

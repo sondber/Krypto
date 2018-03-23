@@ -5,7 +5,7 @@ from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 
 
-def get_list(exc=0, hour=0, local_time=0):
+def get_list(exc=0, freq="m", local_time=0):
 
     if exc == 0:
         exc_name = "bitstampusd"
@@ -22,7 +22,7 @@ def get_list(exc=0, hour=0, local_time=0):
     elif exc == -1:
         exc_name = "test"
 
-    if hour == 0:
+    if freq == "m" or freq == 0:
         file_name = "data/export_csv/" + exc_name + "_edit.csv"
         time_listM = []
         priceM = []
@@ -46,9 +46,9 @@ def get_list(exc=0, hour=0, local_time=0):
 
         return exc_name, time_listM, priceM, volumeM
 
-    else:
+    elif freq =="h" or freq ==1:
         file_name = "data/export_csv/" + exc_name + "_global_time_hourly.csv"
-        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_hourly_csv(file_name)
+        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_clean_csv(file_name)
 
         if local_time == 1:
             if exc == 0 or exc == 5:
@@ -68,10 +68,13 @@ def get_list(exc=0, hour=0, local_time=0):
             n_hours = 0
 
         if n_hours != 0:
-            year, month, day, hour, minute = supp.fix_time_list(time_listH, move_n_hours=n_hours)
-            time_listH = supp.make_time_list(year, month, day, hour, minute)  # Lager en ny tidsliste fra de flyttede listene
+            year, month, day, freq, minute = supp.fix_time_list(time_listH, move_n_hours=n_hours)
+            time_listH = supp.make_time_list(year, month, day, freq, minute)  # Lager en ny tidsliste fra de flyttede listene
+    else:
+        file_name = "data/export_csv/" + exc_name + "_daily.csv"
+        time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.read_clean_csv(file_name)
 
-        return exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
+        return exc_name, time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD
 
 
 def fetch_long_and_write(exchanges, opening_hours_only="n"):

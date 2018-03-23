@@ -615,6 +615,9 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
 # Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
 def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, force_max_lag=0, AR_order=1):
 
+    hours_to_remove = []
+
+
     if hours_in_period != -1:  # Dette er for
         X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
         if prints == 1:
@@ -622,11 +625,8 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
     else:
         n_dummies = 0
     x_num = n_dummies
-    if HAR_config == 0:  # Blank
-        max_lag = max(1, force_max_lag)
-        X_HAR = []
 
-    elif HAR_config == 1:  # X_AR(1)
+    if HAR_config == 1:  # AR(1)
         max_lag = max(1, force_max_lag)
         X_AR = AR_matrix(Y, AR_order)
         X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
@@ -708,10 +708,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
         X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
 
-
-
         X_HAR = np.append(X_AR, X_lagged, axis=1)
-
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
         last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
 
@@ -746,7 +743,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         else:
             print("  supp.%i (END): Y is: %i, X_benchmark is %i" % (gf(cf()).lineno, len(Y), len(X_benchmark)))
 
-    return Y, X_benchmark, max_lag
+    return Y, X_benchmark, max_lag, hours_to_remove
 
 
 def AR_matrix(Y, order=1):

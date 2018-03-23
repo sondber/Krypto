@@ -15,7 +15,7 @@ log_illiqs = True
 
 for exc in exchanges:
     exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
-        exc=exc, hour=1, local_time=1)
+        exc=exc, freq=1, local_time=1)
 
     hour = supp.fix_time_list(time_listH)[3]
 

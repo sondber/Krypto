@@ -21,6 +21,5 @@ os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 for exc in [0, 1, 2, 3, 4, 5]:
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
-    for conv_time in [0, 1]:
-        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=conv_time, plot_for_extreme=0)
-        dis.write_hourly_csv(exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH, local_time=1-conv_time)
+    time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=0, plot_for_extreme=0)
+    dis.write_hourly_csv(exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH)

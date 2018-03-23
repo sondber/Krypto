@@ -13,38 +13,41 @@ import realized_volatility
 import math
 
 
-intraday = 0
+intraday = 1
 intraweek = 0
-global_time = 1
-standardize = 0 # Only for global plot
-
-exch = [0]
-gt_count = 0 # for global time. Should always be 0
-
+global_time = 0
+exch = [0, 1, 2, 3, 4, 5]
 
 for exc in exch:
     if intraday == 1:
-        # HOURS ----------------------------------------------------------------------------------------------------
+        for local_time in [1]:
+            # HOURS ----------------------------------------------------------------------------------------------------
 
-        exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, hour=1, local_time=1)
-        print("------ INTRADAY FOR", exc_name.upper(), "------")
+            if local_time == 1:
+                time_s = ""
+            else:
+                time_s = "_global_time"
 
-        # Finding average for every hour of the day
-        hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_listH, returnsH, frequency="h")
-        hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_listH, log_volumesH, frequency="h")
-        hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_listH, spreadH, frequency="h")
-        hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_listH, rvolH, frequency="h")
-        #hour_of_day, avg_log_rvol_hour, low_log_rvol_hour, upper_log_rvol_hour = dis.cyclical_average(time_listH, log_rvol_hours, frequency="h")
-        hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_listH, illiqH, frequency="h")
-        #hour_of_day, avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour = dis.cyclical_average(illiq_timeH, log_illiq_hours, frequency="h")
+            exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, hour=1, local_time=local_time)
+            print("------ INTRADAY FOR", exc_name.upper(), "------")
 
-        plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title="Return_" + exc_name, perc=1, ndigits=2, yzero=1)
-        plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title="Log_Volume_" + exc_name, perc=0)
-        plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title="Spread_" + exc_name, perc=1)
-        plot.intraday(avg_rvol_hour, low_rvol_hour, upper_rvol_hour, title="RVol_" + exc_name, perc=1, logy=0, ndigits=0)
-        plot.intraday(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title="ILLIQ_" + exc_name, perc=1, ndigits=2)
-        #plot.intraday(avg_log_rvol_hour, low_log_rvol_hour, upper_log_rvol_hour, title="Log_RVol" + exc_name, perc=1, logy=1, ndigits=0)
-        #plot.intraday(avg_log_illiq_hour, low_log_illiq_hour, upper_log_illiq_hour, title="Log_ILLIQ" + exc_name, perc=0, ndigits=3, logy=0)  # Skulle helst brukt vanlig illiq med log-skala i stedet
+            # Finding average for every hour of the day
+            hour_of_day, avg_returns_hour, low_returns_hour, upper_returns_hour = dis.cyclical_average(time_listH, returnsH, frequency="h")
+            hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_listH, log_volumesH, frequency="h")
+            hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_listH, spreadH, frequency="h")
+            hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_listH, rvolH, frequency="h")
+            hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_listH, illiqH, frequency="h")
+
+            title = "Return_" + exc_name + time_s
+            plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title=title, perc=1, ndigits=2, yzero=1)
+            title = "Volumes_" + exc_name + time_s
+            plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title=title, perc=0)
+            title = "Spread_" + exc_name + time_s
+            plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title=title, perc=1)
+            title = "RVol_" + exc_name + time_s
+            plot.intraday(avg_rvol_hour, low_rvol_hour, upper_rvol_hour, title=title, perc=1, logy=0, ndigits=0)
+            title = "illiq_" + exc_name + time_s
+            plot.intraday(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title=title, perc=1, ndigits=2)
 
     if intraweek == 1:
         exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
@@ -74,47 +77,75 @@ for exc in exch:
         #plot.intraweek(avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day, title="Log_ILLIQ" + exc_name, perc=0,   logy=0, ndigits=3)
         plot.intraweek(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume_" + exc_name, perc=0,weekends=1)  # Hva faen gjør vi med y-aksen på denne?
 
-    if global_time == 1:
-
+if global_time == 1:
+    for exc in exch:
         exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
             exc=exc, hour=1, local_time=0)
 
         hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_listH, volumesH, frequency="h")
         hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_listH, spreadH, frequency="h")
 
+        spread_std = (avg_spread_hour - np.mean(avg_spread_hour))/(max(avg_spread_hour)-min(avg_spread_hour))
+        volumes_std = (avg_volumes_hour - np.mean(avg_volumes_hour))/(max(avg_volumes_hour)-min(avg_volumes_hour))
+        spread = avg_spread_hour
+        volumes = avg_volumes_hour
 
-        if standardize == 1:
-            spread_for_plot = supp.standardize(avg_spread_hour)
-            volumes_for_plot = supp.standardize(avg_volumes_hour)
-        else:
-            spread_for_plot = avg_spread_hour
-            volumes_for_plot = avg_volumes_hour
+        if exc == 0:
+            marker = "s"
+            color = "black"
+        elif exc == 1:
+            marker = "x"
+            color = "blue"
+        elif exc == 2:
+            marker = "o"
+            color = "blue"
+        elif exc == 3:
+            marker = "v"
+            color = "black"
+        elif exc == 4:
+            marker = "+"
+            color = "blue"
+        elif exc == 5:
+            marker = "p"
+            color = "black"
+
 
         plt.figure(1, figsize=[16, 4], dpi=300)
-        plt.title("Spread")
-        plt.plot(spread_for_plot, label=exc_name)
+        plt.plot(spread_std, label=exc_name, color=color, marker=marker)
         plt.figure(2, figsize=[16, 4], dpi=300)
-        plt.title("Volumes")
-        plt.plot(volumes_for_plot, label=exc_name)
+        plt.plot(spread, label=exc_name, color=color, marker=marker)
+        plt.figure(3, figsize=[16, 4], dpi=300)
+        plt.plot(volumes_std, label=exc_name, color=color, marker=marker)
+        plt.figure(4, figsize=[16, 4], dpi=300)
+        plt.plot(volumes, label=exc_name, color=color, marker=marker)
 
+    title1 = "intraday_spread_std"
+    title2 = "intraday_spread"
+    title3 = "intraday_volumes_std"
+    title4 = "intraday_volumes"
 
-if global_time == 1:
+    location1 = "figures/seasonality/global/" + title1 + ".png"
+    location2 = "figures/seasonality/global/" + title2 + ".png"
+    location3 = "figures/seasonality/global/" + title3 + ".png"
+    location4 = "figures/seasonality/global/" + title4 + ".png"
+
 
     plt.figure(1, figsize=[16, 4], dpi=300)
     plt.legend()
     plt.xlim([0, 23])
-    title1 = "intraday_spread"
-    if standardize:
-        title1 += "_standardized"
-    location1 = "figures/seasonality/global/" + title1 + ".png"
     plt.savefig(location1)
 
     plt.figure(2, figsize=[16, 4], dpi=300)
     plt.legend()
     plt.xlim([0, 23])
-    title2 = "intraday_volumes"
-    if standardize:
-        title2 += "_standardized"
-    location2 = "figures/seasonality/global/" + title2 + ".png"
     plt.savefig(location2)
 
+    plt.figure(3, figsize=[16, 4], dpi=300)
+    plt.legend()
+    plt.xlim([0, 23])
+    plt.savefig(location3)
+
+    plt.figure(4, figsize=[16, 4], dpi=300)
+    plt.legend()
+    plt.xlim([0, 23])
+    plt.savefig(location4)

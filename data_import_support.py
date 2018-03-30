@@ -802,7 +802,7 @@ def clean_series_hour(time_listM, pricesM, volumesM, exc=0, convert_time_zones=1
 
     #print("  dis.%i: Length of time %i, spread %i, rvol %i, illiq %i, and log_illiq %i" % (gf(cf()).lineno, len(time_listH), len(spreadH), len(rvolH), len(illiqH), len(log_illiqH)))
     print(" \033[32;0;0mFinished running 'clean_series_hour' ...\033[0;0;0m")
-    return time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
+    return time_listH, returnsH, volumesH, log_volumesH, spreadH, illiqH, log_illiqH, rvolH, log_rvolH
 
 
 def read_single_exc_csvs(file_name, time_list, price, volume):

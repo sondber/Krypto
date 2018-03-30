@@ -70,6 +70,9 @@ def get_list(exc=0, freq="m", local_time=0):
         if n_hours != 0:
             year, month, day, freq, minute = supp.fix_time_list(time_listH, move_n_hours=n_hours)
             time_listH = supp.make_time_list(year, month, day, freq, minute)  # Lager en ny tidsliste fra de flyttede listene
+
+        return exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH
+
     else:
         file_name = "data/export_csv/" + exc_name + "_daily.csv"
         time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.read_clean_csv(file_name)

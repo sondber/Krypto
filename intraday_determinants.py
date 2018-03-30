@@ -16,7 +16,7 @@ standardized_coeffs = 0 # Should be 1
 benchmark_only = 1  # For testing
 bench_types = [3]
 AR_order = 24
-benchmark_prints = 0  # For kontroll av antall rader og kolonner
+benchmark_prints = 1  # For kontroll av antall rader og kolonner
 intercept = 0
 force_max_lag = benchmark_only * 48  # Når vi vil sammenlikne benchmarks
 
@@ -33,8 +33,7 @@ exchanges = [0]  # just for testing
 # 3 iterere over exchanges
 
 for exc in exchanges:
-    exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
-        exc=exc, freq=1, local_time=1)
+    exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, freq="h", local_time=1)
 
     #supp.print_n(50)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")
@@ -45,8 +44,6 @@ for exc in exchanges:
         #    print("     --------------------------- %i hours per period --------------------------" % hours_in_period)
 
         #print()
-        # 4 importere clean_trans_hours
-
 
         if log_illiqs == 1:
             illiqH = log_illiqH
@@ -97,7 +94,7 @@ for exc in exchanges:
             """
             m_col = 0
             # Benchmark
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=0, intercept=intercept)
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=benchmark_prints, intercept=intercept)
             #supp.print_n(max(0, 35 - np.size(coeff_matrix, 1)-bench_type))
 
 

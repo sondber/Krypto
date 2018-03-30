@@ -766,6 +766,38 @@ def A_before_B(time_A, time_B):
         before = True
     return before
 
+def add_two_series_w_different_time_lists(time_A, data_A, time_B, data_B):
+    # find list that starts last:
+    if A_before_B(time_A[0], time_B[0]):
+        long_data = data_A
+        long_time = time_A
+        short_data = data_B
+        short_time = time_B
+    else:
+        long_data = data_B
+        long_time = time_B
+        short_data = data_A
+        short_time = time_A
+
+    n_long = len(long_time)
+    n_short = len(short_time)
+    k = 0
+    while long_time[k] < short_time[0]:
+        k+=1
+    time_out = []
+    data_out = []
+    j = 0
+    for i in range(k, n_long):
+        while short_time[j] != long_time[i] and j < n_short - 1:
+            j += 1
+        if j != n_short:
+            time_out.append(long_time[i])
+            data_out.append(short_data[j]+long_data[i])
+        else:
+            j=0
+    return time_out, data_out
+
+
 
 def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med unix-integers. returnerer én-til-én
     single = 1
@@ -788,5 +820,7 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
 
 
 def timestamp_to_unix(time_stamp):
-    unix = time.mktime(datetime.datetime.strptime(time_stamp, '%d.%m.%Y %H:%M').timetuple())
+    unix = time.mktime(datetime.strptime(time_stamp, '%d.%m.%Y %H:%M').timetuple())
     return unix
+
+

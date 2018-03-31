@@ -13,8 +13,8 @@ import realized_volatility
 import math
 
 
-intraday = 0
-intraweek = 1
+intraday = 1
+intraweek = 0
 global_time = 0
 exch = [0, 1, 2, 3, 4, 5]
 

@@ -33,8 +33,7 @@ exchanges = [0]  # just for testing
 # 3 iterere over exchanges
 
 for exc in exchanges:
-    exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
-        exc=exc, freq=1, local_time=1)
+    exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, freq=1, local_time=1)
 
     #supp.print_n(50)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")

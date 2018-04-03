@@ -923,7 +923,10 @@ def import_from_csv_w_ticks(exc_name, start_stamp, end_stamp): #note that start_
 def write_clean_csv(exc_name, time_list, returns, spread, volumes, log_volumes, illiq, log_illiq, rvol, log_rvol, local_time = 0, freq="h"):
 
     if freq == "h":
-        frequency = "_global_time_hourly"
+        if local_time == 0:
+            frequency = "_global_time_hourly"
+        else:
+            frequency = "_local_time_hourly"
     else:
         frequency = "_daily"  # All daily data is converted to local time. Global time makes no sense
     write_filename = "data/export_csv/" + exc_name + frequency + ".csv"

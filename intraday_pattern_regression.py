@@ -310,7 +310,7 @@ for exc in exchanges:
             X = np.append(X, np.matrix(sixth), axis=0)
             X = np.transpose(X)
 
-            n_entries = 6  # Må bare være minst like stor som antall forklaringsvariable
+            n_entries = 6  # antall forklaringsvariable
             n_rows = 3 + n_entries * 2  # in final table
 
         n_cols = 5

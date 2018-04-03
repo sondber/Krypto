@@ -24,7 +24,6 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_AR, hours_to_remove = AR_matrix(Y, time_listH, AR_order, hours_to_remove)
 
         X_AR = X_AR[max_lag - AR_order:,:]
-        print(hours_to_remove)
         hours_to_remove = adjust_hours_for_removal(hours_to_remove, n_hours =(max_lag-AR_order))
         X_HAR = X_AR
 
@@ -32,21 +31,20 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         if prints == 1:
             print("  rs.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x , n_x + AR_order - 1, AR_order))
 
-    elif HAR_config == 2:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
+    elif HAR_config == 2:  # Denne skal inkludere AR(24)
+        AR_order = 5
+        max_lag = max(AR_order, force_max_lag)
+        X_AR, hours_to_remove = AR_matrix(Y, time_listH, AR_order, hours_to_remove)
 
-        lagged_list, index_list_prev_lag = supp.get_lagged_list(Y, time_listH, lag=24)
+        print("   \033[32;0;0mrs.%i: %0.1f percent of hours removed due to AR()\033[0;0;0m" % (gf(cf()).lineno, 100*float(len(hours_to_remove)/len(Y))))
+        X_AR = X_AR[max_lag - AR_order:, :]
+        hours_to_remove = adjust_hours_for_removal(hours_to_remove, n_hours=(max_lag - AR_order))
+        X_HAR = X_AR
 
-        X_HAR = np.matrix(lagged_list)
-        last_day_average = supp.get_last_day_average(Y, time_listH, index_list_prev_lag)
-        last_day_average = np.matrix(last_day_average)
-        X_HAR = np.append(X_HAR, last_day_average, axis=0)
-        X_HAR = np.transpose(X_HAR)
-
+        n_x += 1
         if prints == 1:
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
-            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
-        max_lag = max(24, force_max_lag)
-        X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
+            print(
+                "  rs.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x, n_x + AR_order - 1, AR_order))
 
     elif HAR_config == 3: # Denne skal inkludere X_AR(1) verdi 24 timer før, snitt 24 timer før
         AR_order = 1
@@ -55,7 +53,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_AR = X_AR[max_lag - AR_order:,:]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
         hours_to_remove = adjust_hours_for_removal(hours_to_remove, n_hours =(max_lag-AR_order))
 
-        lagged_list, index_list_prev_lag = supp.get_lagged_list(Y, time_listH, lag=288)
+        lagged_list, index_list_prev_lag = supp.get_lagged_list(Y, time_listH, lag=24)
 
         X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
         X_HAR = np.append(X_AR, X_lagged, axis=1)
@@ -65,34 +63,16 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
 
         if prints == 1:
             n_x += 1
-            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x , n_x + AR_order - 1, AR_order))
+            print("  rs.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x , n_x + AR_order - 1, AR_order))
             n_x += AR_order
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_x))
+            print("  rs.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_x))
             n_x += 1
-            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_x))
+            print("  rs.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_x))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
 
     elif HAR_config == 4: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
-        max_lag = max(48, force_max_lag)
-
-        lagged_list_24, index_list_prev_lag_24 = supp.get_lagged_list(Y, time_listH, lag=24)
-        X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
-
-        lagged_list_48, index_list_prev_lag_48 = supp.get_lagged_list(Y, time_listH, lag=48)
-        X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
-
-        X_HAR = X_lagged
-
-        last_day_average = supp.get_last_day_average(Y, time_listH, index_list_prev_lag_48)
-        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-
-        if prints == 1:
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
-            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 2))
-            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 3))
-
-        X_HAR = np.append(X_HAR, last_day_average, axis=1)
+        1
 
     elif HAR_config == 5: # Denne skal inkludere X_AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
         AR_order = 1
@@ -114,13 +94,13 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
 
         if prints == 1:
             n_x += 1
-            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x , n_x + AR_order - 1, AR_order))
+            print("  rs.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, n_x , n_x + AR_order - 1, AR_order))
             n_x += AR_order
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_x))
+            print("  rs.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_x))
             n_x += 1
-            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_x))
+            print("  rs.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_x))
             n_x += 1
-            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_x))
+            print("  rs.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_x))
 
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
 
@@ -130,19 +110,13 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_benchmark = X_HAR
 
 
-    print(np.size(X_HAR, 0), np.size(X_HAR, 1))
-    print(np.size(X_benchmark, 0), np.size(X_benchmark, 1))
     if HAR_config > 0 and hours_in_period != -1:
         X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
 
-    X_benchmark = np.delete(X_benchmark, hours_to_remove, 0)
-    Y = Y[max_lag:]
-    Y = np.delete(Y, hours_to_remove)
-
     #if prints == 1:
-    #    print("  rs.%i (END): Y is: %i, X_benchmark is (%i,%i)" % (gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
+        #print("  rs.%i (END): Y is: %i, X_benchmark is (%i,%i)" % (gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
 
-    return Y, X_benchmark, max_lag
+    return Y, X_benchmark, max_lag, hours_to_remove
 
 
 def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=0):
@@ -237,16 +211,16 @@ def fmt_print(print_loc, data, p_value=1, type="coeff"):  # Her endrer vi antall
             print_loc += "$-$"
 
         if abs(data) < 10:
-            print_loc += "{0:.4f}".format(abs(data))
-        else:
             print_loc += "{0:.3f}".format(abs(data))
+        else:
+            print_loc += "{0:.2f}".format(abs(data))
 
         if p_value <= 0.01:
-            stars = "**"
+            stars = "** "
         elif p_value <= 0.05:
-            stars = "* "
+            stars = "*  "
         else:
-            stars = "  "
+            stars = "   "
         print_loc += stars + "&"
 
     elif type == "std_err":
@@ -272,7 +246,7 @@ def binary_missing_to_indeces(binary_list):
             if binary_list[i] == 0:
                 index_list.append(i)
 
-        return index_list
+    return index_list
 
 
 def AR_matrix(y, y_time, order, hours_to_remove=[]):
@@ -305,6 +279,7 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
         value_exists_binary = np.zeros([n, order])
         x_ar = np.zeros([ar_len, order])
         for k in range(order):
+            print("  \033[0;32;0mrs.%i: order %i out of %i\033[0;0;0m" % (gf(cf()).lineno, k+1, order))
             i = n - 1
             year, month, day, hour, minute = supp.fix_time_list(y_time, single_time_stamp=0, move_n_hours=-(k+1))
             y_time_moved = supp.make_time_list(year, month, day, hour, minute)
@@ -322,7 +297,6 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
                 if not found:
                     value_exists_binary[i, k] = 0
                 i -= 1
-
     indeces = binary_missing_to_indeces(value_exists_binary)
     hours_to_remove = add_two_remove_lists(hours_to_remove, indeces)
     #print("  \033[0;32;0mrs.%i: finished running 'AR_matrix'\033[0;0;0m" % (gf(cf()).lineno))

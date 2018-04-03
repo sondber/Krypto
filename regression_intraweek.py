@@ -11,13 +11,10 @@ from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import print_n
 from regression_support import import_to_matrices, import_regressions, fmt_print
 
-<<<<<<< HEAD
 exch = [0, 2, 3, 4]  # 0=bitstamp, 1=coincheck
-=======
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
 exch = [0]  # 0=bitstamp, 1=coincheck
->>>>>>> master
 
 intraweek_pattern_regression = 1
 subtract_means = 1  # from day-of-week regression
@@ -34,9 +31,7 @@ return_multi = 0
 
 
 for exc in exch:
-    exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
-    time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD = \
-        dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, print_days_excluded=0, convert_time_zones=1)
+    exc_name, time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD= di.get_list(exc,freq="d", local_time=1)
 
     if log_illiqs:
         illiq = log_illiqD
@@ -329,7 +324,7 @@ for exc in exch:
             std_errs_matrix = np.zeros([n_entries, n_cols])
 
             m_col = 0
-            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
+            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=1)
             coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
@@ -446,14 +441,14 @@ for exc in exch:
                 print_rows[print_r] += (first_col[print_r]) + "&"
 
             # Dette er benchmarken
-            data_r = 0
             for print_r in range(0, 8, 2):
+                if print_r == 0:
+                    data_r = 0
+                else:
+                    data_r = int((print_r - 2)/2) + 8
                 for c in range(0, n_cols):
-                    print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
-                                                    p_values_matrix[data_r, c], type="coeff")
-                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c],
-                                                        type="std_err")
-                data_r += 1
+                    print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c], p_values_matrix[data_r, c], type="coeff")
+                    print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
 
             # Dette er regresjonene mot en og en annen variabel
             for print_r in range(8, 20, 2):
@@ -654,8 +649,11 @@ for exc in exch:
                 print_rows[print_r] += (first_col[print_r]) + "&"
 
             # Dette er benchmarken
-            data_r = 0
             for print_r in range(0, 8, 2):
+                if print_r == 0:
+                    data_r = 0
+                else:
+                    data_r = int((print_r - 2) / 2) + 8
                 for c in range(0, n_cols):
                     print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
                                                     p_values_matrix[data_r, c], type="coeff")
@@ -886,8 +884,11 @@ for exc in exch:
                 print_rows[print_r] += (first_col[print_r]) + "&"
 
             # Dette er benchmarken
-            data_r = 0
             for print_r in range(0, 8, 2):
+                if print_r == 0:
+                    data_r = 0
+                else:
+                    data_r = int((print_r - 2) / 2) + 8
                 for c in range(0, n_cols):
                     print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[data_r, c],
                                                     p_values_matrix[data_r, c], type="coeff")

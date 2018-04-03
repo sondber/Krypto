@@ -13,11 +13,12 @@ coinbase_hour_list, prices, volumes_coinbaseH = dis.convert_to_hour(time_list_co
 #time_list2=coinbase_hour_list[0:10]
 
 
-time_list_combined, volumes_combined = dis.add_two_series_w_different_times(bitstamp_hour_list, volumes_bitstampH, coinbase_hour_list, volumes_coinbaseH)
-print("combined ",time_list_combined[-10:-1])
-print("combined ",volumes_combined[-10:-1])
-print("coin ",coinbase_hour_list[-10:-1])
-print("coin ",volumes_coinbaseH[-10:-1])
-print("bits ",bitstamp_hour_list[-10:-1])
-print("bits ",volumes_bitstampH[-10:-1])
+time_list_combined, volumes_combined = dis.add_two_series_w_different_times(coinbase_hour_list, volumes_coinbaseH,bitstamp_hour_list, volumes_bitstampH)
+#time_list_combined, volumes_combined = dis.add_two_series_w_different_times(bitstamp_hour_list, volumes_bitstampH,coinbase_hour_list, volumes_coinbaseH)
+print("combined ",time_list_combined[-1010:-1000])
+print("combined ",volumes_combined[-1010:-1000])
+print("coin ",coinbase_hour_list[-1010:-1000])
+print("coin ",volumes_coinbaseH[-1010:-1000])
+print("bits ",bitstamp_hour_list[-1010:-1000])
+print("bits ",volumes_bitstampH[-1010:-1000])
 

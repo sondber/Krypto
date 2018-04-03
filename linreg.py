@@ -14,6 +14,7 @@ def reg_multiple(Y, X, intercept=1, prints=0):
 
     if prints == 1:
         print(reg_model.summary())
+        print_n(4)
     coeffs = reg_model.params
     tvalues = reg_model.tvalues
     rsquared=reg_model.rsquared_adj

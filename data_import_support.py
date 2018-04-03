@@ -1008,7 +1008,36 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
     #1 finne når vi skal starte
     #2 finne når vi skal slutte
     # summere opp alle dager imellom
+    # antar at de to tidsseriene er overlappende
     time_out=[]
     data_out=[]
+    t=0 #forskjellen mellom starten på de ulike tidsserier
+    if time_list1[0]<time_list2[0]: #liste2 er yngst
+
+        while time_list1[t]!=time_list2[0]:
+            t=t+1
+
+        if time_list1[-1]<time_list2[-1]: #hvis liste 1 slutter først
+            for i in range(len(time_list1)-t):
+                time_out.append(time_list2[i])
+                data_out.append(data2[i]+data1[t+i])
+
+        else:
+            for i in range(len(time_list2)):
+                time_out.append(time_list2[i])
+                data_out.append(data2[i]+data1[t+i])
+
+    else: #liste1 er yngst
+        while time_list2[t]!=time_list1[0]:
+            t=t+1
+        if time_list1[-1]<time_list2[-1]: #hvis liste1 slutter først
+            for i in range(len(time_list1)):
+                time_out.append(time_list1[i])
+                data_out.append(data1[i]+data2[t+i])
+        else:
+            for i in range(len(time_list2)-t):
+                time_out.append(time_list1[i])
+                data_out.append(data1[i]+data2[t+i])
+
 
     return time_out, data_out

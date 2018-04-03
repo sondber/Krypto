@@ -1009,12 +1009,14 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
     time_out=[]
     data_out=[]
     t=0 #forskjellen mellom starten på de ulike tidsserier
-    if time_list1[0]<time_list2[0]: #liste2 er yngst
+    if supp.timestamp_to_unix(time_list1[0])<supp.timestamp_to_unix(time_list2[0]): #liste2 er yngst
 
+        print(supp.timestamp_to_unix(time_list1[0])<supp.timestamp_to_unix(time_list2[0]))
         while time_list1[t]!=time_list2[0]:
             t=t+1
+            print(time_list1[t]," ",time_list2[0])
 
-        if time_list1[-1]<time_list2[-1]: #hvis liste 1 slutter først
+        if supp.timestamp_to_unix(time_list1[-1])<supp.timestamp_to_unix(time_list2[-1]): #hvis liste 1 slutter først
             for i in range(len(time_list1)-t):
                 time_out.append(time_list2[i])
                 data_out.append(data2[i]+data1[t+i])
@@ -1027,7 +1029,7 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
     else: #liste1 er yngst
         while time_list2[t]!=time_list1[0]:
             t=t+1
-        if time_list1[-1]<time_list2[-1]: #hvis liste1 slutter først
+        if supp.timestamp_to_unix(time_list1[-1])<supp.timestamp_to_unix(time_list2[-1]): #hvis liste1 slutter først
             for i in range(len(time_list1)):
                 time_out.append(time_list1[i])
                 data_out.append(data1[i]+data2[t+i])

@@ -1,5 +1,6 @@
 import numpy as np
 import data_import as di
+import regression_support
 from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 import plot
@@ -323,16 +324,16 @@ for exc in exchanges:
         m_col = 0
 
         Y = returnsH
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
         Y = log_volumesH
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
         Y = log_rvolH
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0)
         Y = spreadH
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=0, prints=0)
 
         if log_illiqs == True:
@@ -341,7 +342,7 @@ for exc in exchanges:
             Y = illiqH  # LOG / LINEAR !
 
 
-        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+        m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
             m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
             intercept=0, prints=0)
 
@@ -366,19 +367,19 @@ for exc in exchanges:
             std_errs_matrix = np.zeros([n_entries, n_cols])
 
             Y = returnsH
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0)
             Y = log_volumesH
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0)
             Y = log_rvolH
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0)
             Y = spreadH
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0, prints=0)
 
@@ -387,7 +388,7 @@ for exc in exchanges:
             else:
                 Y = illiqH  # LOG / LINEAR !
 
-            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = supp.import_regressions(
+            m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = regression_support.import_regressions(
                 m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array,
                 intercept=0, prints=0)
 
@@ -454,17 +455,17 @@ for exc in exchanges:
         i = 0
         for r in range(0, n_rows - 3, 2):
             for c in range(0, n_cols):
-                print_rows[r] = supp.fmt_print(print_rows[r], coeff_matrix[i, c], p_values_matrix[i, c], type="coeff")
-                print_rows[r + 1] = supp.fmt_print(print_rows[r + 1], std_errs_matrix[i, c], type="std_err")
+                print_rows[r] = regression_support.fmt_print(print_rows[r], coeff_matrix[i, c], p_values_matrix[i, c], type="coeff")
+                print_rows[r + 1] = regression_support.fmt_print(print_rows[r + 1], std_errs_matrix[i, c], type="std_err")
             i += 1
 
 
         # Dette fikser de tre nedreste radene
-        print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
+        print_rows = regression_support.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
 
         print()
         print("     ------------------------------------------------", str(exc_name),
               "-----------------------------------------")
 
-        supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
+        regression_support.final_print_regressions_latex(print_rows)  # Gjør hele printejobben

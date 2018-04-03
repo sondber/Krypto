@@ -1,71 +1,10 @@
 import csv
 import math
+import time
 from datetime import datetime
 from inspect import currentframe as cf, getframeinfo as gf
-import time
+
 import numpy as np
-import linreg
-
-
-def final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows, double_cols=0):
-    # Dette fikser de tre nedreste radene
-
-    for c in range(0, n_cols):
-        n_obs = str(int(n_obs_array[c]))
-        r2 = "{0:.3f}".format(rsquared_array[c])
-
-        if aic_array[c] > 0:
-            aic = str(int(aic_array[c]))
-        else:
-            aic = "$-$" + str(int(abs(aic_array[c])))
-
-        print_rows[n_rows - 3] += "   " + n_obs
-        for i in range(8 - len(n_obs)):
-            print_rows[n_rows - 3] += " "
-        print_rows[n_rows - 3] += "&"
-
-        print_rows[n_rows - 2] += "   " + r2
-        for i in range(8 - len(r2)):
-            print_rows[n_rows - 2] += " "
-        print_rows[n_rows - 2] += "&"
-
-        print_rows[n_rows - 1] += " " + aic
-
-        for i in range(10 - len(aic)):
-            print_rows[n_rows - 1] += " "
-        print_rows[n_rows - 1] += "&"
-
-        if c % 2 == 1:
-            if double_cols == 1:
-                print_rows[n_rows - 3] += " &"
-                print_rows[n_rows - 2] += " &"
-                print_rows[n_rows - 1] += " &"
-
-    return print_rows
-
-
-def final_print_regressions_latex(print_rows):
-    tightness = 1  #
-    t_string = "[-" + str(tightness) + "ex]"
-
-    for i in range(0, len(print_rows)):
-        count = 0
-        while (print_rows[i][len(print_rows[i]) - 1] == " " or print_rows[i][
-                len(print_rows[i]) - 1] == "&") and count < 10:
-            print_rows[i] = print_rows[i][0:len(print_rows[i]) - 1]
-            count += 1
-        if i == len(print_rows) - 3:
-            print("        \\hline")
-        if i < len(print_rows) - 3:
-            if i % 2 == 0:
-                print(print_rows[
-                          i] + "  \\\\" + t_string)  # Fjerner det siste &-tegnet og legger til backslash og tightness
-            else:
-                print(print_rows[i] + "  \\\\")  # Fjerner det siste &-tegnet og legger til backslash
-        else:
-            print(print_rows[i] + "  \\\\" + "[-0.5ex]")  # Fjerner det siste &-tegnet og legger til backslash
-    print()
-    print()
 
 
 def fill_blanks(in_list):
@@ -449,60 +388,9 @@ def standardize(in_list):
     return out_list
 
 
-def import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
-                       std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array):
-    for j in range(0, len(coeffs)):
-        coeff_matrix[j, m_col] = coeffs[j]
-        std_errs_matrix[j, m_col] = std_errs[j]
-        p_values_matrix[j, m_col] = p_values[j]
-    rsquared_array[m_col] = rsquared
-    aic_array[m_col] = aic
-    n_obs_array[m_col] = n_obs
-    return coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array
-
-
 def print_n(n):
     for k in range(n + 1):
         print()
-
-
-def import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array,
-                       n_obs_array, prints=0, intercept=1):
-    coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X, intercept=intercept,
-                                                                                    prints=prints)
-    coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
-        import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
-                           std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
-    m_col += 1
-    return m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array
-
-
-def fmt_print(print_loc, data, p_value=1, type="coeff"):  # Her endrer vi antall desimaler i tabellene!
-    if type == "coeff":
-        if data >= 0:
-            print_loc += "   "
-        else:
-            print_loc += "$-$"
-
-        if abs(data) < 10:
-            print_loc += "{0:.4f}".format(abs(data))
-        else:
-            print_loc += "{0:.3f}".format(abs(data))
-
-        if p_value <= 0.01:
-            stars = "**"
-        elif p_value <= 0.05:
-            stars = "* "
-        else:
-            stars = "  "
-        print_loc += stars + "&"
-
-    elif type == "std_err":
-        print_loc += "  (" + str("{0:.3f}".format(data)) + ")" + "  &"
-    else:
-        pass
-
-    return print_loc
 
 
 def remove_extremes(time_list, data, threshold_upper, threshold_lower=0):
@@ -538,19 +426,6 @@ def find_date_index(date_to_find, time_list_hours, next_date=0):
             return index
     else:
         return index
-
-
-def time_of_day_dummies(time_list, hours_in_period=4):
-    hour = fix_time_list(time_list)[3]
-    n_rows = len(time_list)
-
-    n_dummies = int(24/hours_in_period)  # Antall forklaringsvariable
-    X_dummies = np.zeros([n_rows, n_dummies])
-    for i in range(n_rows):
-        j = int(math.floor(float(hour[i]/hours_in_period)))
-        X_dummies[i, j] = 1
-
-    return X_dummies, n_dummies
 
 
 def get_lagged_list(data, time_list, freq="h", lag=24):
@@ -610,154 +485,6 @@ def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24)
             n_avg = 0
 
     return last_day_average
-
-
-# Denne skal finne forrige entry på samme tidspunkt (i.e. samme klokkeslett en/to dager før)
-def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, force_max_lag=0, AR_order=1):
-
-    hours_to_remove = []
-
-
-    if hours_in_period != -1:  # Dette er for
-        X_dummies, n_dummies = time_of_day_dummies(time_listH, hours_in_period=hours_in_period)  # Dette gir dummy variable
-        if prints == 1:
-            print("  supp.%i: x1 through x%i in the benchmark are time-based dummy variables" % (gf(cf()).lineno , n_dummies))
-    else:
-        n_dummies = 0
-    x_num = n_dummies
-
-    if HAR_config == 1:  # AR(1)
-        max_lag = max(1, force_max_lag)
-        X_AR = AR_matrix(Y, AR_order)
-        X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
-        X_HAR = X_AR
-
-        x_num  += 1
-        if prints == 1:
-            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
-
-    elif HAR_config == 2:  # Denne skal inkludere verdi 24 timer før, og snitt av 24 timer
-
-        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
-
-        X_HAR = np.matrix(lagged_list)
-        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
-        last_day_average = np.matrix(last_day_average)
-        X_HAR = np.append(X_HAR, last_day_average, axis=0)
-        X_HAR = np.transpose(X_HAR)
-
-        if prints == 1:
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
-            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, n_dummies + 2))
-        max_lag = max(24, force_max_lag)
-        X_HAR = X_HAR[max_lag:np.size(X_HAR, 0), :]
-
-    elif HAR_config == 3: # Denne skal inkludere X_AR(1) verdi 24 timer før, snitt 24 timer før
-        max_lag = max(24, force_max_lag)
-        X_AR = AR_matrix(Y, AR_order)
-        X_AR = X_AR[max_lag - AR_order:,:]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
-
-        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=288)
-
-        X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
-        X_HAR = np.append(X_AR, X_lagged, axis=1)
-
-        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
-        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-
-        if prints == 1:
-            x_num += 1
-            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
-            x_num += AR_order
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, x_num))
-            x_num += 1
-            print("  supp.%i: x%i is the average for the previous 24 hours" % (gf(cf()).lineno, x_num))
-
-        X_HAR = np.append(X_HAR, last_day_average, axis=1)
-
-    elif HAR_config == 4: # Denne skal inkludere verdi 24 timer før, 48 timer før og snitt av 48 timer
-        max_lag = max(48, force_max_lag)
-
-        lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
-        X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
-
-        lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
-        X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
-
-        X_HAR = X_lagged
-
-        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
-        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-
-        if prints == 1:
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, n_dummies + 1))
-            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, n_dummies + 2))
-            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, n_dummies + 3))
-
-        X_HAR = np.append(X_HAR, last_day_average, axis=1)
-
-    elif HAR_config == 5: # Denne skal inkludere X_AR(1), verdi 24 timer før, 48 timer før og snitt av 48 timer
-        max_lag = max(48, force_max_lag)
-        X_AR = AR_matrix(Y, AR_order)
-        X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
-
-
-        lagged_list_24, index_list_prev_lag_24 = get_lagged_list(Y, time_listH, lag=24)
-        X_lagged = np.transpose(np.matrix(lagged_list_24[max_lag:]))
-
-        lagged_list_48, index_list_prev_lag_48 = get_lagged_list(Y, time_listH, lag=48)
-        X_lagged = np.append(X_lagged, np.transpose(np.matrix(lagged_list_48[max_lag:])), axis=1)
-
-        X_HAR = np.append(X_AR, X_lagged, axis=1)
-        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag_48)
-        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
-
-        if prints == 1:
-            x_num += 1
-            print("  supp.%i: x%i through x%i is the X_AR(%i) model" % (gf(cf()).lineno, x_num , x_num + AR_order - 1, AR_order))
-            x_num += AR_order
-            print("  supp.%i: x%i is the value 24 hours prior" % (gf(cf()).lineno, x_num))
-            x_num += 1
-            print("  supp.%i: x%i is the value 48 hours prior" % (gf(cf()).lineno, x_num))
-            x_num += 1
-            print("  supp.%i: x%i is the average for the previous 48 hours" % (gf(cf()).lineno, x_num))
-
-        X_HAR = np.append(X_HAR, last_day_average, axis=1)
-
-    if prints == 1:
-        print("  supp.%i: Number of indeces that should be removed due to lag: %i" % (gf(cf()).lineno,max_lag))
-    Y = Y[max_lag:len(Y)]  # Passer på at disse har samme lengde
-
-    if hours_in_period != -1:
-        X_dummies = X_dummies[max_lag:]   # Passer på at disse har samme lengde
-        X_benchmark = X_dummies
-    else:
-        X_benchmark = X_HAR
-
-    if HAR_config > 0 and hours_in_period != -1:
-        X_benchmark = np.append(X_benchmark, X_HAR, axis=1)
-
-    if prints == 1:
-        if HAR_config > 0:
-            print("  supp.%i (END): Y is: %i, X_benchmark is (%i,%i)" % (gf(cf()).lineno, len(Y), np.size(X_benchmark, 0), np.size(X_benchmark, 1)))
-        else:
-            print("  supp.%i (END): Y is: %i, X_benchmark is %i" % (gf(cf()).lineno, len(Y), len(X_benchmark)))
-
-    return Y, X_benchmark, max_lag, hours_to_remove
-
-
-def AR_matrix(Y, order=1):
-    n = len(Y)
-
-    ar_len = n - order
-
-    if order == 1:
-        X_AR = np.transpose(np.matrix(Y[0:ar_len]))
-    else:
-        X_AR = np.zeros([ar_len, order])
-        for i in range(0, order):
-            X_AR[:,i] = Y[order - i - 1:n - (i + 1)]
-    return X_AR
 
 
 def A_before_B(time_A, time_B):

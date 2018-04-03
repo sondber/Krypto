@@ -1000,3 +1000,12 @@ def read_clean_csv(file_name):
     return time_list, returns, spread, volumes, log_volumes, illiq, log_illiq, rvol, log_rvol
 
 
+
+def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_or_average="sum"):
+    #1 finne når vi skal starte
+    #2 finne når vi skal slutte
+    # summere opp alle dager imellom
+    time_out=[]
+    data_out=[]
+
+    return time_out, data_out

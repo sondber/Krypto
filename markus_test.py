@@ -45,6 +45,8 @@ with open(file_name, 'w', newline='') as csvfile:
         rowdata = [time_list_combined[i]]
         rowdata.append(volumes_combined[i])
         writ.writerow(rowdata)
+
+'''   #for å sjekke om ting blir riktig     
 print("combined ",time_list_combined[-778:-768])
 print("combined ",volumes_combined[-778:-768])
 print("coin ",coinbase_hour_list[-3010:-3000])
@@ -59,3 +61,4 @@ print("krak ",krak_hour_list[-3010:-3000])
 print("krak ",volumes_krakH[-3010:-3000])
 print("cc ",cc_hour_list[-3010:-3000])
 print("cc ",volumes_ccH[-3010:-3000])
+'''

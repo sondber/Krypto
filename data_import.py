@@ -7,19 +7,19 @@ import data_import_support as dis
 
 def get_list(exc=0, freq="m", local_time=0):
 
-    if exc == 0:
+    if exc == 0 or exc == "bitstampusd":
         exc_name = "bitstampusd"
-    elif exc == 1:
+    elif exc == 1 or exc == "coincheckjpy":
         exc_name = "coincheckjpy"
-    elif exc == 2:
+    elif exc == 2 or exc == "btcncny":
         exc_name = "btcncny"
-    elif exc == 3:
+    elif exc == 3 or exc == "coinbaseusd":
         exc_name = "coinbaseusd"
-    elif exc == 4:
+    elif exc == 4 or exc == "korbitkrw":
         exc_name = "korbitkrw"
-    elif exc == 5:
+    elif exc == 5 or exc == "krakeneur":
         exc_name = "krakeneur"
-    elif exc == -1:
+    elif exc == -1 or exc == "test":
         exc_name = "test"
 
     if freq == "m" or freq == 0:
@@ -48,6 +48,7 @@ def get_list(exc=0, freq="m", local_time=0):
 
     elif freq =="h" or freq ==1:
         file_name = "data/export_csv/" + exc_name + "_global_time_hourly.csv"
+
         time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_clean_csv(file_name)
 
         if local_time == 1:

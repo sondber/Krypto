@@ -6,9 +6,10 @@ import data_import as di
 import data_import_support as dis
 import legacy
 import linreg
+import regression_support
 from Sondre import sondre_support_formulas as supp
-from Sondre.sondre_support_formulas import import_to_matrices, print_n, \
-    import_regressions, fmt_print
+from Sondre.sondre_support_formulas import print_n
+from regression_support import import_to_matrices, import_regressions, fmt_print
 
 <<<<<<< HEAD
 exch = [0, 2, 3, 4]  # 0=bitstamp, 1=coincheck
@@ -248,13 +249,13 @@ for exc in exch:
             data_r += 1
 
         # Dette fikser de tre nedreste radene
-        print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows,
-                                           double_cols=1)
+        print_rows = regression_support.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows,
+                                                         double_cols=1)
 
         print(
             "     ------------------------------------------------Regression table for Intraweek seasonality-----------------------------------------")
         print()
-        supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
+        regression_support.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
     if determinants_regression == 1:
 
@@ -483,13 +484,13 @@ for exc in exch:
                         print_rows[print_r + 1] += "           &"
 
             # Dette fikser de tre nedreste radene
-            print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
+            print_rows = regression_support.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
             print(
                 "           -----------------------------------------Regression table for Bid-ask spread----------------------------------------")
             print()
-            supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
+            regression_support.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
         if illiq_multi == 1:
             Y = illiq[max_lag: len(illiq)]
@@ -689,13 +690,13 @@ for exc in exch:
                         print_rows[print_r + 1] += "           &"
 
             # Dette fikser de tre nedreste radene
-            print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
+            print_rows = regression_support.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
             print(
                 "           -----------------------------------------Regression table for ILLIQ----------------------------------------")
             print()
-            supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
+            regression_support.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
         if return_multi == 1:
 
@@ -920,13 +921,13 @@ for exc in exch:
                         print_rows[print_r] += "           &"
                         print_rows[print_r + 1] += "           &"
 
-            print_rows = supp.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
+            print_rows = regression_support.final_three_rows(print_rows, n_obs_array, rsquared_array, aic_array, n_cols, n_rows)
 
             print()
             print(
                 "           -----------------------------------------Regression table for Return----------------------------------------")
             print()
-            supp.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
+            regression_support.final_print_regressions_latex(print_rows)  # Gjør hele printejobben
 
     if autoreg == 1:  # Er ikke oppdatert med ny output!
         print_n(20)

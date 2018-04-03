@@ -49,6 +49,9 @@ def write_daily_volume_to_csv():
             rowdata.append(volumes_combined[i])
             writ.writerow(rowdata)
 
+
+
+
 def get_global_daily_volume():
     file_name = 'data/export_csv/global_daily_volume_index.csv'
     time_listD = []
@@ -68,6 +71,7 @@ def get_global_daily_volume():
             i = i + 1
     print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
     return time_listD, volumesD
+
 
 
 def write_hourly_volume_to_csv():
@@ -107,6 +111,8 @@ def write_hourly_volume_to_csv():
             writ.writerow(rowdata)
 
 
+
+
 def get_global_hourly_volume():
     file_name = 'data/export_csv/global_hourly_volume_index.csv'
     time_listD = []
@@ -127,25 +133,36 @@ def get_global_hourly_volume():
     print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
     return time_listD, volumesD
 
-'''   #for å sjekke om ting blir riktig     
-print("combined ",time_list_combined[-778:-768])
-print("combined ",volumes_combined[-778:-768])
-print("coin ",coinbase_hour_list[-3010:-3000])
-print("coin ",volumes_coinbaseH[-3010:-3000])
-print("bits ",bitstamp_hour_list[-3010:-3000])
-print("bits ",volumes_bitstampH[-3010:-3000])
-print("btcn ",btcncny_hour_list[-778:-768])
-print("btcn ",volumes_btcncnyH[-778:-768])
-print("korb ",korbit_hour_list[-3010:-3000])
-print("korb ",volumes_korbitH[-3010:-3000])
-print("krak ",krak_hour_list[-3010:-3000])
-print("krak ",volumes_krakH[-3010:-3000])
-print("cc ",cc_hour_list[-3010:-3000])
-print("cc ",volumes_ccH[-3010:-3000])
+   #for å sjekke om ting blir riktig
 '''
 
+    print("combined ", time_list_combined[-778:-768])
+    print("combined ", volumes_combined[-778:-768])
+    print("coin ", coinbase_hour_list[-3010:-3000])
+    print("coin ", volumes_coinbaseH[-3010:-3000])
+    print("bits ", bitstamp_hour_list[-3010:-3000])
+    print("bits ", volumes_bitstampH[-3010:-3000])
+    print("btcn ", btcncny_hour_list[-778:-768])
+    print("btcn ", volumes_btcncnyH[-778:-768])
+    print("korb ", korbit_hour_list[-3010:-3000])
+    print("korb ", volumes_korbitH[-3010:-3000])
+    print("krak ", krak_hour_list[-3010:-3000])
+    print("krak ", volumes_krakH[-3010:-3000])
+    print("cc ", cc_hour_list[-3010:-3000])
+    print("cc ", volumes_ccH[-3010:-3000])
 
-#exc_name1,time_list1, returns1, spread1, volumes1, log_volumes1, illiq1, log_illiq1, rvol1, log_rvol1 =di.get_list(exc="bitstampusd", freq="h", local_time=0)
-#exc_name2,time_list2, returns2, spread2, volumes2, log_volumes2, illiq2, log_illiq2, rvol2, log_rvol2 =di.get_list(exc="btcncny", freq="h", local_time=0)
-#time_list1=bitstamp_hour_list[0:10]
-#time_list2=coinbase_hour_list[0:10]
+'''
+
+'''
+    print("combined ", time_list_combined[-10:-1])
+    print("combined ", volumes_combined[-10:-1])
+    print("coin ", coinbase_day_list[-10:-1])
+    print("coin ", volumes_coinbaseD[-10:-1])
+    print("bits ", bitstamp_day_list[-10:-1])
+    print("bits ", volumes_bitstampD[-10:-1])
+    print("korb ", volumes_korbitD[-10:-1])
+    print("krak ", krak_day_list[-10:-1])
+    print("krak ", volumes_krakD[-10:-1])
+    print("cc ", cc_day_list[-10:-1])
+    print("cc ", volumes_ccD[-10:-1])
+'''

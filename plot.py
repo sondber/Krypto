@@ -295,7 +295,7 @@ def utc_nyc(in_list):
 
 def intraday(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0, logy=0):
     # converting to NYC time (UTC-5)
-    plt.figure(figsize=[8, 2], dpi=300)
+    plt.figure(figsize=[4.3, 2], dpi=300)
     plt.plot(average, color="black")
     plt.plot(low, label="95% confidence interval", color="black", linestyle='--', linewidth=0.5)
     plt.plot(high, color="black", linestyle='--', linewidth=0.5)

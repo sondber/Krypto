@@ -14,7 +14,7 @@ import math
 
 
 intraday = 1
-intraweek = 0
+intraweek = 1
 global_time = 0
 exch = [0, 1, 2, 3, 4, 5]
 

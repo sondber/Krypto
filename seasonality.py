@@ -14,13 +14,13 @@ import math
 
 
 intraday = 1
-intraweek = 1
+intraweek = 0
 global_time = 0
-exch = [0, 1, 2, 3, 4, 5]
+exch = [0, 2, 3, 4, 5]
 
 for exc in exch:
     if intraday == 1:
-        for local_time in [0, 1]:
+        for local_time in [1]:
             # HOURS ----------------------------------------------------------------------------------------------------
 
             if local_time == 1:
@@ -40,7 +40,7 @@ for exc in exch:
 
             title = "Return_" + exc_name + time_s
             plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title=title, perc=1, ndigits=2, yzero=1)
-            title = "Volumes_" + exc_name + time_s
+            title = "Log_Volumes_" + exc_name + time_s
             plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title=title, perc=0)
             title = "Spread_" + exc_name + time_s
             plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title=title, perc=1)

@@ -1,5 +1,6 @@
 import data_import as di
 import data_import_support as dis
+import csv
 
 bitstamp, time_list_bitstampM, prices_bitstampM, volumes_bitstampM = di.get_list(exc="bitstampusd")
 coinbase, time_list_coinbaseM, prices_coinbaseM, volumes_coinbaseM = di.get_list(exc="coinbaseusd")
@@ -22,3 +23,18 @@ print("coin ",volumes_coinbaseH[-1010:-1000])
 print("bits ",bitstamp_hour_list[-1010:-1000])
 print("bits ",volumes_bitstampH[-1010:-1000])
 
+
+location = "data/export_csv/"
+file_name = location + "global_volume_index.csv"
+with open(file_name, 'w', newline='') as csvfile:
+    writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % file_name)
+    header2 = ["Time"]
+    header2.append("Volume")
+
+    writ.writerow(header2)
+
+    for i in range(len(volumes_combined)):
+        rowdata = [time_list_combined[i]]
+        rowdata.append(volumes_combined[i])
+        writ.writerow(rowdata)

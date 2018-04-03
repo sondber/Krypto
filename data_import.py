@@ -47,10 +47,7 @@ def get_list(exc=0, freq="m", local_time=0):
         return exc_name, time_listM, priceM, volumeM
 
     elif freq =="h" or freq ==1:
-        if local_time == 1:
-            file_name = "data/export_csv/" + exc_name + "_local_time_hourly.csv"
-        else:
-            file_name = "data/export_csv/" + exc_name + "_global_time_hourly.csv"
+        file_name = "data/export_csv/" + exc_name + "_global_time_hourly.csv"
 
         time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_clean_csv(file_name)
 

@@ -37,11 +37,7 @@ def write_daily_volume_index_to_csv():
             rowdata.append(volumes_combined[i])
             writ.writerow(rowdata)
 
-
 def get_global_daily_volume_index(transformed=0):
-
-
-def get_global_daily_volume():
     file_name = 'data/export_csv/global_daily_volume_index.csv'
     time_listD = []
     volumesD = []
@@ -72,8 +68,6 @@ def get_global_daily_volume():
 
 
 def write_hourly_volume_index_to_csv(print_components=0):
-
-def write_hourly_volume_to_csv():
     bitstamp, time_list_bitstampM, prices_bitstampM, volumes_bitstampM = di.get_list(exc="bitstampusd")
     coinbase, time_list_coinbaseM, prices_coinbaseM, volumes_coinbaseM = di.get_list(exc="coinbaseusd")
     korbit, time_list_korbitM, prices_korbitM, volumes_korbitM = di.get_list(exc="korbitkrw")
@@ -122,9 +116,6 @@ def write_hourly_volume_to_csv():
 
 
 def get_global_hourly_volume_index(transformed=0):
-
-
-def get_global_hourly_volume():
     file_name = 'data/export_csv/global_hourly_volume_index.csv'
     time_listH = []
     volumesH = []
@@ -206,4 +197,3 @@ def get_global_hourly_volume():
     print("cc ", cc_day_list[-10:-1])
     print("cc ", volumes_ccD[-10:-1])
 '''
->>>>>>> master:markus_test.py

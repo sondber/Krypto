@@ -4,6 +4,7 @@ import data_import
 import data_import as di
 import data_import_support
 import plot
+import regression_support
 from Jacob import jacob_support as jake_supp
 from Sondre import sondre_support_formulas as supp
 import descriptive_stats as desc
@@ -92,3 +93,12 @@ print("Indeces to remove:")
 print(indeces_to_remove)
 
 """
+
+exc, time_listM, pricesM, volumesM = di.get_list(-1)
+time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
+
+lagged_list, index_list, hours_to_remove_1 = regression_support.get_lagged_list(pricesH, time_listH, lag=24)
+
+last_day_average, hours_to_remove = rs.get_last_day_average(pricesH,time_listH, index_list)
+
+print(hours_to_remove)

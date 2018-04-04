@@ -1,7 +1,7 @@
 import csv
+import datetime
 import math
 import time
-import datetime
 from inspect import currentframe as cf, getframeinfo as gf
 
 import numpy as np
@@ -426,65 +426,6 @@ def find_date_index(date_to_find, time_list_hours, next_date=0):
             return index
     else:
         return index
-
-
-def get_lagged_list(data, time_list, freq="h", lag=24):
-    if freq != "h":
-        print("FUNCTIONALITY ONLY WRITTEN FOR HOURLY FREQUENCY")
-
-    n_entries = len(data)
-    lagged_list = np.zeros(n_entries)
-    index_list = np.zeros(n_entries)
-    found = 0
-
-    y, mo, d, h, mi = fix_time_list(time_list, single_time_stamp=0, move_n_hours=-lag)
-    time_stamp = make_time_list(y, mo, d, h, mi)
-
-    for i in range(len(time_stamp) - 1, -1, -1):
-        for j in range(i, i - lag - 1, -1):
-            if time_stamp[i] == time_list[j]:
-                lagged_list[i] = data[j]
-                index_list[i] = j
-                found = 1
-        if found == 0:
-            lagged_list[i] = -1
-            index_list[i] = -1
-        found = 0
-
-    return lagged_list, index_list
-
-
-def get_last_day_average(data, time_list, index_list_prev_lag, freq="h", lag=24):
-    partsum = 0
-    n_avg = 0
-    last_day_average = np.zeros(len(data))
-
-    for i in range(0, len(data)):
-        # determine starting point of averaging. If none is found, average is set to -1
-        y_i, mo_i, d_i, h_i, mi_i = fix_time_list(time_list[i], single_time_stamp=1)
-        timeindex_i = y_i * (365 * 31 * 24 * 60) + mo_i * (31 * 24 * 60) + d_i * (24 * 60) + h_i * 60 + mi_i
-        start_point_avg = -1
-        if index_list_prev_lag[i] == -1:
-            for k in range(max(0, i - lag), i):
-                y_k, mo_k, d_k, h_k, mi_k = fix_time_list(time_list[k], single_time_stamp=1)
-                timeindex_k = y_k * (365 * 31 * 24 * 60) + mo_k * (31 * 24 * 60) + d_k * (24 * 60) + h_k * 60 + mi_k
-                if timeindex_i - timeindex_k < lag * 60:
-                    start_point_avg = k
-                    break
-        else:
-            start_point_avg = int(index_list_prev_lag[i])
-
-        if start_point_avg == -1:
-                last_day_average[i] = -1
-        else:
-            for j in range(start_point_avg, i):
-                partsum += data[j]
-                n_avg += 1
-            last_day_average[i] = partsum / n_avg
-            partsum = 0
-            n_avg = 0
-
-    return last_day_average
 
 
 def A_before_B(time_A, time_B):

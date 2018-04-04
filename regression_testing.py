@@ -1,6 +1,7 @@
 import numpy as np
 import data_import as di
 import data_import_support as dis
+import regression_support
 from Sondre import sondre_support_formulas as supp
 
 #os.chdir("/Users/Jacob/Documents/GitHub/krypto")
@@ -22,9 +23,9 @@ time_list = time_test
 
 lag_test = 7
 
-lagged_list, index_list = supp.get_lagged_list(data, time_list, lag=lag_test)
+lagged_list, index_list = regression_support.get_lagged_list(data, time_list, lag=lag_test)
 
-last_day_average = supp.get_last_day_average(data, time_list, index_list, lag=lag_test)
+last_day_average = regression_support.get_last_day_average(data, time_list, index_list, lag=lag_test)
 
 for i in range(len(lagged_list)):
     #print("Index: ", i, "Input:", time_list[i], "Input data:", data[i], "Lagged data:", lagged_list[i], "Index of lag:", index_list[i])

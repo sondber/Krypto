@@ -27,7 +27,6 @@ spread_determinants = 0  # perform analysis on determinants of spread
 illiq_determinants = 1  # perform analysis on determinants of illiq    IKKE LAGET ENDA
 return_determinants = 0  # perform analysis on determinants of return  IKKE LAGET ENDA
 
-
 # 2 importere prices, volumes
 exchanges = [0, 2, 3, 4]
 

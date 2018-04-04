@@ -5,22 +5,25 @@ from Sondre import sondre_support_formulas as supp
 import data_import_support as dis
 
 
-def get_list(exc=0, freq="m", local_time=0):
+def get_list(exc=0, freq="m", local_time=0): # testtest
 
-    if exc == 0 or exc == "bitstampusd":
+    if exc == 0 or exc == "bitstampusd" or exc == "bitstamp":
         exc_name = "bitstampusd"
-    elif exc == 1 or exc == "coincheckjpy":
+    elif exc == 1 or exc == "coincheckjpy" or exc == "coincheck":
         exc_name = "coincheckjpy"
-    elif exc == 2 or exc == "btcncny":
+    elif exc == 2 or exc == "btcncny" or exc == "btcn":
         exc_name = "btcncny"
-    elif exc == 3 or exc == "coinbaseusd":
+    elif exc == 3 or exc == "coinbaseusd" or exc == "coinbase":
         exc_name = "coinbaseusd"
-    elif exc == 4 or exc == "korbitkrw":
+    elif exc == 4 or exc == "korbitkrw" or exc == "korbit":
         exc_name = "korbitkrw"
-    elif exc == 5 or exc == "krakeneur":
+    elif exc == 5 or exc == "krakeneur"or exc == "kraken":
         exc_name = "krakeneur"
     elif exc == -1 or exc == "test":
         exc_name = "test"
+    else:
+        print("\033[31;0;0mYou did not choose an exchange, so I am returning bitstamp\033[0;0;0m")
+        exc_name = "bitstampusd"
 
     if freq == "m" or freq == 0:
         file_name = "data/export_csv/" + exc_name + "_edit.csv"
@@ -115,7 +118,7 @@ def fetch_aggregate_csv(file_name, n_exc):
     return time_list, prices, volumes
 
 
-def get_global_volume():
+def get_global_volume_actual_daily():
     file_name = 'data/export_csv/volume_daily.csv'
     time_listD = []
     volumesD = []

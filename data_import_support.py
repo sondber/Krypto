@@ -358,8 +358,8 @@ def get_month(month_string):
     return month_num
 
 
-def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, time_zone_conversion=0):
-    year, month, day, hour, minute = supp.fix_time_list(time_list, move_n_hours=time_zone_conversion)
+def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0):
+    year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
     h_list = []  # integer indicating which hour it is

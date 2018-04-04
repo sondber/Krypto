@@ -16,8 +16,8 @@ import rolls
 import ILLIQ
 import regression_support as rs
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
-#os.chdir("/Users/Jacob/Documents/GitHub/krypto")
+#os.chdir("/Users/sondre/Documents/GitHub/krypto")
+os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 
 local_time = 0
@@ -74,27 +74,21 @@ linreg.reg_multiple(volumesD, volumes_combined,prints=1)
 plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
 plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
 """
-
 """
+
 check = 1
 lag = 3
 
 exc, time_listM, pricesM, volumesM = di.get_list(-1)
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
-index_test, x_test = rs.AR_matrix(pricesH, time_listH, order=lag)
-print(index_test)
+for i in range(len(time_listH)):
+    print(time_listH[i], pricesH[i])
 
-if check == 1:
-    if lag == 1:
-        for i in range(0,lag):
-            print(time_listH[i], pricesH[i], index_test[i])
-        for j in range(0, len(x_test)):
-            print(time_listH[j+lag], pricesH[j+lag], index_test[j+lag], x_test[j])
-    else:
-        col = 0  #HER SJEKKER DU DE ULIKE AR(COL) (husk at 0 er 1)
-        for i in range(0, lag):
-            print(time_listH[i], pricesH[i], index_test[i,col])
-        for j in range(0, len(x_test)):
-            print(time_listH[j + lag], pricesH[j + lag], index_test[j + lag, col], x_test[j, col])
+ar_test, indeces_to_remove = rs.AR_matrix(pricesH, time_listH, order=lag)
+print("Resulting AR:")
+print(ar_test)
+print("Indeces to remove:")
+print(indeces_to_remove)
+
 """

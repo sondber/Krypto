@@ -257,7 +257,7 @@ def binary_missing_to_indeces(binary_list):
 def AR_matrix(y, y_time, order, hours_to_remove=[]):
     # print("  \033[0;32;0mrs.%i: running 'AR_matrix'...\033[0;0;0m" % (gf(cf()).lineno))
     n = len(y)
-    ar_len = n - order
+    ar_len = n #- order
 
     if order == 1:
         value_exists_binary = np.zeros(n)
@@ -274,7 +274,7 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
                 if y_time_moved[i] == y_time[j]:
                     found = True
                     value_exists_binary[i] = 1
-                    x_ar[i - 1, 0] = y[j]
+                    x_ar[i, 0] = y[j]
                 j -= 1
             if not found:
                 value_exists_binary[i] = 0
@@ -295,7 +295,7 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
                     if y_time_moved[i] == y_time[j]:
                         found = True
                         value_exists_binary[i, k] = 1
-                        x_ar[i - order, k] = y[j]
+                        x_ar[i, k] = y[j]
                     j -= 1
                 if not found:
                     value_exists_binary[i, k] = 0

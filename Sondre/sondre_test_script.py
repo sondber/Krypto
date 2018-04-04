@@ -18,12 +18,12 @@ import ILLIQ
 import regression_support as rs
 import global_volume_index as gvi
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
-#os.chdir("/Users/Jacob/Documents/GitHub/krypto")
+#os.chdir("/Users/sondre/Documents/GitHub/krypto")
+os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
-
-local_time = 0
 """
+local_time = 0
+
 for exc in range(6):
     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
     time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.clean_series_hour(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=local_time, plot_for_extreme=0)
@@ -31,7 +31,7 @@ for exc in range(6):
     #time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.clean_series_days(time_listM, pricesM, volumesM, exc=exc, convert_time_zones=1, plot_for_extreme=0)
     #dis.write_clean_csv(exc_name, time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD, freq="d")
 """
-
+"""
 time_list_indexD, volume_indexD = gvi.get_global_daily_volume_index()
 time_list_indexH, volume_indexH = gvi.get_global_hourly_volume_index()
 time_listD, volumes_actualD = di.get_global_volume_actual_daily()
@@ -47,9 +47,8 @@ print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.
 
 plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
 plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
-<<<<<<< HEAD
 """
-
+"""
 exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
 time_list_nativeH, priceH, volume_nativeH = dis.convert_to_hour(time_listM, priceM, volumeM)
 spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(priceM, time_listM, calc_basis="h", kill_output=1)
@@ -74,16 +73,11 @@ X = np.append(X, volume_indexH, axis=1)
 
 linreg.reg_multiple(spreadH, X, prints=1)
 
-
-
-<<<<<<< HEAD
-
-=======
 plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
 plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
 """
->>>>>>> master
-"""
+
+
 
 check = 1
 lag = 3
@@ -100,8 +94,9 @@ print(ar_test)
 print("Indeces to remove:")
 print(indeces_to_remove)
 
-"""
 
+
+"""
 exc, time_listM, pricesM, volumesM = di.get_list(-1)
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 
@@ -110,7 +105,6 @@ lagged_list, index_list, hours_to_remove_1 = regression_support.get_lagged_list(
 last_day_average, hours_to_remove = rs.get_last_day_average(pricesH,time_listH, index_list)
 
 print(hours_to_remove)
-=======
 #
 # exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
 # time_list_nativeH, priceH, volume_nativeH = dis.convert_to_hour(time_listM, priceM, volumeM)
@@ -134,4 +128,5 @@ print(hours_to_remove)
 # volume_indexH = np.transpose(np.matrix(volume_indexH))
 # X = np.append(X, volume_indexH, axis=1)
 # linreg.reg_multiple(spreadH, X, prints=1)
->>>>>>> 2ac5947abdc5047810278ce188e3a702692b773b
+"""
+

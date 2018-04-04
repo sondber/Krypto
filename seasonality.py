@@ -8,25 +8,28 @@ import data_import_support as dis
 import os
 import rolls
 import scipy.stats as st
+import global_volume_index as gvi
 import ILLIQ
 import realized_volatility
 import math
 
 
-intraday = 1
+intraday = 0
+figure_formats = "narrow"
 intraweek = 0
-global_time = 0
-exch = [0, 2, 3, 4, 5]
+global_volume_index = 0
+global_time = 1
+exch = [0, 1, 2, 3, 4, 5]
 
 for exc in exch:
     if intraday == 1:
-        for local_time in [1]:
+        for local_time in [0, 1]:
             # HOURS ----------------------------------------------------------------------------------------------------
 
             if local_time == 1:
-                time_s = ""
+                folder = figure_formats + "/local_time/"
             else:
-                time_s = "_global_time"
+                folder = figure_formats + "/global_time/"
 
             exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, freq="h", local_time=local_time)
             print("------ INTRADAY FOR", exc_name.upper(), "------")
@@ -38,16 +41,16 @@ for exc in exch:
             hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_listH, rvolH, frequency="h")
             hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_listH, illiqH, frequency="h")
 
-            title = "Return_" + exc_name + time_s
-            plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title=title, perc=1, ndigits=2, yzero=1)
-            title = "Log_Volumes_" + exc_name + time_s
-            plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title=title, perc=0)
-            title = "Spread_" + exc_name + time_s
-            plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title=title, perc=1)
-            title = "RVol_" + exc_name + time_s
-            plot.intraday(avg_rvol_hour, low_rvol_hour, upper_rvol_hour, title=title, perc=1, logy=0, ndigits=0)
-            title = "illiq_" + exc_name + time_s
-            plot.intraday(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title=title, perc=1, ndigits=2)
+            title = folder + "Return_" + exc_name
+            plot.intraday(avg_returns_hour, low_returns_hour, upper_returns_hour, title=title, perc=1, ndigits=2, yzero=1, fig_format=figure_formats)
+            title = folder + "Log_Volumes_" + exc_name
+            plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title=title, perc=0, fig_format=figure_formats)
+            title = folder + "Spread_" + exc_name
+            plot.intraday(avg_spread_hour, low_spread_hour, upper_spread_hour, title=title, perc=1, fig_format=figure_formats)
+            title = folder + "RVol_" + exc_name
+            plot.intraday(avg_rvol_hour, low_rvol_hour, upper_rvol_hour, title=title, perc=1, logy=0, ndigits=0, fig_format=figure_formats)
+            title = folder + "illiq_" + exc_name
+            plot.intraday(avg_illiq_hour, low_illiq_hour, upper_illiq_hour, title=title, perc=1, ndigits=2, fig_format=figure_formats)
 
     if intraweek == 1:
 
@@ -60,20 +63,24 @@ for exc in exch:
         day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_listD, spreadD, frequency="d")
         day_of_week, avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average(time_listD, illiqD, frequency="d")
         day_of_week, avg_rvol_day, low_rvol_day, upper_rvol_day = dis.cyclical_average(time_listD, rvolD, frequency="d")
-        plot.intraweek(avg_returns_day, low_returns_day, upper_returns_day, title="Return_" + exc_name, perc=1, ndigits=1)
-        plot.intraweek(avg_spread_day, low_spread_day, upper_spread_day, title="Spread_" + exc_name, perc=1, ndigits=3)
-        plot.intraweek(avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean, title="ILLIQ_" + exc_name, perc=1,   logy=0, ndigits=3)
-        plot.intraweek(avg_rvol_day, low_rvol_day, upper_rvol_day, title="RVol_" + exc_name, perc=1,   logy=0, ndigits=3)
+        plot.intraweek(avg_returns_day, low_returns_day, upper_returns_day, title="Return_" + exc_name, perc=1, ndigits=1, fig_format=figure_formats)
+        plot.intraweek(avg_spread_day, low_spread_day, upper_spread_day, title="Spread_" + exc_name, perc=1, ndigits=3, fig_format=figure_formats)
+        plot.intraweek(avg_illiq_day_clean, low_illiq_day_clean, upper_illiq_day_clean, title="ILLIQ_" + exc_name, perc=1,   logy=0, ndigits=3, fig_format=figure_formats)
+        plot.intraweek(avg_rvol_day, low_rvol_day, upper_rvol_day, title="RVol_" + exc_name, perc=1,   logy=0, ndigits=3, fig_format=figure_formats)
 
         # Finding average for transformed
         day_of_week, avg_log_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(time_listD, log_volumesD, frequency="d")
-        #day_of_week, avg_log_rvol_day, low_log_rvol_day, upper_log_rvol_day = dis.cyclical_average(time_listD, log_rvolD, frequency="d")
-        #day_of_week, avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day = dis.cyclical_average(time_listD, log_illiqD, frequency="d")
+        plot.intraweek(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume_" + exc_name, perc=0,weekends=1, fig_format=figure_formats)  # Hva faen gjør vi med y-aksen på denne?
 
-        #plot.intraweek(avg_log_rvol_day, low_log_rvol_day, upper_log_rvol_day, title="Log_RVol" + exc_name, perc=0,   logy=0, ndigits=0)
-        #plot.intraweek(avg_log_illiq_day, low_log_illiq_day, upper_log_illiq_day, title="Log_ILLIQ" + exc_name, perc=0,   logy=0, ndigits=3)
-        plot.intraweek(avg_log_volume_day, low_log_volume_day, upper_log_volume_day, title="Log_Volume_" + exc_name, perc=0,weekends=1)  # Hva faen gjør vi med y-aksen på denne?
+if global_volume_index == 1:
+    time_H, volume_indexH = gvi.get_global_hourly_volume_index(transformed=1)
+    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_H, volume_indexH, frequency="h")
+    title = "Log_Volumes_Global_index"
+    plot.intraday(avg_volumes_hour, low_volumes_hour, upper_volumes_hour, title=title, perc=0, fig_format="wide")
 
+
+
+exch = [0, 1, 3, 4, 5]
 if global_time == 1:
     for exc in exch:
         exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(
@@ -105,7 +112,6 @@ if global_time == 1:
         elif exc == 5:
             marker = "p"
             color = "black"
-
 
         plt.figure(1, figsize=[16, 4], dpi=300)
         plt.plot(spread_std, label=exc_name, color=color, marker=marker)

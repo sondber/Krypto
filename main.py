@@ -5,7 +5,7 @@ import data_import as di
 import matplotlib.pyplot as plt
 import numpy as np
 
-tidsliste,volum= di.get_global_volume()
+tidsliste,volum= di.get_global_volume_actual_daily()
 
 def plot(time_list, data, title, ylims=[], perc=0, logy=0, ndigits=2, ylab=""):
     n_labels = 5

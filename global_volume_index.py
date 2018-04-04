@@ -39,6 +39,9 @@ def write_daily_volume_index_to_csv():
 
 
 def get_global_daily_volume_index(transformed=0):
+
+
+def get_global_daily_volume():
     file_name = 'data/export_csv/global_daily_volume_index.csv'
     time_listD = []
     volumesD = []
@@ -69,6 +72,8 @@ def get_global_daily_volume_index(transformed=0):
 
 
 def write_hourly_volume_index_to_csv(print_components=0):
+
+def write_hourly_volume_to_csv():
     bitstamp, time_list_bitstampM, prices_bitstampM, volumes_bitstampM = di.get_list(exc="bitstampusd")
     coinbase, time_list_coinbaseM, prices_coinbaseM, volumes_coinbaseM = di.get_list(exc="coinbaseusd")
     korbit, time_list_korbitM, prices_korbitM, volumes_korbitM = di.get_list(exc="korbitkrw")
@@ -117,6 +122,9 @@ def write_hourly_volume_index_to_csv(print_components=0):
 
 
 def get_global_hourly_volume_index(transformed=0):
+
+
+def get_global_hourly_volume():
     file_name = 'data/export_csv/global_hourly_volume_index.csv'
     time_listH = []
     volumesH = []
@@ -165,3 +173,37 @@ def get_global_hourly_volume_index(transformed=0):
 # exc_name2,time_list2, returns2, spread2, volumes2, log_volumes2, illiq2, log_illiq2, rvol2, log_rvol2 =di.get_list(exc="btcncny", freq="h", local_time=0)
 # time_list1=bitstamp_hour_list[0:10]
 # time_list2=coinbase_hour_list[0:10]
+   #for å sjekke om ting blir riktig
+'''
+
+    print("combined ", time_list_combined[-778:-768])
+    print("combined ", volumes_combined[-778:-768])
+    print("coin ", coinbase_hour_list[-3010:-3000])
+    print("coin ", volumes_coinbaseH[-3010:-3000])
+    print("bits ", bitstamp_hour_list[-3010:-3000])
+    print("bits ", volumes_bitstampH[-3010:-3000])
+    print("btcn ", btcncny_hour_list[-778:-768])
+    print("btcn ", volumes_btcncnyH[-778:-768])
+    print("korb ", korbit_hour_list[-3010:-3000])
+    print("korb ", volumes_korbitH[-3010:-3000])
+    print("krak ", krak_hour_list[-3010:-3000])
+    print("krak ", volumes_krakH[-3010:-3000])
+    print("cc ", cc_hour_list[-3010:-3000])
+    print("cc ", volumes_ccH[-3010:-3000])
+
+'''
+
+'''
+    print("combined ", time_list_combined[-10:-1])
+    print("combined ", volumes_combined[-10:-1])
+    print("coin ", coinbase_day_list[-10:-1])
+    print("coin ", volumes_coinbaseD[-10:-1])
+    print("bits ", bitstamp_day_list[-10:-1])
+    print("bits ", volumes_bitstampD[-10:-1])
+    print("korb ", volumes_korbitD[-10:-1])
+    print("krak ", krak_day_list[-10:-1])
+    print("krak ", volumes_krakD[-10:-1])
+    print("cc ", cc_day_list[-10:-1])
+    print("cc ", volumes_ccD[-10:-1])
+'''
+>>>>>>> master:markus_test.py

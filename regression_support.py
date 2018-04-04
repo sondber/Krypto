@@ -262,7 +262,7 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
         year, month, day, hour, minute = supp.fix_time_list(y_time, single_time_stamp=0, move_n_hours=-1)
         y_time_moved = supp.make_time_list(year, month, day, hour, minute)
 
-        while i>=0:
+        while i >= 0:
             found = False
             j = i
 
@@ -279,16 +279,15 @@ def AR_matrix(y, y_time, order, hours_to_remove=[]):
         value_exists_binary = np.zeros([n, order])
         x_ar = np.zeros([ar_len, order])
         for k in range(order):
-            print("  \033[0;32;0mrs.%i: order %i out of %i\033[0;0;0m" % (gf(cf()).lineno, k+1, order))
+            #print("  \033[0;32;0mrs.%i: order %i out of %i\033[0;0;0m" % (gf(cf()).lineno, k+1, order))
             i = n - 1
             year, month, day, hour, minute = supp.fix_time_list(y_time, single_time_stamp=0, move_n_hours=-(k+1))
             y_time_moved = supp.make_time_list(year, month, day, hour, minute)
 
-            while i >= k:
+            while i >= order:
                 found = False
                 j = i
-                t_0 = time.time()
-                while not found and j > 0:
+                while not found and j >= 0:
                     if y_time_moved[i] == y_time[j]:
                         found = True
                         value_exists_binary[i, k] = 1

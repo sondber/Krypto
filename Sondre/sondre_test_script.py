@@ -47,7 +47,6 @@ print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.
 
 plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
 plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
-<<<<<<< HEAD
 """
 
 exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
@@ -74,15 +73,9 @@ X = np.append(X, volume_indexH, axis=1)
 
 linreg.reg_multiple(spreadH, X, prints=1)
 
-
-
-<<<<<<< HEAD
-
-=======
 plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
 plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
 """
->>>>>>> master
 """
 
 check = 1
@@ -110,7 +103,6 @@ lagged_list, index_list, hours_to_remove_1 = regression_support.get_lagged_list(
 last_day_average, hours_to_remove = rs.get_last_day_average(pricesH,time_listH, index_list)
 
 print(hours_to_remove)
-=======
 #
 # exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
 # time_list_nativeH, priceH, volume_nativeH = dis.convert_to_hour(time_listM, priceM, volumeM)
@@ -134,4 +126,3 @@ print(hours_to_remove)
 # volume_indexH = np.transpose(np.matrix(volume_indexH))
 # X = np.append(X, volume_indexH, axis=1)
 # linreg.reg_multiple(spreadH, X, prints=1)
->>>>>>> 2ac5947abdc5047810278ce188e3a702692b773b

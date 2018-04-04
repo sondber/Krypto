@@ -54,16 +54,26 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         AR_order = 1
         max_lag = max(24, force_max_lag)
         X_AR, hours_to_remove = AR_matrix(Y, time_listH, AR_order, hours_to_remove)
-        X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
-        hours_to_remove = adjust_hours_for_removal(hours_to_remove, n_hours=(max_lag - AR_order))
 
-        lagged_list, index_list_prev_lag = get_lagged_list(Y, time_listH, lag=24)
+        print("  rs.%i: X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_AR,0), np.size(X_AR,1)))
 
-        X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
+        #X_AR = X_AR[max_lag - AR_order:, :]  # Hvis max lag er 24, men order=1, så vil vi kutte bort 23 entries til
+
+        print("  rs.%i: X_AR is (%i,%i)" % (gf(cf()).lineno, np.size(X_AR,0), np.size(X_AR,1)))
+        #hours_to_remove = adjust_hours_for_removal(hours_to_remove, n_hours=(max_lag - AR_order))
+
+        lagged_list, index_list_prev_lag, hours_to_remove = get_lagged_list(Y, time_listH, lag=24, hours_to_remove_prev=hours_to_remove)
+        print("  rs.%i: lagged list is (%i)" % (gf(cf()).lineno, len(lagged_list)))
+
+        #X_lagged = np.transpose(np.matrix(lagged_list[max_lag:]))
+        X_lagged = np.transpose(np.matrix(lagged_list))
         X_HAR = np.append(X_AR, X_lagged, axis=1)
+        print("  rs.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR,0), np.size(X_HAR,1)))
 
         last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
-        last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
+        print("  rs.%i: last day average is (%i)" % (gf(cf()).lineno, len(last_day_average)))
+        #last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
+        last_day_average = np.transpose(np.matrix(last_day_average))
 
         if prints == 1:
             n_x += 1

@@ -23,8 +23,8 @@ intercept = 0
 force_max_lag = benchmark_only * 48  # Når vi vil sammenlikne benchmarks
 
 
-spread_determinants = 0  # perform analysis on determinants of spread
-illiq_determinants = 1  # perform analysis on determinants of illiq    IKKE LAGET ENDA
+spread_determinants = 1  # perform analysis on determinants of spread
+illiq_determinants = 0  # perform analysis on determinants of illiq    IKKE LAGET ENDA
 return_determinants = 0  # perform analysis on determinants of return  IKKE LAGET ENDA
 
 # 2 importere prices, volumes

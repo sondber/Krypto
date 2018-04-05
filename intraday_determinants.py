@@ -28,7 +28,7 @@ illiq_determinants = 0  # perform analysis on determinants of illiq    IKKE LAGE
 return_determinants = 0  # perform analysis on determinants of return  IKKE LAGET ENDA
 
 # 2 importere prices, volumes
-exchanges = [0, 2, 3, 4]
+exchanges = [0, 1, 2, 3, 4]
 
 # 3 iterere over exchanges
 
@@ -66,13 +66,13 @@ for exc in exchanges:
             # 6 lage benchmark
             Y, X_benchmark, max_lag, hours_to_remove = rs.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag)
 
-            print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
-            print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
-            print("   \033[32;0;0mintday_dets.%i: Number of hours removed: %i\033[0;0;0m" % (gf(cf()).lineno, len(hours_to_remove)))
+            # print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
+            # print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
+            # print("   \033[32;0;0mintday_dets.%i: Number of hours removed: %i\033[0;0;0m" % (gf(cf()).lineno, len(hours_to_remove)))
             X_benchmark = np.delete(X_benchmark, hours_to_remove, 0)
             Y = np.delete(Y, hours_to_remove)
-            print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
-            print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
+            # print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
+            # print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
 
             end_index = len(spreadH) # Final index for all series
 
@@ -105,11 +105,10 @@ for exc in exchanges:
             #supp.print_n(max(0, 35 - np.size(coeff_matrix, 1)-bench_type))
 
             if benchmark_only != 1:
+                hours_to_remove_lagged = rs.adjust_hours_for_removal(hours_to_remove, n_hours=1)
+
                 # Return
-                ############
-                # Må finne en måte å hente lagged, nå som max_lag ikke er verdt shit.
-                ##############
-                X_temp = returnsH[]
+                X_temp = returnsH
                 X_temp = np.delete(X_temp, hours_to_remove)
                 X_temp = np.transpose(np.matrix(X_temp))
 
@@ -120,8 +119,8 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=intercept, prints=print_all)
 
                 # Return lagged
-                X_temp = returnsH[max_lag - 1:- 1]
-                X_temp = np.delete(X_temp, hours_to_remove)
+                X_temp = rs.get_lagged_list(returnsH, time_listH, lag=1, hours_to_remove_prev=[])[0]
+                X_temp = np.delete(X_temp, hours_to_remove_lagged)[0:-1]
                 X_temp = np.transpose(np.matrix(X_temp))
 
                 X = np.append(X_benchmark, X_temp, axis=1)
@@ -130,7 +129,7 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=intercept, prints=print_all)
 
                 # Volume
-                X_temp = log_volumesH[max_lag:]
+                X_temp = log_volumesH
                 X_temp = np.delete(X_temp, hours_to_remove)
                 X_temp = np.transpose(np.matrix(X_temp))
 
@@ -141,8 +140,8 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=intercept, prints=print_all)
 
                 # Volume lagged
-                X_temp = log_volumesH[max_lag - 1:-1]
-                X_temp = np.delete(X_temp, hours_to_remove)
+                X_temp = rs.get_lagged_list(log_volumesH, time_listH, lag=1, hours_to_remove_prev=[])[0]
+                X_temp = np.delete(X_temp, hours_to_remove_lagged)[0:-1]
                 X_temp = np.transpose(np.matrix(X_temp))
 
                 X = np.append(X_benchmark, X_temp, axis=1)
@@ -152,7 +151,7 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=intercept, prints=print_all)
 
                 # Volatility
-                X_temp = log_rvolH[max_lag:]
+                X_temp = log_rvolH
                 X_temp = np.delete(X_temp, hours_to_remove)
                 X_temp = np.transpose(np.matrix(X_temp))
 
@@ -163,8 +162,8 @@ for exc in exchanges:
                 m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, intercept=intercept, prints=print_all)
 
                 # Volatility lagged
-                X_temp = log_rvolH[max_lag - 1:-1]
-                X_temp = np.delete(X_temp, hours_to_remove)
+                X_temp = rs.get_lagged_list(log_rvolH, time_listH, lag=1, hours_to_remove_prev=[])[0]
+                X_temp = np.delete(X_temp, hours_to_remove_lagged)[0:-1]
                 X_temp = np.transpose(np.matrix(X_temp))
 
                 X = np.append(X_benchmark, X_temp, axis=1)
@@ -187,7 +186,7 @@ for exc in exchanges:
                 # Lager alt dettesom om benchmark er:
                 # 3 time_based, AR(1), bas^(t-24), bas^(2D)
 
-                first_col_entries = ['$AR(1)$', '$bas^{t-24}$','$bas^{D}$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
+                first_col_entries = ['$AR(1)$', '$bas_{t-24}$','$bas^{D}$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
                                      '$v_{t-1}$', '$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 
                 n_rows = 3 + (len(first_col_entries)-3) * 2  # in final table

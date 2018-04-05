@@ -52,7 +52,7 @@ def get_list(exc=0, freq="m", local_time=0): # testtest
     elif freq =="h" or freq ==1:
         file_name = "data/export_csv/" + exc_name + "_global_time_hourly.csv"
 
-        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = dis.read_clean_csv(file_name)
+        time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = read_clean_csv(file_name)
 
         if local_time == 1:
             if exc == 0 or exc == 5:
@@ -78,7 +78,7 @@ def get_list(exc=0, freq="m", local_time=0): # testtest
 
     else:
         file_name = "data/export_csv/" + exc_name + "_daily.csv"
-        time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.read_clean_csv(file_name)
+        time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = read_clean_csv(file_name)
 
         return exc_name, time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD
 
@@ -138,3 +138,61 @@ def get_global_volume_actual_daily():
     print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
     return time_listD, volumesD
 
+
+def get_real_spread(exchange_name):
+    time_list = []
+    spread = []
+
+    file_name = 'data/export_csv/' + exchange_name + "_real_spread.csv"
+
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        for row in reader:
+            try:
+                ts = row[0][0:16]
+                time_stamp = ts[8:10] + "."+ts[5:7]+"."+ts[0:4]+" "+ts[11:16]
+                time_list.append(time_stamp)
+                spread.append(float(row[1]))
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+    print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
+    return time_list, spread
+
+
+def read_clean_csv(file_name):
+    time_list= []
+    returns = []
+    spread = []
+    volumes= []
+    log_volumes = []
+    illiq = []
+    log_illiq = []
+    rvol = []
+    log_rvol = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
+        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
+        i = 0
+        next(reader)
+        next(reader)
+        next(reader)
+        for row in reader:
+            try:
+                time_list.append(row[0])
+                returns.append(float(row[1]))
+                spread.append(float(row[2]))
+                volumes.append(float(row[3]))
+                log_volumes.append(float(row[4]))
+                illiq.append(float(row[5]))
+                log_illiq.append(float(row[6]))
+                rvol.append(float(row[7]))
+                log_rvol.append(float(row[8]))
+            except ValueError:
+                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
+            i = i + 1
+    #print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
+    return time_list, returns, spread, volumes, log_volumes, illiq, log_illiq, rvol, log_rvol

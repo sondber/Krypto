@@ -199,7 +199,8 @@ first_hour = time_list_realH[0]
 =======
 """
 
-for t in range(6):
+"""
+for t in range(1):
     exc, time_listM, pricesM, volumesM = di.get_list(t)
 
     spread, spread_rel, time_list, count_value_error, bias_list = rolls.rolls(pricesM, time_listM, kill_output=0, bias_indicator=1)
@@ -215,6 +216,7 @@ for t in range(6):
     bias_cntr = 0
 
     for j in range(0, len(bias_list)):
+        print(time_list[j])
         if bias_list[j] == 1:
             bias_cntr += 1
 
@@ -228,6 +230,15 @@ for t in range(6):
     name = exc + "_indicator_"+ str(count_value_error)
     plot.intraday(data_average, lower, upper, name)
 
+"""
+
+names = ["korbit", "bitstamp", "kraken"]
+
+for i in range(len(names)):
+    time_list, spread =  di.get_real_spread(names[i])
+    day_time, data_average, lower, upper = dis.cyclical_average(time_list, spread, incl_zeros=1)
+    name = names[i] + "spread_real"
+    plot.intraday(data_average, lower, upper, name)
 
 
 >>>>>>> jacob

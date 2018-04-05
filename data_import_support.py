@@ -977,42 +977,6 @@ def write_clean_csv(exc_name, time_list, returns, spread, volumes, log_volumes, 
             writ.writerow(rowdata)
 
 
-def read_clean_csv(file_name):
-    time_list= []
-    returns = []
-    spread = []
-    volumes= []
-    log_volumes = []
-    illiq = []
-    log_illiq = []
-    rvol = []
-    log_rvol = []
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        next(reader)
-        next(reader)
-        for row in reader:
-            try:
-                time_list.append(row[0])
-                returns.append(float(row[1]))
-                spread.append(float(row[2]))
-                volumes.append(float(row[3]))
-                log_volumes.append(float(row[4]))
-                illiq.append(float(row[5]))
-                log_illiq.append(float(row[6]))
-                rvol.append(float(row[7]))
-                log_rvol.append(float(row[8]))
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            i = i + 1
-    #print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
-    return time_list, returns, spread, volumes, log_volumes, illiq, log_illiq, rvol, log_rvol
-
-
-
 def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_or_average="sum"):
     #1 finne når vi skal starte
     #2 finne når vi skal slutte

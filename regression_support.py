@@ -70,7 +70,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_HAR = np.append(X_AR, X_lagged, axis=1)
         print("  rs.%i: X_HAR is (%i,%i)" % (gf(cf()).lineno, np.size(X_HAR,0), np.size(X_HAR,1)))
 
-        last_day_average = get_last_day_average(Y, time_listH, index_list_prev_lag)
+        last_day_average, hours_to_remove = get_last_day_average(Y, time_listH, index_list_prev_lag, hours_to_remove_prev=hours_to_remove)
         print("  rs.%i: last day average is (%i)" % (gf(cf()).lineno, len(last_day_average)))
         #last_day_average = np.transpose(np.matrix(last_day_average[max_lag:]))
         last_day_average = np.transpose(np.matrix(last_day_average))
@@ -121,7 +121,7 @@ def benchmark_hourly(Y, time_listH, HAR_config=0, hours_in_period=4, prints=1, f
         X_HAR = np.append(X_HAR, last_day_average, axis=1)
 
     if hours_in_period != -1:
-        X_benchmark = X_dummies[max_lag:, :]
+        X_benchmark = X_dummies
     else:
         X_benchmark = X_HAR
 

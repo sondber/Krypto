@@ -66,10 +66,13 @@ for exc in exchanges:
             # 6 lage benchmark
             Y, X_benchmark, max_lag, hours_to_remove = rs.benchmark_hourly(Y, time_listH, HAR_config=bench_type, hours_in_period=hours_in_period, prints=benchmark_prints, force_max_lag=force_max_lag)
 
+            print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
+            print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
             print("   \033[32;0;0mintday_dets.%i: Number of hours removed: %i\033[0;0;0m" % (gf(cf()).lineno, len(hours_to_remove)))
             X_benchmark = np.delete(X_benchmark, hours_to_remove, 0)
-            Y = Y[max_lag:]
             Y = np.delete(Y, hours_to_remove)
+            print("   \033[32;0;0mintday_dets.%i: Length of Y %i\033[0;0;0m" % (gf(cf()).lineno, len(Y)))
+            print("   \033[32;0;0mintday_dets.%i: Size of benchmark: (%i,%i)\033[0;0;0m" % (gf(cf()).lineno, np.size(X_benchmark,0), np.size(X_benchmark,1)))
 
             end_index = len(spreadH) # Final index for all series
 
@@ -101,10 +104,12 @@ for exc in exchanges:
             m_col, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = rs.import_regressions(m_col, Y, X_benchmark, coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array, prints=benchmark_prints, intercept=intercept)
             #supp.print_n(max(0, 35 - np.size(coeff_matrix, 1)-bench_type))
 
-
             if benchmark_only != 1:
                 # Return
-                X_temp = returnsH[max_lag:]
+                ############
+                # Må finne en måte å hente lagged, nå som max_lag ikke er verdt shit.
+                ##############
+                X_temp = returnsH[]
                 X_temp = np.delete(X_temp, hours_to_remove)
                 X_temp = np.transpose(np.matrix(X_temp))
 

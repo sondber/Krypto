@@ -76,6 +76,10 @@ linreg.reg_multiple(spreadH, X, prints=1)
 plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
 plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
 """
+<<<<<<< HEAD
+=======
+
+>>>>>>> jacob
 """
 
 check = 1
@@ -92,6 +96,11 @@ print("Resulting AR:")
 print(ar_test)
 print("Indeces to remove:")
 print(indeces_to_remove)
+<<<<<<< HEAD
+=======
+"""
+
+>>>>>>> jacob
 
 """
 
@@ -126,3 +135,39 @@ print(hours_to_remove)
 # volume_indexH = np.transpose(np.matrix(volume_indexH))
 # X = np.append(X, volume_indexH, axis=1)
 # linreg.reg_multiple(spreadH, X, prints=1)
+<<<<<<< HEAD
+=======
+"""
+
+for t in range(6):
+    exc, time_listM, pricesM, volumesM = di.get_list(t)
+
+    spread, spread_rel, time_list, count_value_error, bias_list = rolls.rolls(pricesM, time_listM, kill_output=0, bias_indicator=1)
+
+    cntr = 0
+
+    for i in range(len(spread_rel)):
+        if spread_rel[i] == 0:
+            cntr += 1
+
+    print("Counted", cntr, "zeros. Compare with errors:", count_value_error)
+
+    bias_cntr = 0
+
+    for j in range(0, len(bias_list)):
+        if bias_list[j] == 1:
+            bias_cntr += 1
+
+
+    print("Counted", bias_cntr, "errors in bias_list")
+
+
+    day_time, data_average, lower, upper = dis.cyclical_average(time_list, bias_list, incl_zeros=1)
+    lower = data_average
+    upper = data_average
+    name = exc + "_indicator_"+ str(count_value_error)
+    plot.intraday(data_average, lower, upper, name)
+
+
+
+>>>>>>> jacob

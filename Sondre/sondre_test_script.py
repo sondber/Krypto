@@ -1,8 +1,8 @@
+import csv
 import numpy as np
 import linreg
 import data_import
 import data_import as di
-import data_import_support
 import plot
 import regression_support
 from Jacob import jacob_support as jake_supp
@@ -36,7 +36,11 @@ os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 # time_list_indexH, volume_indexH = gvi.get_global_hourly_volume_index()
 # time_listD, volumes_actualD = di.get_global_volume_actual_daily()
 
+<<<<<<< HEAD
 """
+=======
+
+>>>>>>> master
 corr = np.corrcoef(volumes_actualD, volume_indexD)
 print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.1f%% with the actual volumes" % (100*sum(volume_indexD)/sum(volumes_actualD), 100*corr[0,1]))
 
@@ -71,7 +75,10 @@ linreg.reg_multiple(spreadH, X, prints=1)
 plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
 plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
 """
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 """
 
 check = 1
@@ -79,7 +86,6 @@ lag = 3
 
 exc, time_listM, pricesM, volumesM = di.get_list(-1)
 time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
-=======
 # start_i = time_listD.index(time_list_indexD[0])
 # time_listD = time_listD[start_i:]
 # volumes_actualD = volumes_actualD[start_i:]
@@ -91,11 +97,54 @@ time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumes
 # plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
 # plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
 
+<<<<<<< HEAD
+=======
+#
+# exc_name = "bitstamp_new_minutes"
+# file_name= "data/long_raw_data/" + exc_name + ".csv"
+#
+# time_listM, pricesM, volumesM = dis.price_volume_from_raw(file_name, [], [], [], semi=1, unix=0, price_col=4)
+# y, mo, d, h, mi = supp.fix_time_list(time_listM)
+#
+# unixM = []
+# for i in range(len(time_listM)):
+#     unixM.append(supp.timestamp_to_unix(time_listM[i]))
+#
+# for i in range(1, len(time_listM)):
+#     if unixM[i] - unixM[i-1] != 60:
+#         print(i, time_listM[i])
+#
+# pricesM = supp.fill_blanks(pricesM)
+# print("finihed importing")
+# print(len(time_listM), time_listM[-10:])
+# print(len(pricesM),(pricesM[-10:]))
+# print(len(volumesM), (volumesM[-10:]))
+# spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
+#
+#
+# write_filename = "data/export_csv/bitstamp_spread_new.csv"
+# with open(write_filename, 'w', newline='') as csvfile:
+#     writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+#     print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % write_filename)
+#
+#     header3 = ["Time"]
+#     header3.append("Spread")
+#     writ.writerow(header3)
+#
+#     for i in range(len(time_listH)):
+#         rowdata = [time_listH[i]]
+#         rowdata.append(spreadH[i])
+#         writ.writerow(rowdata)
+#
+#
+
+>>>>>>> master
 ar_test, indeces_to_remove = rs.AR_matrix(pricesH, time_listH, order=lag)
 print("Resulting AR:")
 print(ar_test)
 print("Indeces to remove:")
 print(indeces_to_remove)
+<<<<<<< HEAD
 
 
 
@@ -103,6 +152,12 @@ print(indeces_to_remove)
 exc_name, time_listM, pricesM, volumesM = di.get_list("bitstamp", freq="m", local_time="0")
 spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
 
+=======
+"""
+
+exc_name, time_listM, pricesM, volumesM = di.get_list("bitstamp", freq="m", local_time="0")
+spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
+>>>>>>> master
 
 time_list_realH, real_spreadH = di.get_real_spread("bitstamp")
 first_hour = time_list_realH[0]
@@ -186,8 +241,6 @@ first_hour = time_list_realH[0]
 # volume_indexH = np.transpose(np.matrix(volume_indexH))
 # X = np.append(X, volume_indexH, axis=1)
 # linreg.reg_multiple(spreadH, X, prints=1)
-<<<<<<< HEAD
-=======
 """
 
 """
@@ -231,4 +284,7 @@ for i in range(len(names)):
     name = names[i] + "spread_real"
     plot.intraday(data_average, lower, upper, name)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master

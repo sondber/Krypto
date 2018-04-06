@@ -446,11 +446,11 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
         single = 0
 
     if single == 1:
-        timestamp = datetime.utcfromtimestamp(unix_stamp).strftime('%d.%m.%Y %H:%M')
+        timestamp = datetime.datetime.utcfromtimestamp(unix_stamp).strftime('%d.%m.%Y %H:%M')
     else:
         timestamp = []
         for i in range(list_length):
-            timestamp.append(datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
+            timestamp.append(datetime.datetime.utcfromtimestamp(unix_stamp[i]).strftime('%d.%m.%Y %H:%M'))
 
     return timestamp
 

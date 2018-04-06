@@ -9,6 +9,7 @@ import regression_support as rs
 from Sondre import sondre_support_formulas as supp
 from Jacob import jacob_support as jake_supp
 from inspect import getframeinfo as gf, currentframe as cf
+import global_volume_index as gvi
 
 # 1 kontrollpanel
 log_illiqs = 0 # Should log-illiq be used rather than plain illiq?
@@ -29,11 +30,19 @@ return_determinants = 0  # perform analysis on determinants of return  IKKE LAGE
 
 # 2 importere prices, volumes
 exchanges = [0, 1, 2, 3, 4]
+exchanges = [0]
 
 # 3 iterere over exchanges
 
 for exc in exchanges:
     exc_name, time_listH, returnsH, spreadH, volumesH, log_volumesH, illiqH, log_illiqH, rvolH, log_rvolH = di.get_list(exc=exc, freq='h', local_time=1)
+    time_list_global_volumesH, global_volumesH = gvi.get_global_hourly_volume_index(transformed=1)
+
+    time_list_global_volumesH, global_volumesH = gvi.remove_holes(time_listH, time_list_global_volumesH, global_volumesH)
+
+    print(time_list_global_volumesH[0:20])
+    print(time_listH[0:20])
+
 
     #supp.print_n(50)
     print("----------------- INTRADAY DETERMINANTS REGRESSION FOR", exc_name.upper()[0:-3], "----------------------")

@@ -37,6 +37,47 @@ local_time = 0
 # time_listD, volumes_actualD = di.get_global_volume_actual_daily()
 
 
+corr = np.corrcoef(volumes_actualD, volume_indexD)
+print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.1f%% with the actual volumes" % (100*sum(volume_indexD)/sum(volumes_actualD), 100*corr[0,1]))
+
+plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
+plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
+"""
+
+exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
+time_list_nativeH, priceH, volume_nativeH = dis.convert_to_hour(time_listM, priceM, volumeM)
+spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(priceM, time_listM, calc_basis="h", kill_output=1)
+
+start_i = time_list_spread.index(time_list_indexH[0])
+end_i = time_list_spread.index(time_list_indexH[-1]) + 1
+time_list_spread = time_list_spread[start_i:end_i]
+spreadH = spreadH[start_i:end_i]
+volume_nativeH = volume_nativeH[start_i:end_i]
+
+print("It is %s that the time lists are equal" % (time_list_spread == time_list_indexH))
+time_listH = time_list_spread
+
+time_list_removed = []
+time_listH, time_list_removed, spreadH, volume_indexH, volume_nativeH = supp.remove_list1_zeros_from_all_lists(time_listH, time_list_removed, spreadH, volume_indexH, volume_nativeH)
+
+
+
+X = np.transpose(np.matrix(volume_nativeH))
+volume_indexH = np.transpose(np.matrix(volume_indexH))
+X = np.append(X, volume_indexH, axis=1)
+
+linreg.reg_multiple(spreadH, X, prints=1)
+
+plot.time_series_single(time_list_combined,volumes_combined,"global_volumes_index")
+plot.time_series_single(time_listD,volumesD,"actual_global_volumes")
+"""
+"""
+
+check = 1
+lag = 3
+
+exc, time_listM, pricesM, volumesM = di.get_list(-1)
+time_listH, pricesH, volumesH = dis.convert_to_hour(time_listM, pricesM, volumesM)
 # start_i = time_listD.index(time_list_indexD[0])
 # time_listD = time_listD[start_i:]
 # volumes_actualD = volumes_actualD[start_i:]
@@ -87,6 +128,15 @@ local_time = 0
 #
 #
 
+ar_test, indeces_to_remove = rs.AR_matrix(pricesH, time_listH, order=lag)
+print("Resulting AR:")
+print(ar_test)
+print("Indeces to remove:")
+print(indeces_to_remove)
+"""
+
+exc_name, time_listM, pricesM, volumesM = di.get_list("bitstamp", freq="m", local_time="0")
+spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
 
 time_list_realH, real_spreadH = di.get_real_spread("bitstamp")
 first_hour = time_list_realH[0]
@@ -170,3 +220,46 @@ first_hour = time_list_realH[0]
 # volume_indexH = np.transpose(np.matrix(volume_indexH))
 # X = np.append(X, volume_indexH, axis=1)
 # linreg.reg_multiple(spreadH, X, prints=1)
+"""
+
+"""
+for t in range(1):
+    exc, time_listM, pricesM, volumesM = di.get_list(t)
+
+    spread, spread_rel, time_list, count_value_error, bias_list = rolls.rolls(pricesM, time_listM, kill_output=0, bias_indicator=1)
+
+    cntr = 0
+
+    for i in range(len(spread_rel)):
+        if spread_rel[i] == 0:
+            cntr += 1
+
+    print("Counted", cntr, "zeros. Compare with errors:", count_value_error)
+
+    bias_cntr = 0
+
+    for j in range(0, len(bias_list)):
+        print(time_list[j])
+        if bias_list[j] == 1:
+            bias_cntr += 1
+
+
+    print("Counted", bias_cntr, "errors in bias_list")
+
+
+    day_time, data_average, lower, upper = dis.cyclical_average(time_list, bias_list, incl_zeros=1)
+    lower = data_average
+    upper = data_average
+    name = exc + "_indicator_"+ str(count_value_error)
+    plot.intraday(data_average, lower, upper, name)
+
+"""
+
+names = ["korbit", "bitstamp", "kraken"]
+
+for i in range(len(names)):
+    time_list, spread =  di.get_real_spread(names[i])
+    day_time, data_average, lower, upper = dis.cyclical_average(time_list, spread, incl_zeros=1)
+    name = names[i] + "spread_real"
+    plot.intraday(data_average, lower, upper, name)
+

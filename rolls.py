@@ -16,7 +16,7 @@ def first_price_differences(prices):  # takes list of prices, returnsH equal len
     return returnlist
 
 
-def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # calc_basis "h"/"d"
+def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0, bias_indicator = 0):  # calc_basis "h"/"d"
     year, month, day, hour, minute = supp.fix_time_list(time_list_minute)  # gives 5 equal length lists
 
     spread = []
@@ -24,6 +24,8 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
     time_list = []
 
     count_value_error = 0
+
+    bias_indicator_list = []
 
     if kill_output == 0:
         print("Calculating first price differences ...")
@@ -55,9 +57,11 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
                     print("There is an error when i = %i and y = %i" %(i, y))
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 2))
+                bias_indicator_list.append(0)
             except ValueError:
                 count_value_error += 1
                 ba_calc = 0
+                bias_indicator_list.append(1)
             spread.append(ba_calc)
             time_list.append(time_list_minute[i])
             spread_rel.append(ba_calc / prices_minute[i + minutes_in_window - 1])
@@ -71,9 +75,11 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
                 sum_inside += (price_differences[j] * price_differences[j - 1])
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (start_index - 2))
+                bias_indicator_list.append(0)
             except ValueError:
                 count_value_error += 1
                 ba_calc = 0
+                bias_indicator_list.append(1)
             spread.append(ba_calc)
             time_list.append(time_list_minute[0])
             spread_rel.append(ba_calc / prices_minute[start_index - 1])
@@ -83,9 +89,11 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
                 sum_inside += price_differences[y] * price_differences[y - 1]
             try:
                 ba_calc = 2 * math.sqrt(-sum_inside / (minutes_in_window - 2))
+                bias_indicator_list.append(0)
             except ValueError:
                 count_value_error += 1
                 ba_calc = 0
+                bias_indicator_list.append(1)
             spread.append(ba_calc)
             time_list.append(time_list_minute[i])
             spread_rel.append(ba_calc / prices_minute[i + minutes_in_window - 1])
@@ -97,5 +105,9 @@ def rolls(prices_minute, time_list_minute, calc_basis="h", kill_output=0):  # ca
         print("The length of the time-vector is", len(time_list))
         print(count_value_error, "(", round(100 * (count_value_error / len(spread_rel)), 2), "%)",
               "value errors were counted when calculating Roll-spreads")
+        count_value_error = round(100 * (count_value_error / len(spread_rel)), 2)
 
-    return spread, spread_rel, time_list, count_value_error
+    if bias_indicator == 1:
+        return spread, spread_rel, time_list, count_value_error, bias_indicator_list
+    else:
+        return spread, spread_rel, time_list, count_value_error

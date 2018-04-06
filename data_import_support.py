@@ -358,7 +358,7 @@ def get_month(month_string):
     return month_num
 
 
-def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0):
+def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, incl_zeros = 0):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -389,7 +389,16 @@ def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_va
     n_cycles = int(2 * n_entries / n_out)  # trenger bare være minst like stor. Sikkerhetsmargin på 50%
     temp_matrix = np.zeros([n_cycles, n_out])
     for i in range(n_entries):
-        if data[i] != 0:
+        if incl_zeros == 0:
+            if data[i] != 0:
+                if frequency == "h":
+                    index = int(hour[i])
+                elif frequency == "d":
+                    index = int(date(year[i], month[i], day[i]).isoweekday()) - 1
+                cycle_nr = int(count_entries[index])
+                count_entries[index] += 1
+                temp_matrix[cycle_nr, index] = data[i]
+        else:
             if frequency == "h":
                 index = int(hour[i])
             elif frequency == "d":
@@ -966,42 +975,6 @@ def write_clean_csv(exc_name, time_list, returns, spread, volumes, log_volumes, 
             rowdata.append(rvol[i])
             rowdata.append(log_rvol[i])
             writ.writerow(rowdata)
-
-
-def read_clean_csv(file_name):
-    time_list= []
-    returns = []
-    spread = []
-    volumes= []
-    log_volumes = []
-    illiq = []
-    log_illiq = []
-    rvol = []
-    log_rvol = []
-    with open(file_name, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-        print("\033[0;32;0m Reading file '%s'...\033[0;0;0m" % file_name)
-        i = 0
-        next(reader)
-        next(reader)
-        next(reader)
-        for row in reader:
-            try:
-                time_list.append(row[0])
-                returns.append(float(row[1]))
-                spread.append(float(row[2]))
-                volumes.append(float(row[3]))
-                log_volumes.append(float(row[4]))
-                illiq.append(float(row[5]))
-                log_illiq.append(float(row[6]))
-                rvol.append(float(row[7]))
-                log_rvol.append(float(row[8]))
-            except ValueError:
-                print("\033[0;31;0m There was an error on row %i in '%s'\033[0;0;0m" % (i + 1, file_name))
-            i = i + 1
-    #print("\033[0;32;0m Finished reading file '%s'...\033[0;0;0m" % file_name)
-    return time_list, returns, spread, volumes, log_volumes, illiq, log_illiq, rvol, log_rvol
-
 
 
 def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_or_average="sum"):

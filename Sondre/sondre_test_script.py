@@ -18,11 +18,12 @@ import ILLIQ
 import regression_support as rs
 import global_volume_index as gvi
 
-os.chdir("/Users/sondre/Documents/GitHub/krypto")
-#os.chdir("/Users/Jacob/Documents/GitHub/krypto")
+#os.chdir("/Users/sondre/Documents/GitHub/krypto")
+os.chdir("/Users/Jacob/Documents/GitHub/krypto")
 
 
 local_time = 0
+#local_time = 0
 
 # for exc in range(6):
 #     exc_name, time_listM, pricesM, volumesM = di.get_list(exc)
@@ -38,6 +39,7 @@ local_time = 0
 
 
 <<<<<<< HEAD
+"""
 corr = np.corrcoef(volumes_actualD, volume_indexD)
 print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.1f%% with the actual volumes" % (100*sum(volume_indexD)/sum(volumes_actualD), 100*corr[0,1]))
 
@@ -45,6 +47,7 @@ plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
 plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
 """
 
+"""
 exc_name, time_listM, priceM, volumeM = di.get_list(exc="korbit", freq="m")
 time_list_nativeH, priceH, volume_nativeH = dis.convert_to_hour(time_listM, priceM, volumeM)
 spread_abs, spreadH, time_list_spread, count_value_error = rolls.rolls(priceM, time_listM, calc_basis="h", kill_output=1)
@@ -105,13 +108,16 @@ print("Indeces to remove:")
 print(indeces_to_remove)
 <<<<<<< HEAD
 =======
-"""
 
 >>>>>>> jacob
 =======
+
+
+
 exc_name, time_listM, pricesM, volumesM = di.get_list("bitstamp", freq="m", local_time="0")
 spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
 >>>>>>> sondre_is_a_fuck_up
+
 
 time_list_realH, real_spreadH = di.get_real_spread("bitstamp")
 first_hour = time_list_realH[0]

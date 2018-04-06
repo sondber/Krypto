@@ -1,8 +1,8 @@
+import csv
 import numpy as np
 import linreg
 import data_import
 import data_import as di
-import data_import_support
 import plot
 import regression_support
 from Jacob import jacob_support as jake_supp
@@ -48,9 +48,45 @@ local_time = 0
 # plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
 # plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
 
+#
+# exc_name = "bitstamp_new_minutes"
+# file_name= "data/long_raw_data/" + exc_name + ".csv"
+#
+# time_listM, pricesM, volumesM = dis.price_volume_from_raw(file_name, [], [], [], semi=1, unix=0, price_col=4)
+# y, mo, d, h, mi = supp.fix_time_list(time_listM)
+#
+# unixM = []
+# for i in range(len(time_listM)):
+#     unixM.append(supp.timestamp_to_unix(time_listM[i]))
+#
+# for i in range(1, len(time_listM)):
+#     if unixM[i] - unixM[i-1] != 60:
+#         print(i, time_listM[i])
+#
+# pricesM = supp.fill_blanks(pricesM)
+# print("finihed importing")
+# print(len(time_listM), time_listM[-10:])
+# print(len(pricesM),(pricesM[-10:]))
+# print(len(volumesM), (volumesM[-10:]))
+# spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
+#
+#
+# write_filename = "data/export_csv/bitstamp_spread_new.csv"
+# with open(write_filename, 'w', newline='') as csvfile:
+#     writ = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+#     print("\033[0;32;0m Writing to file '%s'...\033[0;0;0m" % write_filename)
+#
+#     header3 = ["Time"]
+#     header3.append("Spread")
+#     writ.writerow(header3)
+#
+#     for i in range(len(time_listH)):
+#         rowdata = [time_listH[i]]
+#         rowdata.append(spreadH[i])
+#         writ.writerow(rowdata)
+#
+#
 
-exc_name, time_listM, pricesM, volumesM = di.get_list("bitstamp", freq="m", local_time="0")
-spread_abs, spreadH, time_listH, count_value_error = rolls.rolls(pricesM, time_listM, calc_basis="h", kill_output=1)
 
 time_list_realH, real_spreadH = di.get_real_spread("bitstamp")
 first_hour = time_list_realH[0]

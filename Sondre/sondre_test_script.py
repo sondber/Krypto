@@ -42,11 +42,11 @@ if import_new_exchanges:
 
 if global_volumes:
 
-    #gvi.write_hourly_volume_index_to_csv()
+    # gvi.write_hourly_volume_index_to_csv()
     # gvi.write_daily_volume_index_to_csv()
 
     time_list_indexD, volume_indexD = gvi.get_global_daily_volume_index()
-    time_list_indexH, volume_indexH = gvi.get_global_hourly_volume_index()
+    # time_list_indexH, volume_indexH = gvi.get_global_hourly_volume_index()
     time_listD, volumes_actualD = di.get_global_volume_actual_daily()
 
     plt.plot(volume_indexD)
@@ -60,7 +60,7 @@ if global_volumes:
         try:
             j = time_list_indexD.index(t)
             time_out.append(t)
-            vol_index.append(volume_indexD[i])
+            vol_index.append(volume_indexD[j])
             vol_actual.append(volumes_actualD[i])
         except:
             pass

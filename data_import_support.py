@@ -1014,7 +1014,9 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
                 data_out.append(data1[i]+data2[t+i])
 
 
-    return time_out, data_outdef fix_different_time_lists(time1, list1, time2, list2, list3, list4, list5, list6, list7, list8, list9):
+    return time_out, data_out
+
+def fix_different_time_lists(time1, list1, time2, list2, list3, list4, list5, list6, list7, list8, list9):
 
     time_out = []
     list1_out = []

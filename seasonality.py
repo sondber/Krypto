@@ -14,11 +14,11 @@ import realized_volatility
 import math
 
 
-intraday = 0
+intraday = 1
 figure_formats = "narrow"
 intraweek = 0
 global_volume_index = 0
-global_time = 1
+global_time = 0
 exch = ["bitstamp", "coinbase", "btcn", "korbit"]
 
 for exc in exch:

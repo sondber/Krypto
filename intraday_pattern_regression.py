@@ -6,8 +6,8 @@ import data_import_support as dis
 import plot
 
 
-exchanges = [0, 2, 3, 4]
-hours_in_window = [3]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
+exchanges = ["korbit"]
+hours_in_window = [1, 2, 4]      # La denne være en liste med de forskjellige vinduene analysen skal gjøres for
 convert_coeffs_to_percentage = 1    # Convert coeffs and std.errs. of returnsH and spreadH to percentage
 convert_logs = 0                    # Convert coeffs and std.errs. of rvol and illiq to percentage, i.e. 100*exp(coeff) NB! Doesn't work
 subtract_means = 1

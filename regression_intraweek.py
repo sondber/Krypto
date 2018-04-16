@@ -9,16 +9,19 @@ import linreg
 import regression_support
 from Sondre import sondre_support_formulas as supp
 from Sondre.sondre_support_formulas import print_n
+import global_volume_index as gvi
 from regression_support import import_to_matrices, import_regressions, fmt_print
 
 exch = [0, 2, 3, 4]  # 0=bitstamp, 1=coincheck
 os.chdir("/Users/sondre/Documents/GitHub/krypto")
 
-exch = [0]  # 0=bitstamp, 1=coincheck
+exch = ["bitstamp", "coinbase", "btcn", "korbit"]
+exch = [0]
 
-intraweek_pattern_regression = 1
+intraweek_pattern_regression = 0
 subtract_means = 1  # from day-of-week regression
 convert_coeffs_to_percentage = 1
+include_global_volumes = True
 convert_logs = 0
 log_illiqs = True
 
@@ -26,12 +29,23 @@ determinants_regression = 1
 autoreg = 0
 
 rolls_multi = 1
-illiq_multi = 1
+illiq_multi = 0
 return_multi = 0
 
 
 for exc in exch:
-    exc_name, time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD= di.get_list(exc,freq="d", local_time=1)
+    exc_name, time_listD, returnsD, volumesD, log_volumesD, spreadD, illiqD, log_illiqD, rvolD, log_rvolD= di.get_list(exc,freq="d", local_time=0)
+
+    # ABSOLUTE RETURNS
+    print("Using absolut returns")
+    for i in range(len(returnsD)):
+        returnsD[i] = abs(returnsD[i])
+
+
+    time_list_global_volumesD, global_volumesD = gvi.get_global_daily_volume_index(transformed=1)
+    if include_global_volumes:
+        time_list_global_volumesD, global_volumesD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD = dis.fix_different_time_lists(time_list_global_volumesD, global_volumesD, time_listD, returnsD, spreadD, volumesD, log_volumesD, illiqD, log_illiqD, rvolD, log_rvolD)
+        time_listD = time_list_global_volumesD
 
     if log_illiqs:
         illiq = log_illiqD
@@ -40,6 +54,7 @@ for exc in exch:
 
     if determinants_regression == 1:
         stdzd_log_volumesD = supp.standardize(log_volumesD)
+        stdzd_global_volumesD = supp.standardize(global_volumesD)
         stdzd_spreadD = supp.standardize(spreadD)
         stdzd_illiqD = supp.standardize(illiq)
         stdzd_returnsD = supp.standardize(returnsD)
@@ -256,6 +271,7 @@ for exc in exch:
 
         # Fetch the standardized variables from earlier
         log_volumesD = stdzd_log_volumesD
+        global_volumesD = stdzd_global_volumesD
         spreadD = stdzd_spreadD
         illiq = stdzd_illiqD
         returnsD = stdzd_returnsD
@@ -312,10 +328,10 @@ for exc in exch:
             X_contemporary = X_benchmark
             X_lagged = X_benchmark
 
-            # These tables are 23 rows tall, 9 wide
-            n_rows = 23  # in final table
+            # These tables are 25 rows tall, 9 wide
+            n_rows = 27  # in final table
             n_entries = 15  # Må bare være minst like stor
-            n_cols = 9
+            n_cols = 11
             coeff_matrix = np.zeros([n_entries, n_cols])
             rsquared_array = np.zeros(n_cols)
             aic_array = np.zeros(n_cols)
@@ -324,7 +340,7 @@ for exc in exch:
             std_errs_matrix = np.zeros([n_entries, n_cols])
 
             m_col = 0
-            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=1)
+            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X_benchmark, prints=0)
             coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
@@ -378,6 +394,30 @@ for exc in exch:
                 import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
+            # Spread - Global Volume
+            x = global_volumesD[start_index: end_index]
+            x = np.transpose(np.matrix(x))
+            X = np.append(X_benchmark, x, axis=1)
+            X_contemporary = np.append(X_contemporary, x, axis=1)
+            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X, prints=0)
+
+            m_col += 1
+            coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
+                import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
+                                   std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
+            # Spread - Global Volume with lag
+            x = global_volumesD[start_index - 1: end_index - 1]
+            x = np.transpose(np.matrix(x))
+            X = np.append(X_benchmark, x, axis=1)
+            X_lagged = np.append(X_lagged, x, axis=1)
+            coeffs, tvalues, rsquared, aic, p_values, std_errs, n_obs = linreg.reg_multiple(Y, X, prints=0)
+
+            m_col += 1
+            coeff_matrix, std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array = \
+                import_to_matrices(m_col, coeffs, std_errs, p_values, rsquared, aic, n_obs, coeff_matrix,
+                                   std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
+
             # Spread - Volatility
             x = log_rvolD[start_index: end_index]
             x = np.transpose(np.matrix(x))
@@ -419,7 +459,7 @@ for exc in exch:
                                    std_errs_matrix, p_values_matrix, rsquared_array, aic_array, n_obs_array)
 
             first_col_entries = ['Intercept', '$bas^D$', '$bas^W$', '$bas^{2M}$', '$r_t$', '$r_{t-1}$', '$v_{t}$',
-                                 '$v_{t-1}$', '$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
+                                 '$v_{t-1}$', '$gv_{t}$', '$gv_{t-1}$','$rv_{t}$', '$rv_{t-1}$', '\\textit{\\# Obs.}', '$R^2$', '\\textit{AIC}']
 
             first_col = []
             j = 0
@@ -429,16 +469,20 @@ for exc in exch:
                                18):  # Tallet her skal være lengden på den lengste entrien
                     first_col[j] += ' '  # Passer på at alle blir like lange
                 j += 1
-                if data_r < 10:
-                    first_col.append('                  ')  # De første 10 radene skal ha mellomrom mellom seg
+                if data_r < 12:
+                    first_col.append('                  ')  # De første 12 radene skal ha mellomrom mellom seg
                     j += 1
 
             print_rows = []
+
+
             # Fyller starten med tomromm så det blir lettere å se
             for data_r in range(0, n_rows):
                 print_rows.append('        ')
             for print_r in range(0, n_rows):
                 print_rows[print_r] += (first_col[print_r]) + "&"
+
+
 
             # Dette er benchmarken
             for print_r in range(0, 8, 2):
@@ -451,7 +495,7 @@ for exc in exch:
                     print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c], type="std_err")
 
             # Dette er regresjonene mot en og en annen variabel
-            for print_r in range(8, 20, 2):
+            for print_r in range(8, 24, 2):
                 data_r = 11
                 for c in range(0, n_cols):
                     if c == int(print_r / 2) - 3:
@@ -460,14 +504,14 @@ for exc in exch:
                         print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[data_r, c],
                                                             type="std_err")
                         data_r += 1
-                    elif c == 7 and (print_r == 8 or print_r == 12 or print_r == 16):
+                    elif c == 9 and (print_r == 8 or print_r == 12 or print_r == 16 or print_r ==20):
                         i_cont = 11 + int((print_r - 8) / 4)
                         print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[i_cont, c],
                                                         p_values_matrix[i_cont, c],
                                                         type="coeff")
                         print_rows[print_r + 1] = fmt_print(print_rows[print_r + 1], std_errs_matrix[i_cont, c],
                                                             type="std_err")
-                    elif c == 8 and (print_r == 10 or print_r == 14 or print_r == 18):
+                    elif c == 10 and (print_r == 10 or print_r == 14 or print_r == 18 or print_r==22):
                         i_lag = 11 + int((print_r - 10) / 4)
                         print_rows[print_r] = fmt_print(print_rows[print_r], coeff_matrix[i_cont, c],
                                                         p_values_matrix[i_cont, c],

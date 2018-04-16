@@ -19,7 +19,7 @@ figure_formats = "narrow"
 intraweek = 0
 global_volume_index = 0
 global_time = 1
-exch = [0, 1, 2, 3, 4, 5]
+exch = ["bitstamp", "coinbase", "btcn", "korbit"]
 
 for exc in exch:
     if intraday == 1:

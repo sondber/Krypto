@@ -1014,4 +1014,36 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
                 data_out.append(data1[i]+data2[t+i])
 
 
-    return time_out, data_out
+    return time_out, data_outdef fix_different_time_lists(time1, list1, time2, list2, list3, list4, list5, list6, list7, list8, list9):
+
+    time_out = []
+    list1_out = []
+    list2_out = []
+    list3_out = []
+    list4_out = []
+    list5_out = []
+    list6_out = []
+    list7_out = []
+    list8_out = []
+    list9_out = []
+
+    for i in range(len(time1)):
+        t = time1[i]
+        try:
+            # print("Found", t)
+            j = time2.index(t)
+            time_out.append(t)
+            list1_out.append(list1[i])
+            list2_out.append(list2[j])
+            list3_out.append(list3[j])
+            list4_out.append(list4[j])
+            list5_out.append(list5[j])
+            list6_out.append(list6[j])
+            list7_out.append(list7[j])
+            list8_out.append(list8[j])
+            list9_out.append(list9[j])
+        except:
+            pass
+            # print("Did not find", t)
+
+    return time_out, list1_out, list2_out, list3_out, list4_out, list5_out, list6_out, list7_out, list8_out, list9_out

@@ -87,42 +87,43 @@ if global_volumes_experimental:
 
     # gvi.write_hourly_volume_index_to_csv()
     gvi.write_daily_volume_index_to_csv()
-    #
-    # time_list_indexD, volume_indexD = gvi.get_global_daily_volume_index()
+
+    time_list_indexD, volume_indexD = gvi.get_global_daily_volume_index()
     # time_list_indexH, volume_indexH = gvi.get_global_hourly_volume_index()
-    # time_listD, volumes_actualD = di.get_global_volume_actual_daily()
-    #
-    # plt.plot(volume_indexD)
-    # plt.figure()
-    #
-    # time_out = []
-    # vol_index = []
-    # vol_actual = []
-    # for i in range(len(volumes_actualD)):
-    #     t = time_listD[i]
-    #     try:
-    #         j = time_list_indexD.index(t)
-    #         time_out.append(t)
-    #         vol_index.append(volume_indexD[j])
-    #         vol_actual.append(volumes_actualD[i])
-    #     except:
-    #         pass
-    #
-    # volumes_actualD = vol_actual
-    # volume_indexD = vol_index
-    #
-    #
-    # plt.plot(volumes_actualD)
-    # plt.figure()
-    # plt.plot(volume_indexD)
-    # plt.show()
-    #
-    #
-    # corr = np.corrcoef(volumes_actualD, volume_indexD)
-    # print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.1f%% with the actual volumes" % (100*sum(volume_indexD)/sum(volumes_actualD), 100*corr[0,1]))
-    #
-    # plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
-    # plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
+    time_listD, volumes_actualD = di.get_global_volume_actual_daily()
+
+
+    plt.plot(volume_indexD)
+    plt.figure()
+
+    time_out = []
+    vol_index = []
+    vol_actual = []
+    for i in range(len(volumes_actualD)):
+        t = time_listD[i]
+        try:
+            j = time_list_indexD.index(t)
+            time_out.append(t)
+            vol_index.append(volume_indexD[j])
+            vol_actual.append(volumes_actualD[i])
+        except:
+            pass
+
+    volumes_actualD = vol_actual
+    volume_indexD = vol_index
+
+
+    plt.plot(volumes_actualD)
+    plt.figure()
+    plt.plot(volume_indexD)
+    plt.show()
+
+
+    corr = np.corrcoef(volumes_actualD, volume_indexD)
+    print("Our index accounts for %0.1f%% of the volume and has a correlation of %0.1f%% with the actual volumes" % (100*sum(volume_indexD)/sum(volumes_actualD), 100*corr[0,1]))
+
+    plot.time_series_single(time_list_indexD,volume_indexD,"global_volumes_index")
+    plot.time_series_single(time_listD,volumes_actualD,"actual_global_volumes")
 
 
 if spread_vs_global_volume_regression_daily:

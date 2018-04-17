@@ -1131,29 +1131,29 @@ def fix_gv(time1, v1, time2, v2, time3, v3, time4, v4, time5, v5):
         time_list_combined.append(i)
         volumes_combined.append(0)
 
-        while time1[t1]<i:
+        while time1[t1]<i+4000:
             t1+=1
-        if time1[t1]==i:
+        if (time1[t1]<i+4000 and time1[t1]>i-4000):
             volumes_combined[-1]+=v1[t1]
 
-        while time2[t2]<i:
+        while time2[t2]<i+4000:
             t2+=1
-        if time2[t2]==i:
+        if time2[t2]<i+4000 and time2[t2]>i-4000):
             volumes_combined[-1]+=v2[t2]
 
-        while time3[t3]<i:
+        while time3[t3]<i+4000:
             t3+=1
-        if time3[t3]==i:
+        if time3[t3]<i+4000 and time3[t3]>i-4000):
             volumes_combined[-1]+=v3[t3]
 
-        while time4[t4]<i:
+        while time4[t4]<i+4000:
             t4+=1
-        if time4[t4]==i:
+        if time4[t4]<i+4000 and time4[t4]>i-4000):
             volumes_combined[-1]+=v4[t4]
 
-        while time5[t5]<i:
+        while time5[t5]<i+4000:
             t5+=1
-        if time5[t5]==i:
+        if time5[t5]<i+4000 and time5[t5]>i-4000):
             volumes_combined[-1]+=v5[t5]
 
     time_list_combined = unix_to_timestamp(time_list_combined)

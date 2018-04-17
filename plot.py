@@ -275,11 +275,12 @@ def plot_x_zero(y_lims):
     plt.plot([0, 10**(-10)], [y_min, y_max], linewidth=0.2, color="black")
 
 
-def hour_of_day_ticks():
-    labels = [ "04:00", "08:00", "12:00", "16:00", "20:00"]
-    plt.xticks([3.5, 7.5, 11.5, 15.5, 19.5], labels)
+def hour_of_day_ticks(hours_per_basket):
+    t = (24/hours_per_basket - 1)
+    labels = ["04:00", "08:00", "12:00", "16:00", "20:00"]
+    plt.xticks([t/6, 2*t/6, 3*t/6, 4*t/6, 5*t/6], labels)
     plt.figtext(0.10, 0.010, "Time", fontsize=10)
-    plt.xlim([0, 23])
+    plt.xlim([0, t])
 
 
 def utc_nyc(in_list):
@@ -294,6 +295,9 @@ def utc_nyc(in_list):
 
 
 def intraday(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0, logy=0, fig_format="narrow"):
+
+    hours_per_basket = 24/len(average)
+
     if fig_format == "wide":
         plt.figure(figsize=[8, 2], dpi=300)
     else:
@@ -316,7 +320,7 @@ def intraday(average, low, high, title="no_title", perc=0, ndigits=2, yzero=0, l
         frmt = '{:3.' + str(ndigits) + 'f}%'
         ax.set_yticklabels([frmt.format(100*x) for x in vals])
 
-    hour_of_day_ticks()
+    hour_of_day_ticks(hours_per_basket)
     title=title.lower()
 
     if yzero==1:

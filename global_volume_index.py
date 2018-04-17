@@ -4,6 +4,7 @@ import csv
 import numpy as np
 from Sondre import sondre_support_formulas as supp
 
+
 def write_daily_volume_index_to_csv():
     bitstamp, time_list_bitstampM, prices_bitstampM, volumes_bitstampM = di.get_list(exc="bitstampusd")
     coinbase, time_list_coinbaseM, prices_coinbaseM, volumes_coinbaseM = di.get_list(exc="coinbaseusd")
@@ -17,10 +18,15 @@ def write_daily_volume_index_to_csv():
     krak_day_list, prices, volumes_krakD = dis.convert_to_day(time_list_krakM, prices_krakM, volumes_krakM)
     cc_day_list, prices, volumes_ccD = dis.convert_to_day(time_list_ccM, prices_ccM, volumes_ccM)
 
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(coinbase_day_list, volumes_coinbaseD, bitstamp_day_list, volumes_bitstampD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, korbit_day_list, volumes_korbitD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, krak_day_list, volumes_krakD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(cc_day_list, volumes_ccD, time_list_combined, volumes_combined)
+
+    #
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(coinbase_day_list, volumes_coinbaseD, bitstamp_day_list, volumes_bitstampD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, korbit_day_list, volumes_korbitD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, krak_day_list, volumes_krakD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(cc_day_list, volumes_ccD, time_list_combined, volumes_combined)
+
+    time_list_combined, volumes_combined = dis.fix_gv(bitstamp_day_list, volumes_bitstampD, coinbase_day_list, volumes_coinbaseD, korbit_day_list, volumes_korbitD, krak_day_list, volumes_krakD, cc_day_list, volumes_ccD)
+
 
     location = "data/export_csv/"
     file_name = location + "global_daily_volume_index.csv"

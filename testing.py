@@ -68,15 +68,15 @@ if intraday == 1:
             print(time_list_hours[i], "   ", prices_hours[i], "   ", volumes_hours[i], "   ","{0:.3f}".format(rvol_hours[i]), "   ","{0:.3f}%".format(100*spread_hours[i]), "   ", "{0:.3f}%".format(100*illiq_hours[i]), "   ", "{0:.3f}".format(log_rvol_hours[i]), "   ", "{0:.3f}".format(log_illiq_hours[i]))
         print()
 
-    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average(time_list_hours,
-                                                                                               volumes_hours,
-                                                                                               frequency="h")
-    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average(time_list_hours,
-                                                                                            spread_hours, frequency="h")
-    hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average(time_list_hours, rvol_hours,
-                                                                                      frequency="h")
-    hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average(time_list_hours, illiq_hours,
-                                                                                         frequency="h", print_n_entries=1, print_val_tab=0)
+    hour_of_day, avg_volumes_hour, low_volumes_hour, upper_volumes_hour = dis.cyclical_average_legacy(time_list_hours,
+                                                                                                      volumes_hours,
+                                                                                                      frequency="h")
+    hour_of_day, avg_spread_hour, low_spread_hour, upper_spread_hour = dis.cyclical_average_legacy(time_list_hours,
+                                                                                                   spread_hours, frequency="h")
+    hour_of_day, avg_rvol_hour, low_rvol_hour, upper_rvol_hour = dis.cyclical_average_legacy(time_list_hours, rvol_hours,
+                                                                                             frequency="h")
+    hour_of_day, avg_illiq_hour, low_illiq_hour, upper_illiq_hour = dis.cyclical_average_legacy(time_list_hours, illiq_hours,
+                                                                                                frequency="h", print_n_entries=1, print_val_tab=0)
 
     if plots == 1:
         plt.plot(avg_volumes_hour)
@@ -107,10 +107,10 @@ if intraweek == 1:
             print(time_list_days[i], "   ", prices_days[i], "   ", volumes_days[i], "   ","{0:.3f}".format(rvol_days[i]), "   ", "{0:.3f}%".format(100 * spread_days[i]), "   ","{0:.3f}%".format(100 * illiq_days[i]), "   ", "{0:.3f}".format(log_rvol_days[i]), "   ", "{0:.3f}".format(log_illiq_days[i]))
         print()
 
-    day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average(time_list_days, spread_days, frequency="d")
-    day_of_week, avg_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average(time_list_days, volumes_days, frequency="d")
-    day_of_week, avg_rvol_day, low_volatility_day_clean, upper_volatility_day_clean = dis.cyclical_average(time_list_days, rvol_days, frequency="d")
-    day_of_week, avg_illiq_day, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average(time_list_days, illiq_days, frequency="d", print_val_tab=0)
+    day_of_week, avg_spread_day, low_spread_day, upper_spread_day = dis.cyclical_average_legacy(time_list_days, spread_days, frequency="d")
+    day_of_week, avg_volume_day, low_log_volume_day, upper_log_volume_day = dis.cyclical_average_legacy(time_list_days, volumes_days, frequency="d")
+    day_of_week, avg_rvol_day, low_volatility_day_clean, upper_volatility_day_clean = dis.cyclical_average_legacy(time_list_days, rvol_days, frequency="d")
+    day_of_week, avg_illiq_day, low_illiq_day_clean, upper_illiq_day_clean = dis.cyclical_average_legacy(time_list_days, illiq_days, frequency="d", print_val_tab=0)
 
     if plots == 1:
         plt.plot(avg_spread_day)

@@ -358,7 +358,7 @@ def get_month(month_string):
     return month_num
 
 
-def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, incl_zeros = 0):
+def cyclical_average_legacy(time_list, data, frequency="h", print_n_entries=0, print_val_tab=0, incl_zeros = 0, hours_per_basket=1):
     year, month, day, hour, minute = supp.fix_time_list(time_list)
     n_entries = len(time_list)
     day_time = []  # Excel stamps for each minute in the day
@@ -406,6 +406,61 @@ def cyclical_average(time_list, data, frequency="h", print_n_entries=0, print_va
             cycle_nr = int(count_entries[index])
             count_entries[index] += 1
             temp_matrix[cycle_nr, index] = data[i]
+
+    temp_matrix = np.matrix(temp_matrix)
+    percentile = 0.95
+
+    if print_val_tab == 1:
+        for i in range(n_cycles):
+            for j in range(7):
+                print('{0:.3f}'.format(temp_matrix[i, j]), end='   ')
+            print()
+
+    if print_n_entries == 1:
+        print(count_entries)
+
+    for i in range(n_out):
+        data_average[i] = float(np.sum(temp_matrix[:, i]) / count_entries[i])  # takes the mean
+        lower[i], upper[i] = st.t.interval(percentile, len(temp_matrix[:, i]) - 1, loc=data_average[i],
+                                           scale=st.sem(temp_matrix[:, i]))
+
+    return day_time, data_average, lower, upper
+
+
+def cyclical_average_hour(time_list, data, print_n_entries=0, print_val_tab=0, hours_per_basket=1):
+    year, month, day, hour, minute = supp.fix_time_list(time_list)
+    n_entries = len(time_list)
+    day_time = []  # Excel stamps for each minute in the day
+    basket_list = []  # integer indicating which hour it is
+    m_list = []  # integer indicating which minute it is
+    n_out = int(24/hours_per_basket)
+
+    # Generating day_time ---------------
+    for h in range(0, n_out):
+        basket = h * hours_per_basket
+        if basket < 10:
+            hs = "0" + str(basket)
+        else:
+            hs = str(basket)
+        day_time.append(hs + ":" + "00")
+        basket_list.append(basket)
+    # -----------------------------------
+
+    # Calculating averages
+
+    lower = np.zeros(n_out)
+    upper = np.zeros(n_out)
+    data_average = np.zeros(n_out)
+    count_entries = np.zeros(n_out)  # Will count actual observations, to get correct numerator in mean
+    temp_list = np.zeros(n_out)
+
+    n_cycles = int(2 * n_entries / n_out)  # trenger bare være minst like stor. Sikkerhetsmargin på 50%
+    temp_matrix = np.zeros([n_cycles, n_out])
+    for i in range(n_entries):
+        index = int(np.floor(float(hour[i]/hours_per_basket)))
+        cycle_nr = int(count_entries[index])
+        count_entries[index] += 1
+        temp_matrix[cycle_nr, index] = data[i]
 
     temp_matrix = np.matrix(temp_matrix)
     percentile = 0.95
@@ -978,9 +1033,6 @@ def write_clean_csv(exc_name, time_list, returns, spread, volumes, log_volumes, 
 
 
 def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_or_average="sum"):
-    #1 finne når vi skal starte
-    #2 finne når vi skal slutte
-    # summere opp alle dager imellom
     # antar at de to tidsseriene er overlappende
     time_out=[]
     data_out=[]
@@ -1016,6 +1068,8 @@ def add_two_series_w_different_times(time_list1, data1, time_list2, data2, sum_o
 
     return time_out, data_out
 
+
+
 def fix_different_time_lists(time1, list1, time2, list2, list3, list4, list5, list6, list7, list8, list9):
 
     time_out = []
@@ -1049,3 +1103,28 @@ def fix_different_time_lists(time1, list1, time2, list2, list3, list4, list5, li
             # print("Did not find", t)
 
     return time_out, list1_out, list2_out, list3_out, list4_out, list5_out, list6_out, list7_out, list8_out, list9_out
+
+
+def fix_gv(time1, v1, time2, v2, time3, v3, time4, v4, time5, v5):
+
+    time_list_combined = []
+    volumes_combined = []
+
+    time1 = supp.timestamp_to_unix(time1)
+    time2 = supp.timestamp_to_unix(time2)
+    time3 = supp.timestamp_to_unix(time3)
+    time4 = supp.timestamp_to_unix(time4)
+    time5 = supp.timestamp_to_unix(time5)
+
+    first = int(min(time1[0], time2[0], time3[0], time4[0], time5[0]))
+    last = int(max(time1[-1], time2[-1], time3[-1], time4[-1], time5[-1]))
+
+    time_list = []
+    for i in range(first, last + 86400, 86400):
+        time_list.append(i)
+
+    time_list = unix_to_timestamp(time_list)
+    print(time_list)
+
+
+    return time_list_combined, volumes_combined

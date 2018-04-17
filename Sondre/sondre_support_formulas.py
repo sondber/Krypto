@@ -456,5 +456,22 @@ def unix_to_timestamp(unix_stamp): #dytt inn enten unix-integer eller liste med 
 
 
 def timestamp_to_unix(time_stamp):
-    unix = time.mktime(datetime.datetime.strptime(time_stamp, '%d.%m.%Y %H:%M').timetuple())
+    single = 1
+    try:
+        list_length = len(time_stamp)
+    except TypeError:
+        list_length = 1
+
+    if list_length > 1:
+        single = 0
+
+    if single == 1:
+        unix = time.mktime(datetime.datetime.strptime(time_stamp, '%d.%m.%Y %H:%M').timetuple()) + 3600
+    else:
+        unix = []
+        for i in range(list_length):
+            unix.append(time.mktime(datetime.datetime.strptime(time_stamp[i], '%d.%m.%Y %H:%M').timetuple()) + 3600)
+
+
+
     return unix

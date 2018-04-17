@@ -1119,12 +1119,13 @@ def fix_gv(time1, v1, time2, v2, time3, v3, time4, v4, time5, v5):
     first = int(min(time1[0], time2[0], time3[0], time4[0], time5[0]))
     last = int(max(time1[-1], time2[-1], time3[-1], time4[-1], time5[-1]))
 
-    time_list = []
+    time_list_combined = []
     for i in range(first, last + 86400, 86400):
-        time_list.append(i)
+        time_list_combined.append(i)
 
-    time_list = unix_to_timestamp(time_list)
-    print(time_list)
 
+
+
+    time_list_combined = unix_to_timestamp(time_list_combined)
 
     return time_list_combined, volumes_combined

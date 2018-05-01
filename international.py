@@ -221,11 +221,11 @@ print(time_list_master[-1])
 print("The length of the set is", len(time_list_master))
 
 if print_cyclical == 1:
-    day_time1, bas_average1, bas_lower1, bas_upper1 = dis.cyclical_average(time_list_master, data_master[:, 0])
-    day_time2, bas_average2, bas_lower2, bas_upper2 = dis.cyclical_average(time_list_master, data_master[:, 1])
+    day_time1, bas_average1, bas_lower1, bas_upper1 = dis.cyclical_average_legacy(time_list_master, data_master[:, 0])
+    day_time2, bas_average2, bas_lower2, bas_upper2 = dis.cyclical_average_legacy(time_list_master, data_master[:, 1])
 
-    day_time1, vol_average1, vol_lower1, vol_upper1 = dis.cyclical_average(time_list_master, data_master[:, 2])
-    day_time2, vol_average2, vol_lower2, vol_upper2 = dis.cyclical_average(time_list_master, data_master[:, 3])
+    day_time1, vol_average1, vol_lower1, vol_upper1 = dis.cyclical_average_legacy(time_list_master, data_master[:, 2])
+    day_time2, vol_average2, vol_lower2, vol_upper2 = dis.cyclical_average_legacy(time_list_master, data_master[:, 3])
 
     name1 = longest_name + "_" + shortest_name + "1"
     name2 = longest_name + "_" + shortest_name + "2"
@@ -235,7 +235,7 @@ if print_cyclical == 1:
     plot.intraday(vol_average2, vol_lower2, vol_upper2, name2 + "_vol")
 
     if sum_volumes == 1:
-        day_time_summed, vol_sum_ave, vol_sum_lower, vol_sum_upper = dis.cyclical_average(bitstamp_hour_list, summed_volume)
+        day_time_summed, vol_sum_ave, vol_sum_lower, vol_sum_upper = dis.cyclical_average_legacy(bitstamp_hour_list, summed_volume)
         plot.intraday(vol_sum_ave, vol_sum_lower, vol_sum_upper, "summed_volume_western")
 
 

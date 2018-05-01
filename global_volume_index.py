@@ -2,6 +2,7 @@ import data_import as di
 import data_import_support as dis
 import csv
 import numpy as np
+from Sondre import sondre_support_formulas as supp
 
 
 def write_daily_volume_index_to_csv():
@@ -17,10 +18,15 @@ def write_daily_volume_index_to_csv():
     krak_day_list, prices, volumes_krakD = dis.convert_to_day(time_list_krakM, prices_krakM, volumes_krakM)
     cc_day_list, prices, volumes_ccD = dis.convert_to_day(time_list_ccM, prices_ccM, volumes_ccM)
 
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(coinbase_day_list, volumes_coinbaseD, bitstamp_day_list, volumes_bitstampD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, korbit_day_list, volumes_korbitD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, krak_day_list, volumes_krakD)
-    time_list_combined, volumes_combined = dis.add_two_series_w_different_times(cc_day_list, volumes_ccD, time_list_combined, volumes_combined)
+
+    #
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(coinbase_day_list, volumes_coinbaseD, bitstamp_day_list, volumes_bitstampD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, korbit_day_list, volumes_korbitD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(time_list_combined, volumes_combined, krak_day_list, volumes_krakD)
+    # time_list_combined, volumes_combined = dis.add_two_series_w_different_times(cc_day_list, volumes_ccD, time_list_combined, volumes_combined)
+
+    time_list_combined, volumes_combined = dis.fix_gv(bitstamp_day_list, volumes_bitstampD, coinbase_day_list, volumes_coinbaseD, korbit_day_list, volumes_korbitD, krak_day_list, volumes_krakD, cc_day_list, volumes_ccD)
+
 
     location = "data/export_csv/"
     file_name = location + "global_daily_volume_index.csv"
@@ -142,6 +148,44 @@ def get_global_hourly_volume_index(transformed=0):
         volumesH = dis.volume_transformation(volumesH, initial_volume, daily=1)
 
     return time_listH, volumesH
+
+
+def remove_holes(time_list_external, time_list_global_volumes, global_volumes):
+
+    print(time_list_external[0:10])
+    print(time_list_global_volumes[0:10])
+    if supp.A_before_B(time_list_external[0], time_list_global_volumes[0]):
+        print("External starts before global")
+        ex_first = 1
+    else:
+        print("Global starts before external")
+        ex_first = 0
+
+    i = 0
+    j = 0
+    j0= 0
+    time_list_out = []
+    data_out = []
+    if ex_first:
+        while time_list_global_volumes[i] != time_list_external[j]:
+            i += 1
+        for j in range(len(time_list_external)):
+            while time_list_global_volumes[i] != time_list_external[j]:
+                i+=1
+            time_list_out.append(time_list_global_volumes[i])
+            data_out.append(global_volumes[i])
+
+    else:
+        while time_list_global_volumes[i] != time_list_external[j0]:
+            j0 += 1
+
+        for j in range(j0, len(time_list_external)):
+            while time_list_global_volumes[i] != time_list_external[j]:
+                i+=1
+            time_list_out.append(time_list_global_volumes[i])
+            data_out.append(global_volumes[i])
+    return time_list_out, data_out
+
 
 
 # for å sjekke om ting blir riktig

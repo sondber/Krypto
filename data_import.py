@@ -9,18 +9,25 @@ def get_list(exc=0, freq="m", local_time=0): # testtest
 
     if exc == 0 or exc == "bitstampusd" or exc == "bitstamp":
         exc_name = "bitstampusd"
+        exc = 0
     elif exc == 1 or exc == "coincheckjpy" or exc == "coincheck":
         exc_name = "coincheckjpy"
+        exc = 1
     elif exc == 2 or exc == "btcncny" or exc == "btcn":
         exc_name = "btcncny"
+        exc = 2
     elif exc == 3 or exc == "coinbaseusd" or exc == "coinbase":
         exc_name = "coinbaseusd"
+        exc = 3
     elif exc == 4 or exc == "korbitkrw" or exc == "korbit":
         exc_name = "korbitkrw"
+        exc = 4
     elif exc == 5 or exc == "krakeneur"or exc == "kraken":
         exc_name = "krakeneur"
+        exc = 5
     elif exc == -1 or exc == "test":
         exc_name = "test"
+        exc = -1
     else:
         print("\033[31;0;0mYou did not choose an exchange, so I am returning bitstamp\033[0;0;0m")
         exc_name = "bitstampusd"
